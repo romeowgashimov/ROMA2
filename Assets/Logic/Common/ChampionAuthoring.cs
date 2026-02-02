@@ -1,0 +1,34 @@
+using Assets.Logic.Common;
+using Unity.Entities;
+using Unity.Rendering;
+using UnityEngine;
+
+namespace Logic.Common
+{
+    public class ChampionAuthoring : MonoBehaviour
+    {
+        public int PathPositionsCapacity = 100;
+        public float MoveSpeed;
+        public class ChampionBaker : Baker<ChampionAuthoring>
+        {
+            public override void Bake(ChampionAuthoring authoring)
+            {
+                Entity entity = GetEntity(TransformUsageFlags.Dynamic);
+                AddComponent<ChampTag>(entity);
+                AddComponent<NewChampTag>(entity);
+                AddComponent<Team>(entity);
+                AddComponent<URPMaterialPropertyBaseColor>(entity);
+                AddComponent<MoveTargetPosition>(entity);
+                
+                NeedPath needPath = new();
+                AddComponent(entity, needPath);
+                SetComponentEnabled<NeedPath>(entity, false);
+                AddComponent(entity, new MoveSpeed { Value = authoring.MoveSpeed });
+                AddComponent(entity, new LastProcessedClick());
+                DynamicBuffer<PathPosition> pathPositions = AddBuffer<PathPosition>(entity);
+                pathPositions.Capacity = authoring.PathPositionsCapacity;
+                AddComponent<FollowPathIndex>(entity);
+            }
+        }
+    }
+}

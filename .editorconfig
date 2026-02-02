@@ -1,0 +1,4 @@
+[*.cs]
+
+# IDE0251: Can be 'readonly'
+dotnet_diagnostic.IDE0251.severity = none

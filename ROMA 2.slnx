@@ -1,0 +1,5 @@
+﻿<Solution>
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Unity.Physics.Custom.csproj" />
+  <Project Path="Unity.Physics.Custom.Editor.csproj" />
+</Solution>
