@@ -188,6 +188,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5998907826215234344, guid: 38f4e9377d234a64488bff6c7061bc95,
+        type: 3}
+      propertyPath: Team
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2033613480962384513, guid: 38f4e9377d234a64488bff6c7061bc95, type: 3}
     m_RemovedGameObjects: []
@@ -299,6 +304,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5998907826215234344, guid: 38f4e9377d234a64488bff6c7061bc95,
+        type: 3}
+      propertyPath: Team
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2033613480962384513, guid: 38f4e9377d234a64488bff6c7061bc95, type: 3}
     m_RemovedGameObjects: []
@@ -371,6 +381,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30709b1a8a21faf4b8e92baca5add00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Logic.Common.GridAuthoring
+  GridSize:
+    x: 100
+    y: 100
 --- !u!4 &272302958
 Transform:
   m_ObjectHideFlags: 0
@@ -453,6 +466,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5998907826215234344, guid: 38f4e9377d234a64488bff6c7061bc95,
+        type: 3}
+      propertyPath: Team
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2033613480962384513, guid: 38f4e9377d234a64488bff6c7061bc95, type: 3}
@@ -565,6 +583,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5998907826215234344, guid: 38f4e9377d234a64488bff6c7061bc95,
+        type: 3}
+      propertyPath: Team
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2033613480962384513, guid: 38f4e9377d234a64488bff6c7061bc95, type: 3}
     m_RemovedGameObjects: []
@@ -675,6 +698,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5998907826215234344, guid: 38f4e9377d234a64488bff6c7061bc95,
+        type: 3}
+      propertyPath: Team
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2033613480962384513, guid: 38f4e9377d234a64488bff6c7061bc95, type: 3}
@@ -830,6 +858,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5998907826215234344, guid: 38f4e9377d234a64488bff6c7061bc95,
+        type: 3}
+      propertyPath: Team
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2033613480962384513, guid: 38f4e9377d234a64488bff6c7061bc95, type: 3}
@@ -1117,6 +1150,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5998907826215234344, guid: 38f4e9377d234a64488bff6c7061bc95,
+        type: 3}
+      propertyPath: Team
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2033613480962384513, guid: 38f4e9377d234a64488bff6c7061bc95, type: 3}
     m_RemovedGameObjects: []
@@ -1386,6 +1424,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5998907826215234344, guid: 38f4e9377d234a64488bff6c7061bc95,
+        type: 3}
+      propertyPath: Team
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2033613480962384513, guid: 38f4e9377d234a64488bff6c7061bc95, type: 3}
     m_RemovedGameObjects: []
@@ -1495,6 +1538,11 @@ PrefabInstance:
     - target: {fileID: 2586615284154785981, guid: c22c40ef4537da44597359c8d8e582e2,
         type: 3}
       propertyPath: MobaTeam
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4568716967356504705, guid: c22c40ef4537da44597359c8d8e582e2,
+        type: 3}
+      propertyPath: Team
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5326781307255034168, guid: c22c40ef4537da44597359c8d8e582e2,
@@ -1616,6 +1664,11 @@ PrefabInstance:
     - target: {fileID: 2586615284154785981, guid: c22c40ef4537da44597359c8d8e582e2,
         type: 3}
       propertyPath: MobaTeam
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4568716967356504705, guid: c22c40ef4537da44597359c8d8e582e2,
+        type: 3}
+      propertyPath: Team
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5326781307255034168, guid: c22c40ef4537da44597359c8d8e582e2,

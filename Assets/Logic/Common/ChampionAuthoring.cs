@@ -1,4 +1,3 @@
-using Assets.Logic.Common;
 using Unity.Entities;
 using Unity.Rendering;
 using UnityEngine;
@@ -19,15 +18,15 @@ namespace Logic.Common
                 AddComponent<Team>(entity);
                 AddComponent<URPMaterialPropertyBaseColor>(entity);
                 AddComponent<MoveTargetPosition>(entity);
-                
                 NeedPath needPath = new();
                 AddComponent(entity, needPath);
                 SetComponentEnabled<NeedPath>(entity, false);
                 AddComponent(entity, new MoveSpeed { Value = authoring.MoveSpeed });
-                AddComponent(entity, new LastProcessedClick());
-                DynamicBuffer<PathPosition> pathPositions = AddBuffer<PathPosition>(entity);
+                AddComponent(entity, new RegisterNeedPathComponent { Value = false });
+                DynamicBuffer<PathPositionElement> pathPositions = AddBuffer<PathPositionElement>(entity);
                 pathPositions.Capacity = authoring.PathPositionsCapacity;
                 AddComponent<FollowPathIndex>(entity);
+                AddComponent<AbilityInput>(entity);
             }
         }
     }

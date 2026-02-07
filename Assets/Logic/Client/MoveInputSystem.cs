@@ -1,7 +1,5 @@
 using Assets.Logic.Client;
-using Assets.Logic.Common;
 using Logic.Common;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Physics;
@@ -11,7 +9,7 @@ using UnityEngine.InputSystem;
 namespace Logic.Client
 {
     [UpdateInGroup(typeof(GhostInputSystemGroup))]
-    public partial class ChampMoveInputSystem : SystemBase
+    public partial class MoveInputSystem : SystemBase
     {
         private MobaInputActions _inputActions;
         private CollisionFilter _selectionFilter;
@@ -25,8 +23,6 @@ namespace Logic.Client
               BelongsTo = 1 << 5, //Raycasts
               CollidesWith = 1 << 0  //GroundPlane
             };
-            
-            EntityQuery _pendingNetworkIdQuery = EntityManager.CreateEntityQuery(typeof(NetworkId));
         }
 
         protected override void OnStartRunning()
@@ -66,12 +62,11 @@ namespace Logic.Client
             if(collisionWorld.CastRay(selectionInput, out Unity.Physics.RaycastHit closestHit))
             {
                 Entity owner = SystemAPI.GetSingletonEntity<OwnerChampTag>();
-                int clickCount = EntityManager.GetComponentData<MoveTargetPosition>(owner).ClickCount;
-                clickCount++;
+                bool flag = EntityManager.GetComponentData<MoveTargetPosition>(owner).Flag;
                 EntityManager.SetComponentData(owner, new MoveTargetPosition
                 {
                     Value = closestHit.Position,
-                    ClickCount = clickCount
+                    Flag = !flag
                 });
             }
         }

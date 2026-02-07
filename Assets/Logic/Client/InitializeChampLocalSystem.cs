@@ -27,7 +27,10 @@ namespace Logic.Client
             {
                 ecb.AddComponent<OwnerChampTag>(owner);
                 ecb.SetComponentEnabled<NeedPath>(owner, false);
-                ecb.SetComponent(owner, new MoveTargetPosition { Value = localTransform.ValueRO.Position });
+                ecb.SetComponent(owner, new MoveTargetPosition
+                {
+                    Value = localTransform.ValueRO.Position, Flag = false
+                });
             }
 
             ecb.Playback(state.EntityManager);

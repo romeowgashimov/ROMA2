@@ -1,6 +1,5 @@
 ﻿using Logic.Common;
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 
@@ -14,12 +13,11 @@ namespace Logic.Server
         public void OnCreate(ref SystemState state)
         {
             _query = SystemAPI.QueryBuilder()
-                .WithAll<MoveTargetPosition, LastProcessedClick, NeedPath>()
+                .WithAll<MoveTargetPosition, RegisterNeedPathComponent, NeedPath>()
                 .WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)
                 .Build();
 
-            state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
-            state.RequireForUpdate<NetworkTime>();
+            state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
         }
         
         [BurstCompile]
@@ -27,8 +25,8 @@ namespace Logic.Server
         {
             _query.SetChangedVersionFilter(ComponentType.ReadOnly<MoveTargetPosition>());
 
-            BeginSimulationEntityCommandBufferSystem.Singleton ecbSingleton = 
-                SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+            EndSimulationEntityCommandBufferSystem.Singleton ecbSingleton = 
+                SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
             EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
             
             RegisterNeedPathJob job = new()
@@ -47,14 +45,11 @@ namespace Logic.Server
 
         private void Execute([EntityIndexInQuery] int key, 
             Entity entity, in MoveTargetPosition input, 
-            ref LastProcessedClick lastClick)
+            ref RegisterNeedPathComponent register)
         {
-            if (input.ClickCount > lastClick.Value)
-            {
-                lastClick.Value = input.ClickCount;
-
-                ECB.SetComponentEnabled<NeedPath>(key, entity, true);
-            }
+            if (register.Value == input.Flag) return;
+            ECB.SetComponent<RegisterNeedPathComponent>(key, entity, new() { Value = input.Flag });
+            ECB.SetComponentEnabled<NeedPath>(key, entity, true);
         }
     }
 }

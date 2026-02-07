@@ -9,7 +9,6 @@ using static Unity.Mathematics.quaternion;
 namespace Logic.Common
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct MoveSystem : ISystem
     {
         private EntityQuery _query;
@@ -18,7 +17,7 @@ namespace Logic.Common
         {
             _query = SystemAPI.QueryBuilder()
                 .WithAll<LocalTransform, MoveTargetPosition, MoveSpeed,
-                    PathPosition, FollowPathIndex, Simulate>()
+                    PathPositionElement, FollowPathIndex, Simulate>()
                 .WithNone<NeedPath>()
                 .Build();
             
@@ -41,7 +40,7 @@ namespace Logic.Common
         
         private void Execute(RefRW<LocalTransform> transform,
             MoveTargetPosition target, MoveSpeed moveSpeed,
-            RefRW<FollowPathIndex> followPathIndex, ref DynamicBuffer<PathPosition> pathPositions)
+            RefRW<FollowPathIndex> followPathIndex, ref DynamicBuffer<PathPositionElement> pathPositions)
         {
             float2 targetInt2;
             switch (followPathIndex.ValueRO.Value)
@@ -71,7 +70,7 @@ namespace Logic.Common
             transform.ValueRW.Position += moveVector;
             transform.ValueRW.Rotation = LookRotationSafe(moveDirection, up());
             
-            if (distancesq(selfPosition, targetFloat3) <= 0.9f) 
+            if (distancesq(selfPosition, targetFloat3) <= 0.3f) 
                 followPathIndex.ValueRW.Value -= 1;
         }
     }

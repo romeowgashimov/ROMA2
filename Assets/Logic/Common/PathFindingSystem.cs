@@ -10,7 +10,6 @@ using static Unity.Mathematics.math;
 namespace Logic.Common
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct PathFindingSystem : ISystem
     {
         private EntityQuery _query;
@@ -18,7 +17,7 @@ namespace Logic.Common
         public void OnCreate(ref SystemState state)
         {
             EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
-            .WithAll<MoveTargetPosition, LocalTransform, MoveSpeed, PathPosition, NeedPath, Simulate>();
+            .WithAll<MoveTargetPosition, LocalTransform, MoveSpeed, PathPositionElement, NeedPath, Simulate>();
             _query = state.GetEntityQuery(builder);
 
             state.RequireForUpdate(_query);
@@ -65,38 +64,17 @@ namespace Logic.Common
         [ReadOnly] public DynamicBuffer<PathNode> Grid;
 
         private void Execute([EntityIndexInQuery] int key, Entity entity, in MoveTargetPosition target, 
-            LocalTransform transform, ref DynamicBuffer<PathPosition> buffer)
+            LocalTransform transform, ref DynamicBuffer<PathPositionElement> buffer)
         {
             int2 startPosition = new((int)transform.Position.x, (int)transform.Position.z);
             int2 endPosition = new((int)target.Value.x, (int)target.Value.z);
             startPosition += GRID_BIAS;
             endPosition += GRID_BIAS;
             
-            int startX;
-            int endX;
-            int startY;
-            int endY;
-            if (startPosition.x < endPosition.x)
-            {
-                startX = startPosition.x;
-                endX = endPosition.x;
-            }
-            else
-            {
-                startX = endPosition.x;
-                endX = startPosition.x;
-            }
-
-            if (startPosition.y < endPosition.y)
-            {
-                startY = startPosition.y;
-                endY = endPosition.y;
-            }
-            else
-            {
-                startY = endPosition.y;
-                endY = startPosition.y;
-            }
+            int startX = min(startPosition.x, endPosition.x);
+            int endX = max(startPosition.x, endPosition.x);
+            int startY = min(startPosition.y, endPosition.y);
+            int endY = max(startPosition.y, endPosition.y);
             _localGridSize = new(startX, startY, endX + 2,endY + 2);
             _localBias = GridSize.x - endX;
 
@@ -121,19 +99,13 @@ namespace Logic.Common
                 int localIndex = LocalizeIndex(globalIndex);
                 PathNode localPathNode = Grid[globalIndex];
                 localPathNode.Index = localIndex;
-                localPathNodes[localIndex] = localPathNode;
-            }
-
-            for(int i = 0; i < localPathNodes.Length; i++)
-            {
-                PathNode pathNode = localPathNodes[i];
                 
-                pathNode.CameFromNodeIndex = -1;
-                pathNode.GCost = int.MaxValue;
-                pathNode.HCost = CalculateDistanceCost(new(pathNode.X, pathNode.Y), endPosition);
-                pathNode.CalculateFCost();
-
-                localPathNodes[i] = pathNode;
+                localPathNode.CameFromNodeIndex = -1;
+                localPathNode.GCost = int.MaxValue;
+                localPathNode.HCost = CalculateDistanceCost(new(localPathNode.X, localPathNode.Y), endPosition);
+                localPathNode.CalculateFCost();
+                
+                localPathNodes[localIndex] = localPathNode;
             }
 
             NativeArray<int2> neighbourOffsetArray = new(8, Allocator.Temp);
@@ -212,7 +184,10 @@ namespace Logic.Common
             {
                 CalculatePath(localPathNodes, endNode, buffer);
                 ECB.SetComponentEnabled<NeedPath>(key, entity, false);
-                ECB.SetComponent<FollowPathIndex>(key, entity, new() { Value = buffer.Length - 1 });
+                ECB.SetComponent<FollowPathIndex>(key, entity, new()
+                {
+                    Value = buffer.Length - 1
+                });
             }
 
             neighbourOffsetArray.Dispose();
@@ -223,7 +198,7 @@ namespace Logic.Common
 
         public EntityCommandBuffer.ParallelWriter ECB;
 
-        private void CalculatePath(NativeArray<PathNode> pathNodes, PathNode endNode, DynamicBuffer<PathPosition> buffer)
+        private void CalculatePath(NativeArray<PathNode> pathNodes, PathNode endNode, DynamicBuffer<PathPositionElement> buffer)
         {
             if(endNode.CameFromNodeIndex == -1) return;
 
@@ -268,7 +243,6 @@ namespace Logic.Common
 
         private int LocalizeIndex(int globalIndex)
         {
-            //Может быть проблема из-за расчёта индекса, так как _localBias считается по икс, и проблема появляется при икс
             globalIndex = abs(globalIndex - _localBias * (globalIndex / GLOBAL_GRID_SIZE));
             return globalIndex - _matrixBias;
         }

@@ -1,8 +1,11 @@
-﻿using Cinemachine;
+﻿using Assets.Logic.Client;
+using Assets.Logic.Common;
+using Cinemachine;
+using Logic.Common;
 using Unity.Entities;
 using UnityEngine;
 
-namespace TMG.NFE_Tutorial
+namespace Client
 {
     public class CameraController : MonoBehaviour
     {
@@ -43,7 +46,7 @@ namespace TMG.NFE_Tutorial
             _transposer = _cinemachineVirtualCamera.GetCinemachineComponent<CinemachineFramingTransposer>();
         }
 
-        /*private void Start()
+        private void Start()
         {
             if (World.DefaultGameObjectInjectionWorld == null) return;
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -68,7 +71,7 @@ namespace TMG.NFE_Tutorial
                     _cameraSet = true;
                 }
             }
-        }*/
+        }
 
         private void OnValidate()
         {
@@ -77,7 +80,7 @@ namespace TMG.NFE_Tutorial
 
         private void Update()
         {
-            // SetCameraForAutoAssignTeam();
+            SetCameraForAutoAssignTeam();
             MoveCamera();
             ZoomCamera();
         }
@@ -120,13 +123,13 @@ namespace TMG.NFE_Tutorial
             }
         }
 
-        /*private void SetCameraForAutoAssignTeam()
+        private void SetCameraForAutoAssignTeam()
         {
             if (!_cameraSet)
             {
                 if (_localChampQuery.TryGetSingletonEntity<OwnerChampTag>(out var localChamp))
                 {
-                    var team = _entityManager.GetComponentData<MobaTeam>(localChamp).Value;
+                    var team = _entityManager.GetComponentData<Team>(localChamp).Value;
                     var cameraPosition = team switch
                     {
                         TeamType.Blue => _blueTeamPosition,
@@ -137,7 +140,7 @@ namespace TMG.NFE_Tutorial
                     _cameraSet = true;
                 }
             }
-        }*/
+        }
 
         private void OnDrawGizmos()
         {

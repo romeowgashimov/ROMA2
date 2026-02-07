@@ -21,6 +21,12 @@ namespace Logic.Common
     public struct MoveTargetPosition : IInputComponentData
     {
         [GhostField(Quantization = 0)] public float3 Value;
-        public int ClickCount;
+        public bool Flag;
+    }
+
+    [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
+    public struct AbilityInput : IInputComponentData
+    {
+        [GhostField] public InputEvent Value;
     }
 }

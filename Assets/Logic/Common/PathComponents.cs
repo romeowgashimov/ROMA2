@@ -4,16 +4,16 @@ using Unity.NetCode;
 
 namespace Logic.Common
 {
-    [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     public struct NeedPath : IEnableableComponent, IComponentData { }
 
-    public struct LastProcessedClick : IComponentData
+    public struct RegisterNeedPathComponent : IComponentData
     {
-        public int Value;
+        [GhostField] public bool Value;
     }
     
+    [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     [InternalBufferCapacity(4)]
-    public struct PathPosition : IBufferElementData
+    public struct PathPositionElement : IBufferElementData
     {
         public int2 Value;
     }

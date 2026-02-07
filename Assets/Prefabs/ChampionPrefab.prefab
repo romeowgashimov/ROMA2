@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: -6927650473352141094}
   - component: {fileID: -2378532758327640827}
   - component: {fileID: 4151137899807470568}
+  - component: {fileID: 4695962307123421118}
+  - component: {fileID: 6582418448893277616}
   m_Layer: 0
   m_Name: ChampionPrefab
   m_TagString: Untagged
@@ -316,7 +318,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1215624f01a8c7c4b8f4ec5111b72439, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Logic.Common.ChampionAuthoring
+  PathPositionsCapacity: 100
   MoveSpeed: 10
+--- !u!114 &4695962307123421118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 403193853099150282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9546a3726f0a480c85cceab8c824d950, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HealthPointsAuthoring
+  MaxHealthPoints: 1000
+--- !u!114 &6582418448893277616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 403193853099150282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7707155b1784fed9cd380edb53ef59b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.AoeAbilityAuthoring
+  AbilityPrefab: {fileID: 4554436324229213116, guid: 4f2e3d45dce0b9e40b98fd7cc8534655,
+    type: 3}
 --- !u!1 &859060646936255700
 GameObject:
   m_ObjectHideFlags: 0
