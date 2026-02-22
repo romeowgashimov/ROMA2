@@ -42,4 +42,26 @@ namespace Logic.Common
     }
     
     public struct DestroyEntityTag : IComponentData { }
+
+    public struct DamageOnTrigger : IComponentData
+    {
+        public int Value;
+    }
+
+    public struct AlreadyDamagedEntity : IBufferElementData
+    {
+        public Entity Value;
+    }
+
+    public struct AbilityCooldownTicks : IComponentData
+    {
+        public uint AoeAbility;
+    }
+
+    [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
+    public struct AbilityCooldownTargetTicks : ICommandData
+    {
+        public NetworkTick Tick { get; set; }
+        public NetworkTick AoeAbility;
+    }
 }

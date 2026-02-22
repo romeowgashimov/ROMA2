@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 9109658604866127568}
   - component: {fileID: -6906729116083896886}
   - component: {fileID: 5998907826215234344}
+  - component: {fileID: -2269101407946460892}
   m_Layer: 0
   m_Name: Tower
   m_TagString: Untagged
@@ -289,7 +290,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9546a3726f0a480c85cceab8c824d950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HealthPointsAuthoring
-  MaxHealthPoints: 2000
+  MaxHealthPoints: 200
 --- !u!114 &5998907826215234344
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -303,3 +304,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.TeamAuthoring
   Team: 0
+--- !u!114 &-2269101407946460892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1808960621481842931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c79d771cedb4794bf100ce60df5f764, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.NetCode.Authoring.Hybrid::Unity.NetCode.GhostAuthoringComponent
+  DefaultGhostMode: 0
+  SupportedGhostModes: 3
+  OptimizationMode: 0
+  Importance: 50
+  MaxSendRate: 0
+  prefabId: 38f4e9377d234a64488bff6c7061bc95
+  HasOwner: 0
+  SupportAutoCommandTarget: 1
+  TrackInterpolationDelay: 0
+  GhostGroup: 0
+  UsePreSerialization: 0
+  UseSingleBaseline: 0
+  RollbackPredictedSpawnedGhostState: 0
+  RollbackPredictionOnStructuralChanges: 1

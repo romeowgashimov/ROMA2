@@ -5,7 +5,6 @@ using Unity.Transforms;
 
 namespace Logic.Common
 {
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct BeginAoeAbilitySystem : ISystem
     {
@@ -14,7 +13,8 @@ namespace Logic.Common
         public void OnCreate(ref SystemState state)
         {
             _query = SystemAPI.QueryBuilder()
-                .WithAll<AbilityInput, AbilityPrefabs, Team, LocalTransform, Simulate>()
+                .WithAll<AbilityInput, AbilityPrefabs, Team, LocalTransform, 
+                    AbilityCooldownTicks, AbilityCooldownTargetTicks, Simulate>()
                 .Build();
             
             state.RequireForUpdate<NetworkTime>();
@@ -30,9 +30,13 @@ namespace Logic.Common
 
             NetworkTime networkTime = SystemAPI.GetSingleton<NetworkTime>();
             if (!networkTime.IsFirstTimeFullyPredictingTick) return;
-            NetworkTick currentTick = networkTime.ServerTick;
             
-            BeginAoeAbilityJob job = new() { ECB = ecb.AsParallelWriter() };
+            BeginAoeAbilityJob job = new()
+            {
+                ECB = ecb.AsParallelWriter(),
+                NetworkTime = networkTime,
+                IsServer = state.WorldUnmanaged.IsServer()
+            };
 
             state.Dependency = job.ScheduleParallel(_query, state.Dependency);
         }
@@ -42,15 +46,53 @@ namespace Logic.Common
     public partial struct BeginAoeAbilityJob : IJobEntity
     {
         public EntityCommandBuffer.ParallelWriter ECB;
+        public NetworkTime NetworkTime;
+        public bool IsServer;
         
-        private void Execute([EntityIndexInQuery] int key, AoeAspect aoe)
+        private void Execute([EntityIndexInQuery] int key,
+            AbilityInput input, AbilityPrefabs abilityPrefab,
+            Team team, LocalTransform transform, AbilityCooldownTicks cooldownTicks,
+            DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks)
         {
-            if (aoe.ShouldAttack)
+            NetworkTick currentTick = NetworkTime.ServerTick;
+            bool isOnCooldown = true;
+            AbilityCooldownTargetTicks curTargetTicks = new();
+
+            for (uint i = 0u; i < NetworkTime.SimulationStepBatchSize; i++)
             {
-                Entity newAoeAbility = ECB.Instantiate(key, aoe.AbilityPrefab);
-                LocalTransform abilityTransform = LocalTransform.FromPosition(aoe.AttackPosition);
+                NetworkTick testTick = currentTick;
+                testTick.Subtract(i);
+                
+                if(!cooldownTargetTicks.GetDataAtTick(testTick, out curTargetTicks))
+                    curTargetTicks.AoeAbility = NetworkTick.Invalid;
+
+                if (curTargetTicks.AoeAbility == NetworkTick.Invalid ||
+                    !curTargetTicks.AoeAbility.IsNewerThan(currentTick))
+                {
+                    isOnCooldown = false;
+                    break;
+                }
+            }
+
+            if (isOnCooldown) return;
+            
+            if (input.Value.IsSet)
+            {
+                Entity newAoeAbility = ECB.Instantiate(key, abilityPrefab.AoeAbility);
+                LocalTransform abilityTransform = LocalTransform.FromPosition(transform.Position);
                 ECB.SetComponent(key, newAoeAbility, abilityTransform);
-                ECB.SetComponent(key, newAoeAbility, aoe.Team);
+                ECB.SetComponent(key, newAoeAbility, team);
+
+                if (IsServer) return;
+                NetworkTick newCooldownTargetTick = currentTick;
+                newCooldownTargetTick.Add(cooldownTicks.AoeAbility);
+                curTargetTicks.AoeAbility = newCooldownTargetTick;
+                
+                NetworkTick nextTick = currentTick;
+                nextTick.Add(1u);
+                curTargetTicks.Tick = nextTick;
+                
+                cooldownTargetTicks.AddCommandData(curTargetTicks);
             }
         }
     }

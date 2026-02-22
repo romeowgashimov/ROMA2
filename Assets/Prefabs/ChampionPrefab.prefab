@@ -347,6 +347,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.AoeAbilityAuthoring
   AbilityPrefab: {fileID: 4554436324229213116, guid: 4f2e3d45dce0b9e40b98fd7cc8534655,
     type: 3}
+  AoeAbilityCooldown: 3
+  NetCodeConfig: {fileID: 11400000, guid: dce9a8c7da8b8cf4093e70364ed6f4c4, type: 2}
 --- !u!1 &859060646936255700
 GameObject:
   m_ObjectHideFlags: 0
