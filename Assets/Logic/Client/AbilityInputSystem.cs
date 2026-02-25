@@ -27,7 +27,13 @@ namespace Logic.Client
             AbilityInput newAbilityInput = new();
             
             if(_inputActions.GameplayMap.AoeAblility.WasPressedThisFrame())
-                newAbilityInput.Value.Set();
+                newAbilityInput.AoeAbility.Set();
+            
+            if(_inputActions.GameplayMap.SkillShotAbility.WasPressedThisFrame())
+                newAbilityInput.SkillShotAbility.Set();
+            
+            if(_inputActions.GameplayMap.ConfirmSkillShotAbility.WasPressedThisFrame())
+                newAbilityInput.ConfirmSkillShotAbility.Set();
             
             foreach(RefRW<AbilityInput> abilityInput in SystemAPI.Query<RefRW<AbilityInput>>())
                 abilityInput.ValueRW = newAbilityInput;

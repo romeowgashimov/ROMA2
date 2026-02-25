@@ -27,6 +27,7 @@ namespace Logic.Common
                 pathPositions.Capacity = authoring.PathPositionsCapacity;
                 AddComponent<FollowPathIndex>(entity);
                 AddComponent<AbilityInput>(entity);
+                AddComponent<AimInput>(entity);
             }
         }
     }

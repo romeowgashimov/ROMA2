@@ -6,9 +6,11 @@ namespace Logic.Common
 {
     public class AbilityAuthoring : MonoBehaviour
     {
-        public GameObject AbilityPrefab;
+        public GameObject AoeAbilityPrefab;
+        public GameObject SkillShotAbilityPrefab;
         
         public float AoeAbilityCooldown;
+        public float SkillShotAbilityCooldown;
         
         public NetCodeConfig NetCodeConfig;
 
@@ -21,11 +23,13 @@ namespace Logic.Common
                 Entity entity = GetEntity(TransformUsageFlags.Dynamic);
                 AddComponent(entity, new AbilityPrefabs
                 {
-                    AoeAbility = GetEntity(authoring.AbilityPrefab, TransformUsageFlags.Dynamic)
+                    AoeAbility = GetEntity(authoring.AoeAbilityPrefab, TransformUsageFlags.Dynamic),
+                    SkillShotAbility = GetEntity(authoring.SkillShotAbilityPrefab, TransformUsageFlags.Dynamic)
                 });
                 AddComponent(entity, new AbilityCooldownTicks
                 {
-                    AoeAbility = (uint)(authoring.AoeAbilityCooldown * authoring.SimulationTickRate)
+                    AoeAbility = (uint)(authoring.AoeAbilityCooldown * authoring.SimulationTickRate),
+                    SkillShotAbility = (uint)(authoring.SkillShotAbilityCooldown * authoring.SimulationTickRate)
                 });
                 AddBuffer<AbilityCooldownTargetTicks>(entity);
             }

@@ -24,17 +24,17 @@ namespace Logic.Common
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            NetworkTime netTime = SystemAPI.GetSingleton<NetworkTime>();
+            if (!netTime.IsFirstTimeFullyPredictingTick) return;
+            
             EndPredictedSimulationEntityCommandBufferSystem.Singleton ecbSingleton = 
                 SystemAPI.GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
             EntityCommandBuffer ecb =  ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
-
-            NetworkTime networkTime = SystemAPI.GetSingleton<NetworkTime>();
-            if (!networkTime.IsFirstTimeFullyPredictingTick) return;
             
             BeginAoeAbilityJob job = new()
             {
                 ECB = ecb.AsParallelWriter(),
-                NetworkTime = networkTime,
+                NetworkTime = netTime,
                 IsServer = state.WorldUnmanaged.IsServer()
             };
 
@@ -50,7 +50,7 @@ namespace Logic.Common
         public bool IsServer;
         
         private void Execute([EntityIndexInQuery] int key,
-            AbilityInput input, AbilityPrefabs abilityPrefab,
+            in AbilityInput input, AbilityPrefabs abilityPrefab,
             Team team, LocalTransform transform, AbilityCooldownTicks cooldownTicks,
             DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks)
         {
@@ -76,7 +76,7 @@ namespace Logic.Common
 
             if (isOnCooldown) return;
             
-            if (input.Value.IsSet)
+            if (input.AoeAbility.IsSet)
             {
                 Entity newAoeAbility = ECB.Instantiate(key, abilityPrefab.AoeAbility);
                 LocalTransform abilityTransform = LocalTransform.FromPosition(transform.Position);

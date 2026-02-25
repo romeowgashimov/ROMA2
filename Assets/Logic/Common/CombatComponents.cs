@@ -28,7 +28,8 @@ namespace Logic.Common
 
     public struct AbilityPrefabs : IComponentData
     {
-        public Entity AoeAbility; 
+        public Entity AoeAbility;
+        public Entity SkillShotAbility;
     }
 
     public struct DestroyOnTimer : IComponentData
@@ -56,6 +57,7 @@ namespace Logic.Common
     public struct AbilityCooldownTicks : IComponentData
     {
         public uint AoeAbility;
+        public uint SkillShotAbility;
     }
 
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
@@ -63,5 +65,13 @@ namespace Logic.Common
     {
         public NetworkTick Tick { get; set; }
         public NetworkTick AoeAbility;
+        public NetworkTick SkillShotAbility;
+    }
+    
+    public struct AimSkillShotTag : IComponentData { }
+
+    public struct AbilityMoveSpeed : IComponentData
+    {
+        public float Value;
     }
 }

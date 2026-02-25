@@ -31,6 +31,14 @@ namespace Logic.Common
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     public struct AbilityInput : IInputComponentData
     {
-        [GhostField] public InputEvent Value;
+        [GhostField] public InputEvent AoeAbility;
+        [GhostField] public InputEvent SkillShotAbility;
+        [GhostField] public InputEvent ConfirmSkillShotAbility;
+    }
+
+    [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
+    public struct AimInput : IInputComponentData
+    {
+        [GhostField(Quantization = 0)] public float3 Value;
     }
 }
