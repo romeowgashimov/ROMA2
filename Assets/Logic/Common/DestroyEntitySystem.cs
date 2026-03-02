@@ -10,7 +10,7 @@ namespace Logic.Common
     {
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
+            state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
             state.RequireForUpdate<NetworkTime>();
         }
 
@@ -22,7 +22,7 @@ namespace Logic.Common
             NetworkTick currentTick = networkTime.ServerTick;
             
             EntityCommandBuffer ecb = SystemAPI
-                .GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
+                .GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged);
 
             foreach ((RefRW<LocalTransform> transform, Entity entity) in SystemAPI

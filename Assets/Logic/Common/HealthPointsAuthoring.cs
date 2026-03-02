@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Logic.Client;
+using Unity.Entities;
 using UnityEngine;
 
 namespace Logic.Common
@@ -6,6 +7,7 @@ namespace Logic.Common
     public class HealthPointsAuthoring : MonoBehaviour
     {
         public int MaxHealthPoints;
+        public Vector3 HealthBarOffset;
 
         public class HealthPointsBaker : Baker<HealthPointsAuthoring>
         {
@@ -16,6 +18,7 @@ namespace Logic.Common
                 AddComponent(entity, new CurrentHealthPoints() { Value = authoring.MaxHealthPoints });
                 AddBuffer<DamageBufferElement>(entity);
                 AddBuffer<DamageThisTick>(entity);
+                AddComponent(entity, new HealthBarOffset { Value =  authoring.HealthBarOffset });
             }
         }
     }

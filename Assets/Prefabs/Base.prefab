@@ -290,6 +290,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HealthPointsAuthoring
   MaxHealthPoints: 500
+  HealthBarOffset: {x: 0, y: 3, z: 0}
 --- !u!114 &4568716967356504705
 MonoBehaviour:
   m_ObjectHideFlags: 0

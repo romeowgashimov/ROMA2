@@ -58,6 +58,14 @@ namespace Logic.Common
     {
         public uint AoeAbility;
         public uint SkillShotAbility;
+        public int Length => 2;
+
+        public uint this[int index] => index switch
+        {
+            0 => AoeAbility,
+            1 => SkillShotAbility,
+            _ => uint.MaxValue
+        };
     }
 
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
@@ -66,9 +74,18 @@ namespace Logic.Common
         public NetworkTick Tick { get; set; }
         public NetworkTick AoeAbility;
         public NetworkTick SkillShotAbility;
+
+        public int Length => 2;
+
+        public NetworkTick this[int index] => index switch
+        {
+            0 => AoeAbility,
+            1 => SkillShotAbility,
+            _ => NetworkTick.Invalid
+        };
     }
-    
-    public struct AimSkillShotTag : IComponentData { }
+
+        public struct AimSkillShotTag : IComponentData { }
 
     public struct AbilityMoveSpeed : IComponentData
     {

@@ -49,7 +49,8 @@ namespace Logic.Common
             JobHandle jobHandle = new BeginSkillShotTagJob
             {
                 NetworkTime = netTime,
-                ECB = ecb
+                ECB = ecb,
+                IsServerAndNotOwner = state.World.IsServer()
             }.Schedule(_queryBeginTag, state.Dependency);
             
             state.Dependency = new AfterSkillShotTagJob
@@ -66,6 +67,7 @@ namespace Logic.Common
     {
         public EntityCommandBuffer ECB;
         public NetworkTime NetworkTime;
+        public bool IsServerAndNotOwner;
 
         private void Execute(in AbilityInput abilityInput,
             in DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks, 

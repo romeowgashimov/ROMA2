@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace TMG.NFE_Tutorial
+namespace Logic.Client
 {
     public class AbilityCooldownUIController : MonoBehaviour
     {
@@ -27,14 +27,17 @@ namespace TMG.NFE_Tutorial
             _skillShotAbilityMask.fillAmount = 0f;
         }
 
-        public void UpdateAoeMask(float fillAmount)
+        public void UpdateMask(int index, float fillAmount)
         {
-            _aoeAbilityMask.fillAmount = fillAmount;
-        }
-
-        public void UpdateSkillShotMask(float fillAmount)
-        {
-            _skillShotAbilityMask.fillAmount = fillAmount;
+            switch (index)
+            {
+                case 0:
+                    _aoeAbilityMask.fillAmount = fillAmount;
+                    break;
+                case 1:
+                    _skillShotAbilityMask.fillAmount = fillAmount;
+                    break;
+            }
         }
     }
 }

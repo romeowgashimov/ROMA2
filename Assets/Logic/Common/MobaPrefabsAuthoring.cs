@@ -1,12 +1,17 @@
 using Unity.Entities;
 using UnityEngine;
 
-namespace Assets.Logic.Common
+namespace Logic.Common
 {
     public class MobaPrefabsAuthoring : MonoBehaviour
     {
+        [Header("Entities")]
         public GameObject Champion;
 
+        [Header("GameObjects")] 
+        public GameObject HealthBarPrefab;
+        public GameObject SkillShotAimPrefab;
+        
         public class MobaPrefabsBaker : Baker<MobaPrefabsAuthoring>
         {
             public override void Bake(MobaPrefabsAuthoring authoring)
@@ -15,6 +20,11 @@ namespace Assets.Logic.Common
                 AddComponent(prefabContainerEntity, new MobaPrefabs
                 {
                     Champion = GetEntity(authoring.Champion, TransformUsageFlags.Dynamic)
+                });
+                AddComponentObject(prefabContainerEntity, new UIPrefabs
+                {
+                    HealthBar = authoring.HealthBarPrefab,
+                    SkillShot =  authoring.SkillShotAimPrefab,
                 });
             }
         }
