@@ -62,8 +62,8 @@ namespace Logic.Client
             if(collisionWorld.CastRay(selectionInput, out Unity.Physics.RaycastHit closestHit))
             {
                 Entity owner = SystemAPI.GetSingletonEntity<OwnerChampTag>();
-                bool flag = EntityManager.GetComponentData<MoveTargetPosition>(owner).Flag;
-                EntityManager.SetComponentData(owner, new MoveTargetPosition
+                bool flag = EntityManager.GetComponentData<InputMoveTargetPosition>(owner).Flag;
+                EntityManager.SetComponentData(owner, new InputMoveTargetPosition
                 {
                     Value = closestHit.Position,
                     Flag = !flag

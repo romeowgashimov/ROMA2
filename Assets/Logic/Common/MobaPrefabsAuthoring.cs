@@ -7,7 +7,8 @@ namespace Logic.Common
     {
         [Header("Entities")]
         public GameObject Champion;
-
+        public GameObject Minion;
+        
         [Header("GameObjects")] 
         public GameObject HealthBarPrefab;
         public GameObject SkillShotAimPrefab;
@@ -19,7 +20,8 @@ namespace Logic.Common
                 Entity prefabContainerEntity = GetEntity(TransformUsageFlags.None);
                 AddComponent(prefabContainerEntity, new MobaPrefabs
                 {
-                    Champion = GetEntity(authoring.Champion, TransformUsageFlags.Dynamic)
+                    Champion = GetEntity(authoring.Champion, TransformUsageFlags.Dynamic),
+                    Minion = GetEntity(authoring.Minion, TransformUsageFlags.Dynamic),
                 });
                 AddComponentObject(prefabContainerEntity, new UIPrefabs
                 {

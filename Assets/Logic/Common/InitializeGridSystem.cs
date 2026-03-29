@@ -29,7 +29,7 @@ namespace Logic.Common
                         {
                             X = x,
                             Y = y,
-                            Index = PathFindingJob.CalculateIndex(x, y, gridSize.x),
+                            Index = CalculateIndex(x, y, gridSize.x),
                             IsWalkable = true,
                             CameFromNodeIndex = -1
                         };
@@ -38,5 +38,7 @@ namespace Logic.Common
             
             EntityManager.SetName(gridEntity, "Grid");
         }
+        
+        private int CalculateIndex(int x, int y, int width) => x + y * width;
     }
 }

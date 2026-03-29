@@ -382,8 +382,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Logic.Common.GridAuthoring
   GridSize:
-    x: 100
-    y: 100
+    x: 120
+    y: 120
 --- !u!4 &272302958
 Transform:
   m_ObjectHideFlags: 0
@@ -1243,6 +1243,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Logic.Common.MobaPrefabsAuthoring
   Champion: {fileID: 403193853099150282, guid: 2fe49a526567fdc46a55b0b1094bd406, type: 3}
+  Minion: {fileID: 3608237881302961655, guid: 99194622db1b196499c57b33645cfe56, type: 3}
   HealthBarPrefab: {fileID: 6246730936639062891, guid: 8aadaf8ffd0c86343a26b96a6d7bb1fd,
     type: 3}
   SkillShotAimPrefab: {fileID: 907054830368013773, guid: 660bbd0c07689ab4da9d13040d620316,
@@ -1338,6 +1339,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1646246677}
+  - component: {fileID: 1646246678}
+  - component: {fileID: 1646246679}
   m_Layer: 0
   m_Name: MinionProperties
   m_TagString: Untagged
@@ -1360,6 +1363,45 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1646246678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1646246674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e65d3ed16be446c0a9618bb95cf15a87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.MinionSpawnPropertiesAuthoring
+  TimeBetweenWaves: 5
+  TimeBetweenMinions: 2000
+  CountToSpawnInWave: 1
+--- !u!114 &1646246679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1646246674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ec98a30e46742f7afd9258a39e9b3a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.MinionPathAuthoring
+  TopLanePath:
+  - {x: -50, y: 1, z: -40}
+  - {x: -50, y: 1, z: 50}
+  - {x: 40, y: 1, z: 50}
+  MidLanePath:
+  - {x: -40, y: 1, z: -40}
+  - {x: 0, y: 1, z: 0}
+  - {x: 40, y: 1, z: 40}
+  BotLanePath:
+  - {x: -40, y: 1, z: -50}
+  - {x: 50, y: 1, z: -50}
+  - {x: 50, y: 1, z: 40}
 --- !u!1001 &1842991065
 PrefabInstance:
   m_ObjectHideFlags: 0

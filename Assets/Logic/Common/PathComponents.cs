@@ -5,11 +5,6 @@ using Unity.NetCode;
 namespace Logic.Common
 {
     public struct NeedPath : IEnableableComponent, IComponentData { }
-
-    public struct RegisterNeedPathComponent : IComponentData
-    {
-        [GhostField] public bool Value;
-    }
     
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     [InternalBufferCapacity(4)]

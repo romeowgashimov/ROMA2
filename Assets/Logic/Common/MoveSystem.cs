@@ -32,7 +32,7 @@ namespace Logic.Common
             state.Dependency = moveJob.ScheduleParallel(_query, state.Dependency);
         }       
     }
-
+    // Добавить интерполяцию
     [BurstCompile]
     public partial struct MoveJob : IJobEntity
     {
@@ -42,6 +42,8 @@ namespace Logic.Common
             MoveTargetPosition target, MoveSpeed moveSpeed,
             RefRW<FollowPathIndex> followPathIndex, ref DynamicBuffer<PathPositionElement> pathPositions)
         {
+            if (pathPositions.IsEmpty) return;
+            
             float2 targetInt2;
             switch (followPathIndex.ValueRO.Value)
             {

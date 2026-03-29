@@ -22,11 +22,17 @@ namespace Logic.Common
     }
     
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
-    public struct MoveTargetPosition : IInputComponentData
+    public struct InputMoveTargetPosition : IInputComponentData
     {
         [GhostField(Quantization = 0)] public float3 Value;
         public bool Flag;
     }
+
+    public struct MoveTargetPosition : IComponentData
+    {
+        [GhostField(Quantization = 0)] public float3 Value;
+        [GhostField] public bool Flag;
+    } 
     
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     public struct AbilityInput : IInputComponentData

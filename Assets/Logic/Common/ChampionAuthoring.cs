@@ -17,12 +17,12 @@ namespace Logic.Common
                 AddComponent<NewChampTag>(entity);
                 AddComponent<Team>(entity);
                 AddComponent<URPMaterialPropertyBaseColor>(entity);
-                AddComponent<MoveTargetPosition>(entity);
+                AddComponent<InputMoveTargetPosition>(entity);
                 NeedPath needPath = new();
                 AddComponent(entity, needPath);
                 SetComponentEnabled<NeedPath>(entity, false);
                 AddComponent(entity, new MoveSpeed { Value = authoring.MoveSpeed });
-                AddComponent(entity, new RegisterNeedPathComponent { Value = false });
+                AddComponent(entity, new MoveTargetPosition { Flag = false });
                 DynamicBuffer<PathPositionElement> pathPositions = AddBuffer<PathPositionElement>(entity);
                 pathPositions.Capacity = authoring.PathPositionsCapacity;
                 AddComponent<FollowPathIndex>(entity);

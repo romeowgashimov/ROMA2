@@ -96,7 +96,7 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
                     ""name"": ""SelectMovePosition"",
                     ""type"": ""Button"",
                     ""id"": ""7e412cf8-fa63-40c7-af5a-a7fbddaa8039"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false

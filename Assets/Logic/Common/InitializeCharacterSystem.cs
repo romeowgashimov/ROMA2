@@ -1,22 +1,22 @@
-using Logic.Common;
+using Assets.Logic.Common;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Rendering;
 
-namespace Assets.Logic.Common
+namespace Logic.Common
 {
     [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
     public partial struct InitializeCharacterSystem : ISystem
     {
-        private void OnUpdate(ref SystemState state)
+        public void OnUpdate(ref SystemState state)
         {
             EntityCommandBuffer ecb = new(Allocator.Temp);
 
             foreach((RefRW<PhysicsMass> mass, Team team, Entity newCharacterEntity) in SystemAPI
             .Query<RefRW<PhysicsMass>, Team>()
-            .WithAny<NewChampTag>()
+            .WithAny<NewChampTag, NewMinionTag>()
             .WithEntityAccess())
             {
                 mass.ValueRW.InverseInertia[0] = 0;
@@ -31,7 +31,8 @@ namespace Assets.Logic.Common
                 };
 
                 ecb.SetComponent(newCharacterEntity, new URPMaterialPropertyBaseColor { Value = teamColor });
-                ecb.RemoveComponent<NewChampTag>(newCharacterEntity);            
+                ecb.RemoveComponent<NewChampTag>(newCharacterEntity);
+                ecb.RemoveComponent<NewMinionTag>(newCharacterEntity);
             }
 
             ecb.Playback(state.EntityManager);

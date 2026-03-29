@@ -1,161 +1,109 @@
-﻿using Unity.Burst;
+﻿using Logic.Client;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
-
+using UnityEngine;
 
 namespace Logic.Common
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct BeginSkillShotAbilitySystem : ISystem
     {
-        private EntityQuery _queryBeginTag;
-        private EntityQuery _queryAfterTag;
-
         public void OnCreate(ref SystemState state)
         {
-            _queryBeginTag = SystemAPI.QueryBuilder()
-                .WithAll<AbilityInput, AbilityPrefabs,
-                    AbilityCooldownTicks, Team,
-                    LocalTransform, AbilityCooldownTargetTicks,
-                    AimInput>()
-                .WithAll<Simulate>()
-                .WithNone<AimSkillShotTag>()
-                .Build();
-
-            _queryAfterTag = SystemAPI.QueryBuilder()
-                .WithAll<AbilityInput, AbilityPrefabs,
-                    AbilityCooldownTicks, Team,
-                    LocalTransform, AbilityCooldownTargetTicks,
-                    AimInput>()
-                .WithAll<AimSkillShotTag, Simulate>()
-                .Build();
-            
             state.RequireForUpdate<NetworkTime>();
-            state.RequireForUpdate<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
+            state.RequireForUpdate<BeginPredictedSimulationEntityCommandBufferSystem.Singleton>();
         }
 
         public void OnUpdate(ref SystemState state)
         {
             NetworkTime netTime = SystemAPI.GetSingleton<NetworkTime>();
             if (!netTime.IsFirstTimeFullyPredictingTick) return;
-            
+
             EntityCommandBuffer ecb = SystemAPI
-                .GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>()
+                .GetSingleton<BeginPredictedSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged);
 
-            JobHandle jobHandle = new BeginSkillShotTagJob
+            bool isServer = state.WorldUnmanaged.IsServer();
+
+            foreach ((AbilityInput abilityInput, DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
+                         LocalTransform transform, Entity champion) in SystemAPI
+                         .Query<AbilityInput, DynamicBuffer<AbilityCooldownTargetTicks>, LocalTransform>()
+                         .WithAll<AbilityPrefabs, AbilityCooldownTicks, Team>()
+                         .WithAll<AimInput, Simulate>()
+                         .WithNone<AimSkillShotTag>()
+                         .WithEntityAccess())
             {
-                NetworkTime = netTime,
-                ECB = ecb,
-                IsServerAndNotOwner = state.World.IsServer()
-            }.Schedule(_queryBeginTag, state.Dependency);
-            
-            state.Dependency = new AfterSkillShotTagJob
-            {
-                NetworkTime = netTime,
-                ECB = ecb
-            }.Schedule(_queryAfterTag, jobHandle);
-            
-        }
-    }
+                if (cooldownTargetTicks.IsOnCooldown(netTime)) continue;
 
-    [BurstCompile]
-    public partial struct BeginSkillShotTagJob : IJobEntity
-    {
-        public EntityCommandBuffer ECB;
-        public NetworkTime NetworkTime;
-        public bool IsServerAndNotOwner;
+                if (!abilityInput.SkillShotAbility.IsSet) continue;
+                ecb.AddComponent<AimSkillShotTag>(champion);
 
-        private void Execute(in AbilityInput abilityInput,
-            in DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks, 
-            in Entity champion)
-        {
-            NetworkTick currentTick = NetworkTime.ServerTick;
-            bool isOnCooldown = true;
+                if (isServer || !SystemAPI.HasComponent<OwnerChampTag>(champion)) continue;
 
-            for (uint i = 0u; i < NetworkTime.SimulationStepBatchSize; i++)
-            {
-                NetworkTick testTick = currentTick;
-                testTick.Subtract(i);
-
-                if (!cooldownTargetTicks.GetDataAtTick(testTick, out AbilityCooldownTargetTicks curTargetTicks))
-                    curTargetTicks.SkillShotAbility = NetworkTick.Invalid;
-
-                if (curTargetTicks.SkillShotAbility == NetworkTick.Invalid ||
-                    !curTargetTicks.SkillShotAbility.IsNewerThan(currentTick))
-                {
-                    isOnCooldown = false;
-                    break;
-                }
+                GameObject skillShotPrefab = SystemAPI.ManagedAPI.GetSingleton<UIPrefabs>().SkillShot;
+                GameObject skillShotUI = Object.Instantiate(skillShotPrefab, transform.Position, Quaternion.identity);
+                ecb.AddComponent(champion, new SkillShotUIReference { Value =  skillShotUI });
             }
 
-            if (isOnCooldown) return;
-
-            if (!abilityInput.SkillShotAbility.IsSet) return;
-            ECB.AddComponent<AimSkillShotTag>(champion);
-        }
-    }
-
-    [BurstCompile]
-    public partial struct AfterSkillShotTagJob : IJobEntity
-    {
-        public EntityCommandBuffer ECB;
-        public NetworkTime NetworkTime;
-        public bool IsServer;
-
-        private void Execute(AbilityInput abilityInput, AbilityPrefabs abilityPrefabs,
-            AbilityCooldownTicks abilityCooldownTicks, Team team,
-            LocalTransform transform, DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
-            AimInput aimInput)
-        {
-            if (!abilityInput.ConfirmSkillShotAbility.IsSet) return;
-            
-            NetworkTick currentTick = NetworkTime.ServerTick;
-            bool isOnCooldown = true;
-            AbilityCooldownTargetTicks curTargetTicks;
-
-            for (uint i = 0u; i < NetworkTime.SimulationStepBatchSize; i++)
+            foreach ((AbilityInput abilityInput, AbilityPrefabs abilityPrefabs,
+                         AbilityCooldownTicks abilityCooldownTicks, Team team,
+                         LocalTransform transform, DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
+                         AimInput aimInput, Entity entity) in SystemAPI
+                         .Query<AbilityInput, AbilityPrefabs, AbilityCooldownTicks, Team,
+                             LocalTransform, DynamicBuffer<AbilityCooldownTargetTicks>, AimInput>()
+                         .WithAll<AimSkillShotTag>()
+                         .WithAll<Simulate>()
+                         .WithEntityAccess())
             {
-                NetworkTick testTick = currentTick;
-                testTick.Subtract(i);
+                if (!abilityInput.ConfirmSkillShotAbility.IsSet) continue;
+            
+                if (cooldownTargetTicks.IsOnCooldown(netTime)) continue;
 
-                if (!cooldownTargetTicks.GetDataAtTick(testTick, out curTargetTicks))
-                    curTargetTicks.SkillShotAbility = NetworkTick.Invalid;
+                NetworkTick currentTick = netTime.ServerTick;
+                Entity skillShot = ecb.Instantiate(abilityPrefabs.SkillShotAbility);
+                LocalTransform newPosition = LocalTransform.FromPositionRotation(transform.Position,
+                    quaternion.LookRotationSafe(aimInput.Value, math.up()));
+                ecb.SetComponent(skillShot, newPosition);
+                ecb.SetComponent(skillShot, team);
+                // Replace RemoveComponent for SetEnabledComponent for all cases
+                ecb.RemoveComponent<AimSkillShotTag>(entity);
+            
+                if (isServer) continue;
+            
+                cooldownTargetTicks.GetDataAtTick(currentTick, out AbilityCooldownTargetTicks curTargetTicks);
+            
+                NetworkTick newCooldownTargetTicks = currentTick;
+                newCooldownTargetTicks.Add(abilityCooldownTicks.SkillShotAbility);
+                curTargetTicks.SkillShotAbility = newCooldownTargetTicks;
 
-                if (curTargetTicks.SkillShotAbility == NetworkTick.Invalid ||
-                    !curTargetTicks.SkillShotAbility.IsNewerThan(currentTick))
-                {
-                    isOnCooldown = false;
-                    break;
-                }
+                NetworkTick nextTick = currentTick;
+                nextTick.Add(1u);
+                curTargetTicks.Tick = nextTick;
+
+                cooldownTargetTicks.AddCommandData(curTargetTicks);
             }
 
-            if (isOnCooldown) return;
+            foreach ((AbilityInput abilityInput, SkillShotUIReference skillShotUIReference, Entity entity) in SystemAPI
+                         .Query<AbilityInput, SkillShotUIReference>()
+                         .WithAll<Simulate>()
+                         .WithEntityAccess())
+            {
+                if (!abilityInput.ConfirmSkillShotAbility.IsSet) continue;
+                Object.Destroy(skillShotUIReference.Value);
+                ecb.RemoveComponent<SkillShotUIReference>(entity);
+            }
             
-            Entity skillShot = ECB.Instantiate(abilityPrefabs.SkillShotAbility);
-            LocalTransform newPosition = LocalTransform.FromPositionRotation(transform.Position,
-                quaternion.LookRotationSafe(aimInput.Value, math.up()));
-            ECB.SetComponent(skillShot, newPosition);
-            ECB.SetComponent(skillShot, team);
-            // Replace RemoveComponent for SetEnabledComponent for all cases
-            ECB.RemoveComponent<AimSkillShotTag>(skillShot);
-            
-            if (IsServer) return;
-            
-            cooldownTargetTicks.GetDataAtTick(currentTick, out curTargetTicks);
-            
-            NetworkTick newCooldownTargetTicks = currentTick;
-            newCooldownTargetTicks.Add(abilityCooldownTicks.SkillShotAbility);
-            curTargetTicks.SkillShotAbility = newCooldownTargetTicks;
-
-            NetworkTick nextTick = currentTick;
-            nextTick.Add(1u);
-            curTargetTicks.Tick = nextTick;
-
-            cooldownTargetTicks.AddCommandData(curTargetTicks);
+            foreach ((SkillShotUIReference skillShotUIReference, Entity entity) in SystemAPI
+                         .Query<SkillShotUIReference>()
+                         .WithAll<Simulate>()
+                         .WithNone<LocalTransform>()
+                         .WithEntityAccess())
+            {
+                Object.Destroy(skillShotUIReference.Value);
+                ecb.RemoveComponent<SkillShotUIReference>(entity);
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Logic.Common
             var deltaTime = SystemAPI.Time.DeltaTime;
 
             foreach (var (transform, movePosition, moveSpeed) in SystemAPI
-                         .Query<RefRW<LocalTransform>, MoveTargetPosition, MoveSpeed>()
+                         .Query<RefRW<LocalTransform>, InputMoveTargetPosition, MoveSpeed>()
                          .WithAll<Simulate>())
             {
                 var moveTarget = movePosition.Value;

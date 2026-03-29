@@ -5,11 +5,11 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
-using static Unity.Mathematics.math;
 
 namespace Logic.Common
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct PathFindingSystem : ISystem
     {
         private EntityQuery _query;
@@ -40,211 +40,137 @@ namespace Logic.Common
             SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
             EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-            PathFindingJob pathFindingJob = new()
+            state.Dependency = new PathFindingJob
             {
                 GridSize = gridSize,
-                Grid = buffer,
+                Grid = buffer.AsNativeArray(),
                 ECB = ecb.AsParallelWriter()
-            };
-
-            state.Dependency = pathFindingJob.ScheduleParallel(_query, state.Dependency);
+            }.ScheduleParallel(_query, state.Dependency);
         }
     }
 
     [BurstCompile]
     public partial struct PathFindingJob : IJobEntity
     {
-        private const int GLOBAL_GRID_SIZE = 100;
-        private const int GRID_BIAS = 50;
-        private int _matrixBias;
-        private int _localBias;
-        private int4 _localGridSize;
-
-        public int2 GridSize;
-        [ReadOnly] public DynamicBuffer<PathNode> Grid;
-
-        private void Execute([EntityIndexInQuery] int key, Entity entity, in MoveTargetPosition target, 
+        private const int GRID_BIAS = 60; // Твое смещение из прошлого кода
+        [ReadOnly] public int2 GridSize;
+        [ReadOnly] public NativeArray<PathNode> Grid;
+        public EntityCommandBuffer.ParallelWriter ECB;
+    
+        private struct NodeState
+        {
+            public float GCost;
+            public int CameFromIndex;
+        }
+    
+        public void Execute([EntityIndexInQuery] int key, Entity entity, in MoveTargetPosition target, 
             LocalTransform transform, ref DynamicBuffer<PathPositionElement> buffer)
         {
-            int2 startPosition = new((int)transform.Position.x, (int)transform.Position.z);
-            int2 endPosition = new((int)target.Value.x, (int)target.Value.z);
-            startPosition += GRID_BIAS;
-            endPosition += GRID_BIAS;
-            
-            int startX = min(startPosition.x, endPosition.x);
-            int endX = max(startPosition.x, endPosition.x);
-            int startY = min(startPosition.y, endPosition.y);
-            int endY = max(startPosition.y, endPosition.y);
-            _localGridSize = new(startX, startY, endX + 2,endY + 2);
-            _localBias = GridSize.x - endX;
-
-            int startIndex = CalculateIndex(startPosition.x, startPosition.y, GridSize.x);
-            int endIndex = CalculateIndex(endPosition.x, endPosition.y, GridSize.x);
-            startIndex = LocalizeIndex(startIndex);
-            endIndex = LocalizeIndex(endIndex);
-
-            int bias = CalculateIndex(startX, startY, GridSize.x);
-            bias = LocalizeIndex(bias);
-            _matrixBias = bias;
-            startIndex -= _matrixBias;
-            endIndex -= _matrixBias;
-
-            int length = CalculateIndex(endX + 2, endY + 2, GridSize.x);
-            length = LocalizeIndex(length) + 1;
-            NativeArray<PathNode> localPathNodes = new(length, Allocator.Temp);
-            for(int localX = startX; localX <= endX; localX++)
-            for(int localY = startY; localY <= endY; localY++)
-            {
-                int globalIndex = CalculateIndex(localX, localY, GridSize.x);
-                int localIndex = LocalizeIndex(globalIndex);
-                PathNode localPathNode = Grid[globalIndex];
-                localPathNode.Index = localIndex;
-                
-                localPathNode.CameFromNodeIndex = -1;
-                localPathNode.GCost = int.MaxValue;
-                localPathNode.HCost = CalculateDistanceCost(new(localPathNode.X, localPathNode.Y), endPosition);
-                localPathNode.CalculateFCost();
-                
-                localPathNodes[localIndex] = localPathNode;
-            }
-
-            NativeArray<int2> neighbourOffsetArray = new(8, Allocator.Temp);
-            neighbourOffsetArray[4] = new(-1, -1);
-            neighbourOffsetArray[5] = new(-1, +1);
-            neighbourOffsetArray[6] = new(+1, -1);
-            neighbourOffsetArray[7] = new(+1, +1);
-            neighbourOffsetArray[0] = new(-1, 0);
-            neighbourOffsetArray[1] = new(+1, 0);
-            neighbourOffsetArray[2] = new(0, +1);
-            neighbourOffsetArray[3] = new(0, -1);
-
-            PathNode startNode = localPathNodes[startIndex];
-            startNode.GCost = 0;
-            startNode.CalculateFCost();
-            localPathNodes[startNode.Index] = startNode;
-
+            // 1. ПЕРЕВОД КООРДИНАТ (Мир -> Сетка)
+            // Если мир -60, то в сетке это 0.
+            int2 startPos = new((int)math.round(transform.Position.x) + GRID_BIAS, (int)math.round(transform.Position.z) + GRID_BIAS);
+            int2 endPos = new((int)math.round(target.Value.x) + GRID_BIAS, (int)math.round(target.Value.z) + GRID_BIAS);
+    
+            // 2. ПРОВЕРКИ
+            if (IsOutside(startPos) || IsOutside(endPos)) return;
+    
+            int startIndex = CalculateIndex(startPos.x, startPos.y, GridSize.x);
+            int endIndex = CalculateIndex(endPos.x, endPos.y, GridSize.x);
+    
+            if (!Grid[endIndex].IsWalkable) return; // Если цель в стене — не ищем
+    
+            // 3. ПОИСК (Оптимизированный)
+            NativeArray<NodeState> nodeStates = new(Grid.Length, Allocator.Temp);
+            NativeBitArray closedSet = new(Grid.Length, Allocator.Temp);
             NativeList<int> openList = new(Allocator.Temp);
-            NativeList<int> closedList = new(Allocator.Temp);
-
-            openList.Add(startNode.Index);
-
-            while(openList.Length > 0)
+    
+            for (int i = 0; i < nodeStates.Length; i++)
+                nodeStates[i] = new() { GCost = float.MaxValue, CameFromIndex = -1 };
+    
+            nodeStates[startIndex] = new() { GCost = 0, CameFromIndex = -1 };
+            openList.Add(startIndex);
+    
+            bool pathFound = false;
+            int safety = 0;
+    
+            while (openList.Length > 0 && safety < 10000)
             {
-                int currentNodeIndex = GetLowestCostFNodeIndex(openList, localPathNodes);
-                PathNode currentPathNode = localPathNodes[currentNodeIndex];
-
-                if(currentNodeIndex == endIndex)
-                    break;
-
-                for(int i = 0; i < openList.Length; i++)
+                safety++;
+                int currentIndex = -1;
+                float minF = float.MaxValue;
+    
+                // Выбираем лучший узел (F = G + H)
+                for (int i = 0; i < openList.Length; i++)
                 {
-                    if(openList[i] == currentNodeIndex)
-                    {
-                        openList.RemoveAtSwapBack(i);
-                        break;
-                    }
+                    int idx = openList[i];
+                    float h = math.distance(GetPos(idx), endPos);
+                    float f = nodeStates[idx].GCost + h;
+                    if (f < minF) { minF = f; currentIndex = idx; }
                 }
-            
-                closedList.Add(currentNodeIndex);
-
-                for(int i = 0; i < neighbourOffsetArray.Length; i++)
+    
+                if (currentIndex == endIndex) { pathFound = true; break; }
+    
+                // Удаляем текущий
+                for (int i = 0; i < openList.Length; i++)
+                    if (openList[i] == currentIndex) { openList.RemoveAtSwapBack(i); break; }
+                
+                closedSet.Set(currentIndex, true);
+    
+                int2 curPos = GetPos(currentIndex);
+                for (int x = -1; x <= 1; x++)
                 {
-                    int2 neighbourOffset = neighbourOffsetArray[i];
-                    int2 neighbourPosition = new(currentPathNode.X + neighbourOffset.x, currentPathNode.Y + neighbourOffset.y);
-
-                    if(!IsPositionInsideGrid(neighbourPosition)) continue;
-
-                    int neighbourIndex = CalculateIndex(neighbourPosition.x, neighbourPosition.y, GridSize.x);
-                    neighbourIndex = LocalizeIndex(neighbourIndex);
-                    
-                    if(closedList.Contains(neighbourIndex)) continue;
-
-                    PathNode neighbourNode = localPathNodes[neighbourIndex];
-                    if(!neighbourNode.IsWalkable) continue;
-
-                    int2 currentNodePosition = new(currentPathNode.X, currentPathNode.Y);
-                    float tentativeGCost = currentPathNode.GCost + CalculateDistanceCost(currentNodePosition, neighbourPosition);
-                    if(tentativeGCost < neighbourNode.GCost)
+                    for (int y = -1; y <= 1; y++)
                     {
-                        neighbourNode.CameFromNodeIndex = currentNodeIndex;
-                        neighbourNode.GCost = tentativeGCost;
-                        neighbourNode.CalculateFCost();
-                        localPathNodes[neighbourIndex] = neighbourNode;
-
-                        if(!openList.Contains(neighbourIndex))
-                            openList.Add(neighbourIndex);
+                        if (x == 0 && y == 0) continue;
+                        int2 nPos = curPos + new int2(x, y);
+                        if (IsOutside(nPos)) continue;
+    
+                        int nIdx = CalculateIndex(nPos.x, nPos.y, GridSize.x);
+                        if (closedSet.IsSet(nIdx) || !Grid[nIdx].IsWalkable) continue;
+    
+                        float dist = (x != 0 && y != 0) ? 1.41f : 1f; // Диагональ чуть дороже
+                        float tGCost = nodeStates[currentIndex].GCost + dist;
+    
+                        if (tGCost < nodeStates[nIdx].GCost)
+                        {
+                            nodeStates[nIdx] = new() { GCost = tGCost, CameFromIndex = currentIndex };
+                            if (!Contains(openList, nIdx)) openList.Add(nIdx);
+                        }
                     }
                 }
             }
-
-            buffer.Clear();
-
-            PathNode endNode = localPathNodes[endIndex];
-            if(endNode.CameFromNodeIndex != -1)
+    
+            // 4. ЗАПИСЬ (Мир <- Сетка)
+            if (pathFound)
             {
-                CalculatePath(localPathNodes, endNode, buffer);
+                buffer.Clear();
+                int curr = endIndex;
+                while (curr != -1)
+                {
+                    int2 p = GetPos(curr);
+                    // Возвращаем в мировые координаты: вычитаем BIAS
+                    buffer.Add(new() { Value = new int2(p.x - GRID_BIAS, p.y - GRID_BIAS) });
+                    curr = nodeStates[curr].CameFromIndex;
+                }
+                
                 ECB.SetComponentEnabled<NeedPath>(key, entity, false);
-                ECB.SetComponent<FollowPathIndex>(key, entity, new()
-                {
-                    Value = buffer.Length - 1
-                });
+                ECB.SetComponent(key, entity, new FollowPathIndex { Value = buffer.Length - 1 });
             }
-
-            neighbourOffsetArray.Dispose();
+    
+            nodeStates.Dispose();
+            closedSet.Dispose();
             openList.Dispose();
-            closedList.Dispose();
-            localPathNodes.Dispose();
         }
-
-        public EntityCommandBuffer.ParallelWriter ECB;
-
-        private void CalculatePath(NativeArray<PathNode> pathNodes, PathNode endNode, DynamicBuffer<PathPositionElement> buffer)
+    
+        private bool IsOutside(int2 pos) => pos.x < 0 || pos.x >= GridSize.x || pos.y < 0 || pos.y >= GridSize.y;
+        private int CalculateIndex(int x, int y, int w) => x + y * w;
+        private int2 GetPos(int i) => new(i % GridSize.x, i / GridSize.x);
+        private bool Contains(NativeList<int> list, int val) 
         {
-            if(endNode.CameFromNodeIndex == -1) return;
-
-            buffer.Add(new() { Value = new(endNode.X - GRID_BIAS, endNode.Y - GRID_BIAS) });
-            
-            PathNode currentNode = endNode;
-            while(currentNode.CameFromNodeIndex != -1)
-            {
-                PathNode cameFromNode = pathNodes[currentNode.CameFromNodeIndex];
-                buffer.Add(new() { Value = new(cameFromNode.X - GRID_BIAS, cameFromNode.Y - GRID_BIAS) });
-                currentNode = cameFromNode;
-            }
-            
-            buffer.RemoveAtSwapBack(buffer.Length - 1);
-        }
-
-        private float CalculateDistanceCost(int2 aPosition, int2 bPosition)
-        {
-            float distance = math.distance(aPosition, bPosition);
-            return distance;
-        }
-
-        private bool IsPositionInsideGrid(int2 gridPosition) => 
-            gridPosition.x >= _localGridSize[0] && gridPosition.y >= _localGridSize[1]
-            && gridPosition.x <= _localGridSize[2] && gridPosition.y <= _localGridSize[3];
-
-        private int GetLowestCostFNodeIndex(NativeList<int> openList, NativeArray<PathNode> pathNodes)
-        {
-            PathNode lowestFCostNode = pathNodes[openList[0]];
-            foreach(int index in openList)
-            {
-                PathNode testPathNode = pathNodes[index];
-                if(testPathNode.FCost < lowestFCostNode.FCost)
-                    lowestFCostNode = testPathNode;
-            }
-
-            return lowestFCostNode.Index;
-        }
-
-        public static int CalculateIndex(int x, int y, int gridWidth) =>
-            x + y * gridWidth;
-
-        private int LocalizeIndex(int globalIndex)
-        {
-            globalIndex = abs(globalIndex - _localBias * (globalIndex / GLOBAL_GRID_SIZE));
-            return globalIndex - _matrixBias;
+            for (int i = 0; i < list.Length; i++) if (list[i] == val) 
+                return true;
+            return false;
         }
     }
+
 }

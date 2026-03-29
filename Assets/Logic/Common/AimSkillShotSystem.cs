@@ -1,4 +1,5 @@
 ﻿using Assets.Logic.Client;
+using Logic.Client;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
@@ -26,10 +27,13 @@ namespace Logic.Common
 
         public void OnUpdate(ref SystemState state)
         {
-            foreach ((RefRW<AimInput> aimInput, RefRW<LocalTransform> localTransform) in SystemAPI
-                         .Query<RefRW<AimInput>, RefRW<LocalTransform>>()
+            foreach ((RefRW<AimInput> aimInput, RefRW<LocalTransform> localTransform,
+                         SkillShotUIReference skillShotUIReference) in SystemAPI
+                         .Query<RefRW<AimInput>, RefRW<LocalTransform>, SkillShotUIReference>()
                          .WithAll<AimSkillShotTag, OwnerChampTag>())
             {
+                skillShotUIReference.Value.transform.position = localTransform.ValueRO.Position;
+                
                 CollisionWorld collisionFilter = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
                 Entity cameraEntity = SystemAPI.GetSingletonEntity<MainCameraTag>();
                 Camera mainCamera = state.EntityManager.GetComponentObject<MainCamera>(cameraEntity).Value;
@@ -51,6 +55,10 @@ namespace Logic.Common
                     direction.y = localTransform.ValueRO.Position.y;
                     direction = math.normalize(direction);
                     aimInput.ValueRW.Value = direction;
+                    
+                    float angleRag = math.atan2(direction.z, direction.x);
+                    float angleDeg = math.degrees(angleRag);
+                    skillShotUIReference.Value.transform.rotation = Quaternion.Euler(0, -angleDeg, 0);
                 }
             }
         }

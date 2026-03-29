@@ -13,7 +13,7 @@ namespace Logic.Server
         public void OnCreate(ref SystemState state)
         {
             _query = SystemAPI.QueryBuilder()
-                .WithAll<MoveTargetPosition, RegisterNeedPathComponent, NeedPath>()
+                .WithAll<InputMoveTargetPosition, MoveTargetPosition, NeedPath>()
                 .WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)
                 .Build();
 
@@ -44,11 +44,11 @@ namespace Logic.Server
         public EntityCommandBuffer.ParallelWriter ECB;
 
         private void Execute([EntityIndexInQuery] int key, 
-            Entity entity, in MoveTargetPosition input, 
-            ref RegisterNeedPathComponent register)
+            Entity entity, in InputMoveTargetPosition input, 
+            ref MoveTargetPosition register)
         {
-            if (register.Value == input.Flag) return;
-            ECB.SetComponent<RegisterNeedPathComponent>(key, entity, new() { Value = input.Flag });
+            if (register.Flag == input.Flag) return;
+            ECB.SetComponent<MoveTargetPosition>(key, entity, new() { Value = input.Value, Flag = input.Flag });
             ECB.SetComponentEnabled<NeedPath>(key, entity, true);
         }
     }
