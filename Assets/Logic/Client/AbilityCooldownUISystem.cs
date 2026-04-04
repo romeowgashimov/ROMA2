@@ -15,6 +15,7 @@ namespace Logic.Client
         public void OnUpdate(ref SystemState state)
         {
             NetworkTick currentTick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
+            //Здесь ошибка, мне кажется
             AbilityCooldownUIController abilityCooldownUIController = AbilityCooldownUIController.Instance;
 
             foreach ((DynamicBuffer<AbilityCooldownTargetTicks> targetTicks,

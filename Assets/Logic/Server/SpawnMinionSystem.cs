@@ -1,5 +1,4 @@
-﻿using Assets.Logic.Common;
-using Logic.Common;
+﻿using Logic.Common;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
@@ -15,6 +14,7 @@ namespace Logic.Server
             state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
             state.RequireForUpdate<MinionPathContainer>();
             state.RequireForUpdate<MobaPrefabs>();
+            state.RequireForUpdate<GameplayingTag>();
         }
 
         [BurstCompile]

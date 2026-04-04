@@ -17,8 +17,9 @@ namespace Logic.Client
         
         protected override void OnCreate()
         {
+            RequireForUpdate<GameplayingTag>();
             _inputActions = new();
-            _selectionFilter = new CollisionFilter
+            _selectionFilter = new()
             {
               BelongsTo = 1 << 5, //Raycasts
               CollidesWith = 1 << 0  //GroundPlane
@@ -68,6 +69,8 @@ namespace Logic.Client
                     Value = closestHit.Position,
                     Flag = !flag
                 });
+                EntityManager.SetComponentData<MoveTargetPosition>(owner, new() { Value = closestHit.Position});
+                EntityManager.SetComponentEnabled<NeedPath>(owner, true);
             }
         }
     }

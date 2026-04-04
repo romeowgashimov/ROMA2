@@ -1,4 +1,5 @@
 ﻿using Logic.Client;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
@@ -21,9 +22,12 @@ namespace Logic.Common
             NetworkTime netTime = SystemAPI.GetSingleton<NetworkTime>();
             if (!netTime.IsFirstTimeFullyPredictingTick) return;
 
-            EntityCommandBuffer ecb = SystemAPI
-                .GetSingleton<BeginPredictedSimulationEntityCommandBufferSystem.Singleton>()
-                .CreateCommandBuffer(state.WorldUnmanaged);
+            /*Без точки синхронизации при отставании сервера, он не успеет обработать команду,
+            высока вероятность появления новых команд, так как старые ещё не обработаны, следовательно,
+            могут появиться непредвиденные новые объекты.
+            Лучше сделать точки синхронизации, а именно новые new ecb(temp), а в конце Playback
+            Многопоток можно и нужно использовать в случаях, когда есть сложные и продолжительные вычисления*/
+            EntityCommandBuffer ecb = new(Allocator.Temp);
 
             bool isServer = state.WorldUnmanaged.IsServer();
 
@@ -35,7 +39,7 @@ namespace Logic.Common
                          .WithNone<AimSkillShotTag>()
                          .WithEntityAccess())
             {
-                if (cooldownTargetTicks.IsOnCooldown(netTime)) continue;
+                if (cooldownTargetTicks.IsOnCooldown(netTime, AbilityType.SkillShotAbility)) continue;
 
                 if (!abilityInput.SkillShotAbility.IsSet) continue;
                 ecb.AddComponent<AimSkillShotTag>(champion);
@@ -59,9 +63,8 @@ namespace Logic.Common
             {
                 if (!abilityInput.ConfirmSkillShotAbility.IsSet) continue;
             
-                if (cooldownTargetTicks.IsOnCooldown(netTime)) continue;
-
-                NetworkTick currentTick = netTime.ServerTick;
+                if (cooldownTargetTicks.IsOnCooldown(netTime, AbilityType.SkillShotAbility)) continue;
+                
                 Entity skillShot = ecb.Instantiate(abilityPrefabs.SkillShotAbility);
                 LocalTransform newPosition = LocalTransform.FromPositionRotation(transform.Position,
                     quaternion.LookRotationSafe(aimInput.Value, math.up()));
@@ -72,17 +75,7 @@ namespace Logic.Common
             
                 if (isServer) continue;
             
-                cooldownTargetTicks.GetDataAtTick(currentTick, out AbilityCooldownTargetTicks curTargetTicks);
-            
-                NetworkTick newCooldownTargetTicks = currentTick;
-                newCooldownTargetTicks.Add(abilityCooldownTicks.SkillShotAbility);
-                curTargetTicks.SkillShotAbility = newCooldownTargetTicks;
-
-                NetworkTick nextTick = currentTick;
-                nextTick.Add(1u);
-                curTargetTicks.Tick = nextTick;
-
-                cooldownTargetTicks.AddCommandData(curTargetTicks);
+                cooldownTargetTicks.UpdateCooldown(abilityCooldownTicks, netTime, AbilityType.SkillShotAbility);
             }
 
             foreach ((AbilityInput abilityInput, SkillShotUIReference skillShotUIReference, Entity entity) in SystemAPI
@@ -104,6 +97,8 @@ namespace Logic.Common
                 Object.Destroy(skillShotUIReference.Value);
                 ecb.RemoveComponent<SkillShotUIReference>(entity);
             }
+            
+            ecb.Playback(state.EntityManager);
         }
     }
 }

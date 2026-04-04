@@ -1,4 +1,4 @@
-namespace Assets.Logic.Common
+namespace Logic.Common
 {
     public enum TeamType : byte
     {

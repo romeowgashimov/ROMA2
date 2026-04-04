@@ -9,7 +9,8 @@ namespace Logic.Client
 
         protected override void OnCreate()
         {
-            _inputActions = new MobaInputActions();
+            RequireForUpdate<GameplayingTag>();
+            _inputActions = new();
         }
 
         protected override void OnStartRunning()

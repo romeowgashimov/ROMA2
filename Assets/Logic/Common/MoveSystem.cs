@@ -21,6 +21,7 @@ namespace Logic.Common
                 .WithNone<NeedPath>()
                 .Build();
             
+            state.RequireForUpdate<GameplayingTag>();
             state.RequireForUpdate(_query);
         }
 

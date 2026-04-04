@@ -1,4 +1,4 @@
-using Assets.Logic.Common;
+using Logic.Common;
 using Unity.Entities;
 
 namespace Assets.Logic.Client

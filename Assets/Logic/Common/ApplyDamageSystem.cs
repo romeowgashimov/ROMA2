@@ -13,6 +13,7 @@ namespace Logic.Common
         {
             state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
             state.RequireForUpdate<NetworkTime>();
+            state.RequireForUpdate<GameplayingTag>();
         }
 
         [BurstCompile]

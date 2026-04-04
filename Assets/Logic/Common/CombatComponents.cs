@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using System;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 
@@ -67,6 +68,13 @@ namespace Logic.Common
             1 => SkillShotAbility,
             _ => uint.MaxValue
         };
+        
+        public uint this[AbilityType index] => index switch
+        {
+            AbilityType.AoeAbility => AoeAbility,
+            AbilityType.SkillShotAbility => SkillShotAbility,
+            _ => uint.MaxValue
+        };
     }
 
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
@@ -78,12 +86,38 @@ namespace Logic.Common
 
         public int Length => 2;
 
-        public NetworkTick this[int index] => index switch
+        public NetworkTick this[int index] =>
+            index switch
+            {
+                0 => AoeAbility,
+                1 => SkillShotAbility,
+                _ => NetworkTick.Invalid
+            };
+
+        public NetworkTick this[AbilityType index]
         {
-            0 => AoeAbility,
-            1 => SkillShotAbility,
-            _ => NetworkTick.Invalid
-        };
+            get
+            {
+                return index switch
+                {
+                    AbilityType.AoeAbility => AoeAbility,
+                    AbilityType.SkillShotAbility => SkillShotAbility,
+                    _ => NetworkTick.Invalid
+                };
+            }
+            set
+            {
+                switch (index)
+                {
+                    case AbilityType.AoeAbility:
+                        AoeAbility = value;
+                        break;
+                    case AbilityType.SkillShotAbility:
+                        SkillShotAbility = value;
+                        break;
+                }
+            }
+        }
     }
 
         public struct AimSkillShotTag : IComponentData { }

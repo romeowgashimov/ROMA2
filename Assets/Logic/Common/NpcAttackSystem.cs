@@ -15,11 +15,12 @@ namespace Logic.Common
         {
             state.RequireForUpdate<NetworkTime>();
             state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
+            state.RequireForUpdate<GameplayingTag>();
         }
 
         public void OnUpdate(ref SystemState state)
         {
-            EntityCommandBuffer.ParallelWriter ECB = SystemAPI
+            EntityCommandBuffer.ParallelWriter ecb = SystemAPI
                 .GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged)
                 .AsParallelWriter();
@@ -29,7 +30,7 @@ namespace Logic.Common
             {
                 CurrentTick = networkTime.ServerTick,
                 TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(isReadOnly: true),
-                ECB = ECB
+                ECB = ecb
             }.ScheduleParallel(state.Dependency);
         }
     }

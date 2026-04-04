@@ -1,5 +1,4 @@
-﻿using Assets.Logic.Common;
-using Unity.Entities;
+﻿using Unity.Entities;
 using UnityEngine;
 
 namespace Logic.Common

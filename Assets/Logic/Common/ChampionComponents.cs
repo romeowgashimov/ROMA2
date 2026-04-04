@@ -1,4 +1,3 @@
-using Assets.Logic.Common;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
@@ -30,8 +29,10 @@ namespace Logic.Common
 
     public struct MoveTargetPosition : IComponentData
     {
-        [GhostField(Quantization = 0)] public float3 Value;
-        [GhostField] public bool Flag;
+        //Убрал синхронизацию с сервером, pathfinding у клиента срабатывал раньше,
+        //чем синхронизация, поэтому находился путь к не той точке 
+        public float3 Value;
+        public bool Flag;
     } 
     
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]

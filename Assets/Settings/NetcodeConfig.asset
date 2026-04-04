@@ -23,6 +23,7 @@ MonoBehaviour:
     TargetFrameRateMode: 0
     m_SendSnapshotsForCatchUpTicks: 0
     SnapshotAckMaskCapacity: 4096
+    m_ClampPartialTicksThreshold: 5
     HandshakeApprovalTimeoutMS: 5000
   ClientTickRate:
     InterpolationTimeNetTicks: 2
@@ -47,6 +48,7 @@ MonoBehaviour:
     PredictionTimeScaleMax: 1.1
   GhostSendSystemData:
     DefaultSnapshotPacketSize: 0
+    PercentReservedForDespawnMessages: 0.33
     MinSendImportance: 0
     MinDistanceScaledSendImportance: 0
     MaxIterateChunks: 0

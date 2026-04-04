@@ -1,5 +1,5 @@
 using Assets.Logic.Client;
-using Assets.Logic.Common;
+using Logic.Common;
 using TMPro;
 using Unity.Entities;
 using Unity.NetCode;

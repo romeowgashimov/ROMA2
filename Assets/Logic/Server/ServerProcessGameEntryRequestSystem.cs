@@ -1,4 +1,3 @@
-using Assets.Logic.Common;
 using Logic.Common;
 using Unity.Collections;
 using Unity.Entities;
@@ -14,6 +13,8 @@ namespace Logic.Server
     {
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<NetworkTime>();
+            state.RequireForUpdate<GameStartProperties>();
             EntityQueryBuilder builder = new EntityQueryBuilder(Allocator.Temp)
             .WithAll<TeamRequest, ReceiveRpcCommandRequest>();
 
@@ -26,9 +27,14 @@ namespace Logic.Server
             EntityCommandBuffer ecb = new(Allocator.Temp);
             Entity champPrefab = SystemAPI.GetSingleton<MobaPrefabs>().Champion;
 
+            Entity gamePropertiesEntity = SystemAPI.GetSingletonEntity<GameStartProperties>();
+            GameStartProperties gameStartProperties = SystemAPI.GetComponent<GameStartProperties>(gamePropertiesEntity);
+            TeamPlayerCounter teamPlayerCounter = SystemAPI.GetComponent<TeamPlayerCounter>(gamePropertiesEntity);
+            DynamicBuffer<SpawnOffset> spawnOffsets = SystemAPI.GetBuffer<SpawnOffset>(gamePropertiesEntity);
+            
             foreach((TeamRequest teamRequest, ReceiveRpcCommandRequest requestSource, Entity requestEntity) in SystemAPI
-            .Query<TeamRequest, ReceiveRpcCommandRequest>()
-            .WithEntityAccess())
+                        .Query<TeamRequest, ReceiveRpcCommandRequest>()
+                        .WithEntityAccess())
             {
                 ecb.DestroyEntity(requestEntity);
                 ecb.AddComponent<NetworkStreamInGame>(requestSource.SourceConnection);
@@ -36,19 +42,38 @@ namespace Logic.Server
                 TeamType requestedTeamType = teamRequest.Value;
 
                 if (requestedTeamType == TeamType.AutoAssign)
-                    requestedTeamType = TeamType.Blue;
-
+                {
+                    if (teamPlayerCounter.BlueTeamPlayers > teamPlayerCounter.RedTeamPlayers)
+                        requestedTeamType = TeamType.Red;
+                    else if (teamPlayerCounter.RedTeamPlayers >= teamPlayerCounter.BlueTeamPlayers)
+                        requestedTeamType = TeamType.Blue;
+                }
+                
                 int clientId = SystemAPI.GetComponent<NetworkId>(requestSource.SourceConnection).Value;
 
                 float3 spawnPos;
                 switch (requestedTeamType)
                 {
                     case TeamType.Blue:
+                        if (teamPlayerCounter.BlueTeamPlayers >= gameStartProperties.MaxPlayersPerTeam)
+                        {
+                            Debug.Log($"Blue Team is full. Client ID: {clientId} is spectating the game");
+                            continue;
+                        }
                         spawnPos = new(-50f, 1, -50f);
+                        spawnPos += spawnOffsets[teamPlayerCounter.BlueTeamPlayers].Value;
+                        teamPlayerCounter.BlueTeamPlayers++;
                         break;
                     
                     case TeamType.Red:
+                        if (teamPlayerCounter.RedTeamPlayers >= gameStartProperties.MaxPlayersPerTeam)
+                        {
+                            Debug.Log($"Red Team is full. Client ID: {clientId} is spectating the game");
+                            continue;
+                        }
                         spawnPos = new(50f, 1, 50f);
+                        spawnPos += spawnOffsets[teamPlayerCounter.RedTeamPlayers].Value;
+                        teamPlayerCounter.RedTeamPlayers++;
                         break;
 
                     default:
@@ -65,10 +90,42 @@ namespace Logic.Server
 
                 ecb.AppendToBuffer(requestSource.SourceConnection, new LinkedEntityGroup { Value = newChamp });
 
-                Debug.Log($"Server is assigning Client ID: {clientId} to the {requestedTeamType} team");
+                //Debug.Log($"Server is assigning Client ID: {clientId} to the {requestedTeamType} team");
+
+                int playersRemainingToStart =
+                    gameStartProperties.MinPlayersToStartGame - teamPlayerCounter.TotalPlayers;
+                
+                Entity gameStartRpc = ecb.CreateEntity();
+                if (playersRemainingToStart <= 0 && !SystemAPI.HasSingleton<GameplayingTag>())
+                {
+                    int simulationTickRate = NetCodeConfig.Global.ClientServerTickRate.SimulationTickRate;
+                    uint ticksUntilStart = (uint)(simulationTickRate * gameStartProperties.CountdownTime);
+                    NetworkTick gameStartTick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
+                    gameStartTick.Add(ticksUntilStart);
+                    
+                    ecb.AddComponent(gameStartRpc, new GameStartTickRpc
+                    {
+                        Value = gameStartTick
+                    });
+                    
+                    Entity gameStartEntity = ecb.CreateEntity();
+                    ecb.AddComponent(gameStartEntity, new GameStartTick
+                    {
+                        Value = gameStartTick
+                    });
+                }
+                else
+                {
+                    ecb.AddComponent(gameStartRpc, new PlayersRemainingToStart
+                    {
+                        Value = playersRemainingToStart
+                    });
+                }
+                ecb.AddComponent<SendRpcCommandRequest>(gameStartRpc);
             }
 
             ecb.Playback(state.EntityManager);
+            SystemAPI.SetSingleton(teamPlayerCounter);
         }
     }
 }

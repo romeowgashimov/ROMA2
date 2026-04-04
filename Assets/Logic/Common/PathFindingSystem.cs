@@ -9,7 +9,6 @@ using Unity.Transforms;
 namespace Logic.Common
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct PathFindingSystem : ISystem
     {
         private EntityQuery _query;

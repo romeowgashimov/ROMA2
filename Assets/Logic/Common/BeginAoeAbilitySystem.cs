@@ -31,14 +31,12 @@ namespace Logic.Common
                 SystemAPI.GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
             EntityCommandBuffer ecb =  ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
             
-            BeginAoeAbilityJob job = new()
+            state.Dependency = new BeginAoeAbilityJob
             {
                 ECB = ecb.AsParallelWriter(),
                 NetworkTime = netTime,
                 IsServer = state.WorldUnmanaged.IsServer()
-            };
-
-            state.Dependency = job.ScheduleParallel(_query, state.Dependency);
+            }.ScheduleParallel(_query, state.Dependency);
         }
     }
     
@@ -54,27 +52,7 @@ namespace Logic.Common
             Team team, LocalTransform transform, AbilityCooldownTicks cooldownTicks,
             DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks)
         {
-            NetworkTick currentTick = NetworkTime.ServerTick;
-            bool isOnCooldown = true;
-            AbilityCooldownTargetTicks curTargetTicks = new();
-
-            for (uint i = 0u; i < NetworkTime.SimulationStepBatchSize; i++)
-            {
-                NetworkTick testTick = currentTick;
-                testTick.Subtract(i);
-                
-                if(!cooldownTargetTicks.GetDataAtTick(testTick, out curTargetTicks))
-                    curTargetTicks.AoeAbility = NetworkTick.Invalid;
-
-                if (curTargetTicks.AoeAbility == NetworkTick.Invalid ||
-                    !curTargetTicks.AoeAbility.IsNewerThan(currentTick))
-                {
-                    isOnCooldown = false;
-                    break;
-                }
-            }
-
-            if (isOnCooldown) return;
+            if (cooldownTargetTicks.IsOnCooldown(NetworkTime, AbilityType.AoeAbility)) return;
             
             if (input.AoeAbility.IsSet)
             {
@@ -84,15 +62,8 @@ namespace Logic.Common
                 ECB.SetComponent(key, newAoeAbility, team);
 
                 if (IsServer) return;
-                NetworkTick newCooldownTargetTick = currentTick;
-                newCooldownTargetTick.Add(cooldownTicks.AoeAbility);
-                curTargetTicks.AoeAbility = newCooldownTargetTick;
                 
-                NetworkTick nextTick = currentTick;
-                nextTick.Add(1u);
-                curTargetTicks.Tick = nextTick;
-                
-                cooldownTargetTicks.AddCommandData(curTargetTicks);
+                cooldownTargetTicks.UpdateCooldown(cooldownTicks, NetworkTime, AbilityType.AoeAbility);
             }
         }
     }

@@ -1308,6 +1308,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1329835357}
+  - component: {fileID: 1329835358}
   m_Layer: 0
   m_Name: GameStartProperties
   m_TagString: Untagged
@@ -1330,6 +1331,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1329835358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329835356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4197cc22ab94334a656bfec7aaa1aeb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.GameStartPropertiesAuthoring
+  MaxPlayersPerTeam: 5
+  MinPlayersToStartGame: 1
+  CountdownTime: 3
+  SpawnOffsets:
+  - {x: 0, y: 0, z: 0}
+  - {x: -2, y: 0, z: 2}
+  - {x: 2, y: 0, z: 2}
+  - {x: 2, y: 0, z: -2}
+  - {x: -2, y: 0, z: -2}
 --- !u!1 &1646246674
 GameObject:
   m_ObjectHideFlags: 0
@@ -1375,9 +1397,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e65d3ed16be446c0a9618bb95cf15a87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.MinionSpawnPropertiesAuthoring
-  TimeBetweenWaves: 5
-  TimeBetweenMinions: 2000
-  CountToSpawnInWave: 1
+  TimeBetweenWaves: 20
+  TimeBetweenMinions: 1
+  CountToSpawnInWave: 3
 --- !u!114 &1646246679
 MonoBehaviour:
   m_ObjectHideFlags: 0
