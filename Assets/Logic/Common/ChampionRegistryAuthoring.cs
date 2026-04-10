@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Unity.Entities;
-using Unity.Entities.Serialization;
 using UnityEngine;
 using Hash128 = Unity.Entities.Hash128;
 
 #if UNITY_EDITOR
+using UnityEditor;
 using static UnityEditor.AssetDatabase;
 #endif
 
@@ -13,43 +13,59 @@ namespace Logic.Common
 {
     public class ChampionRegistryAuthoring : MonoBehaviour
     {
-        public List<GameObject> ChampionPrefabs;
-        // В будущем нужно сделать config всех префабов через ScriptableObject
-        [HideInInspector] public List<EntityPrefabReference> ChampionPrefabReferences;
+        public ChampionDatabase Database;
+        
+        [HideInInspector] 
+        public List<ChampionPrefabElement> ChampionPrefabReferences;
         
         public bool Refresh;
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (!Refresh &&
-                (ChampionPrefabs == null || ChampionPrefabReferences.Count == ChampionPrefabs.Count)) return;
-            
+            if (!Refresh) return;
             Refresh = false;
-                
-            ChampionPrefabReferences = (from hero in ChampionPrefabs
-                    where hero != null 
-                    let path = GetAssetPath(hero)
+            SyncWithDatabase();
+        }
+        
+        public void SyncWithDatabase()
+        {
+            if (Database == null || Database.Configs == null) return;
+
+            ChampionPrefabReferences = (from hero in Database.Configs
+                    where hero.Prefab != null 
+                    let path = GetAssetPath(hero.Prefab)
                     where !string.IsNullOrEmpty(path)
                     let guidStr = AssetPathToGUID(path)
                     where !string.IsNullOrEmpty(guidStr)
-                    select new EntityPrefabReference(new Hash128(guidStr)))
+                    select new ChampionPrefabElement 
+                        { 
+                            Id = hero.Id,
+                            Value = new(new Hash128(guidStr))
+                        })
                 .ToList();
 
-            // Помечаем объект грязным для сохранения
-            UnityEditor.EditorUtility.SetDirty(this);
+            EditorUtility.SetDirty(this);
         }
 #endif
-        
+
         private class HeroRegistryBaker : Baker<ChampionRegistryAuthoring>
         {
             public override void Bake(ChampionRegistryAuthoring authoring)
             {
+                if (authoring.Database == null) return;
+                
+#if UNITY_EDITOR
+                if (authoring.ChampionPrefabReferences == null)
+                    authoring.SyncWithDatabase();
+#endif
+                
                 Entity entity = GetEntity(TransformUsageFlags.None);
                 DynamicBuffer<ChampionPrefabElement> heroes = AddBuffer<ChampionPrefabElement>(entity);
-                foreach (EntityPrefabReference hero in authoring.ChampionPrefabReferences) 
-                    heroes.Add(new() { Value = hero });
-            } 
+                
+                foreach (ChampionPrefabElement reference in authoring.ChampionPrefabReferences) 
+                    heroes.Add(reference);
+            }
         }
     }
 }

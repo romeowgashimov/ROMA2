@@ -7,6 +7,7 @@ using Unity.Transforms;
 
 namespace Logic.Common
 {
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct ServerAuthorizeCharactersSystem : ISystem
     {
         public void OnCreate(ref SystemState state)
@@ -60,11 +61,13 @@ namespace Logic.Common
                     SpawnPosition = pending.SpawnPos
                 });
                 
-                int playersRemainingToStart =
-                    gameStartProperties.MinPlayersToStartGame - teamPlayerCounter.TotalPlayers;
+                teamPlayerCounter.InitializedPlayers++;
+                
+                int initializedPlayers =
+                    teamPlayerCounter.TotalPlayers - teamPlayerCounter.InitializedPlayers;
 
                 Entity gameStartRpc = ecb.CreateEntity();
-                if (playersRemainingToStart <= 0 && !SystemAPI.HasSingleton<GameplayingTag>())
+                if (initializedPlayers <= 0 && !SystemAPI.HasSingleton<GameplayingTag>())
                 {
                     int simulationTickRate = NetCodeConfig.Global.ClientServerTickRate.SimulationTickRate;
                     uint ticksUntilStart = (uint)(simulationTickRate * gameStartProperties.CountdownTime);
@@ -80,13 +83,6 @@ namespace Logic.Common
                     ecb.AddComponent(gameStartEntity, new GameStartTick
                     {
                         Value = gameStartTick
-                    });
-                }
-                else
-                {
-                    ecb.AddComponent(gameStartRpc, new PlayersRemainingToStart
-                    {
-                        Value = playersRemainingToStart
                     });
                 }
                 ecb.AddComponent<SendRpcCommandRequest>(gameStartRpc);

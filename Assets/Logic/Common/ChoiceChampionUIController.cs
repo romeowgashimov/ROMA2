@@ -11,6 +11,9 @@ namespace Logic.Common
         [SerializeField] private GameObject _choiceChampionPanel;
         [SerializeField] private GameObject _championsList;
         [SerializeField] private Button _confirmButton;
+        [SerializeField] private GameObject _countdownPanel;
+        
+        [SerializeField] private ChampionDatabase _championDatabase;
         
         // Make config for champions
         private List<uint> _championIds;
@@ -59,6 +62,8 @@ namespace Logic.Common
                 icons[i].RemoveAllListeners();
             
             _confirmButton.onClick.RemoveAllListeners();
+            
+            //_countdownPanel.SetActive(true);
         }
     }
 }

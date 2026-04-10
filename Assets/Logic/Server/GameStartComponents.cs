@@ -15,7 +15,11 @@ namespace Logic.Server
         public int BlueTeamPlayers;
         public int RedTeamPlayers;
         public int TotalPlayers => BlueTeamPlayers + RedTeamPlayers;
+        public int InitializedPlayers;
+        public int UninitializedPlayers;
     }
+
+    public struct InitializedPlayer : IEnableableComponent, IComponentData { }
 
     public struct SpawnOffset : IBufferElementData
     {

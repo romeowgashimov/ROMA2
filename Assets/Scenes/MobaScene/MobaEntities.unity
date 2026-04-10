@@ -381,34 +381,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6517fa760b6c4c7481d8389a2a6708b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HeroRegistryAuthoring
-  ChampionPrefabs:
-  - {fileID: 403193853099150282, guid: 2fe49a526567fdc46a55b0b1094bd406, type: 3}
-  - {fileID: 403193853099150282, guid: dc014915911b35949b432e1fb4ccdafb, type: 3}
-  ChampionPrefabReferences:
-  - Id:
-      GlobalId:
-        SceneObjectIdentifier0: 0
-        SceneObjectIdentifier1: 0
-        AssetGUID:
-          Value:
-            x: 631852786
-            y: 1289713238
-            z: 453727654
-            w: 1615705232
-        IdentifierType: 1
-      GenerationType: 5
-  - Id:
-      GlobalId:
-        SceneObjectIdentifier0: 0
-        SceneObjectIdentifier1: 0
-        AssetGUID:
-          Value:
-            x: 1368658125
-            y: 1230221593
-            z: 4058133689
-            w: 3215838283
-        IdentifierType: 1
-      GenerationType: 5
+  Database: {fileID: 11400000, guid: 1ee62af5bf15ffd42abac2b9de976edf, type: 2}
   Refresh: 0
 --- !u!4 &213097634
 Transform:

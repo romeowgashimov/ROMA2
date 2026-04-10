@@ -1,5 +1,6 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
+using Unity.Entities.Serialization;
 using Unity.NetCode;
 using static Unity.Scenes.SceneSystem;
 
@@ -32,8 +33,12 @@ namespace Logic.Common
             for (int i = 0; i < requestEntities.Length; i++)
             {
                 ecb.DestroyEntity(requestEntities[i]);
-                
-                LoadPrefabAsync(state.WorldUnmanaged, heroesPrefabs[(int)loadRequests[i].CharacterId].Value);
+
+                EntityPrefabReference reference = default;
+                foreach (ChampionPrefabElement element in heroesPrefabs)
+                    if (element.Id == (int)loadRequests[i].CharacterId) reference = element.Value;
+
+                LoadPrefabAsync(state.WorldUnmanaged, reference);
             }
             ecb.Playback(state.EntityManager);
         }

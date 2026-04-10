@@ -2,6 +2,7 @@ using Unity.Entities;
 using Unity.Entities.Serialization;
 using Unity.Mathematics;
 using Unity.NetCode;
+using UnityEngine;
 
 namespace Logic.Common
 {
@@ -13,6 +14,7 @@ namespace Logic.Common
     
     public struct ChampionPrefabElement : IBufferElementData
     {
+        public int Id;
         public EntityPrefabReference Value;
     }
     

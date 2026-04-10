@@ -38,4 +38,6 @@ namespace Logic.Common
     {
         public NetworkTick Value;
     }
+
+    public struct ChoiceChampionRpc : IRpcCommand { }
 }

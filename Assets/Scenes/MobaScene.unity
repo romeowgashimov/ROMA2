@@ -573,7 +573,6 @@ GameObject:
   - component: {fileID: 111262450}
   - component: {fileID: 111262451}
   - component: {fileID: 111262452}
-  - component: {fileID: 111262453}
   m_Layer: 5
   m_Name: HUDCanvas
   m_TagString: Untagged
@@ -677,7 +676,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 111262445}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ca2f3147f3644378338146be3adc704, type: 3}
   m_Name: 
@@ -685,11 +684,15 @@ MonoBehaviour:
   _beginGamePanel: {fileID: 250991379}
   _confirmQuitPanel: {fileID: 932224090}
   _countdownPanel: {fileID: 587874095}
+  _choiceChampionPanel: {fileID: 1219552859}
+  _championsList: {fileID: 1153669805}
+  _confirmChoiceButton: {fileID: 2080618709}
   _quitWaitingButton: {fileID: 422226216}
   _confirmQuitButton: {fileID: 1347971011}
   _cancelQuitButton: {fileID: 1464990059}
   _waitingText: {fileID: 2088007927}
   _countdownText: {fileID: 407582865}
+  _championDatabase: {fileID: 11400000, guid: 1ee62af5bf15ffd42abac2b9de976edf, type: 2}
 --- !u!114 &111262451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -720,21 +723,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Client.RespawnUIController
   _respawnPanel: {fileID: 730469352}
   _respawnCountdownText: {fileID: 1107588012}
---- !u!114 &111262453
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 111262445}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f11d5838fd4406282749a855f7a6e41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.ChoiceChampionUIController
-  _choiceChampionPanel: {fileID: 1219552859}
-  _championsList: {fileID: 1153669805}
-  _confirmButton: {fileID: 2080618709}
 --- !u!1 &111680876
 GameObject:
   m_ObjectHideFlags: 0
@@ -2143,7 +2131,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -5540,7 +5528,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1219552860
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7345,7 +7333,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -8204,9 +8192,9 @@ RectTransform:
   m_Father: {fileID: 485069645}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -47, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1841518998
 MonoBehaviour:
@@ -8816,7 +8804,7 @@ RectTransform:
   m_Father: {fileID: 1459612372}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -9522,7 +9510,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -9780,7 +9768,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1

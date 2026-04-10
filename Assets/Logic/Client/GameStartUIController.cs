@@ -15,13 +15,18 @@ namespace Logic.Client
         [SerializeField] private GameObject _beginGamePanel;
         [SerializeField] private GameObject _confirmQuitPanel;
         [SerializeField] private GameObject _countdownPanel;
+        [SerializeField] private GameObject _choiceChampionPanel;
         
+        [SerializeField] private GameObject _championsList;
+        [SerializeField] private Button _confirmChoiceButton;
         [SerializeField] private Button _quitWaitingButton;
         [SerializeField] private Button _confirmQuitButton;
         [SerializeField] private Button _cancelQuitButton;
         
         [SerializeField] private TextMeshProUGUI _waitingText;
         [SerializeField] private TextMeshProUGUI _countdownText;
+        
+        [SerializeField] private ChampionDatabase _championDatabase;
         
         private EntityQuery _networkConnectionQuery;
         private EntityManager _entityManager;
@@ -46,6 +51,24 @@ namespace Logic.Client
                 startGameSystem.OnStartGameCountdown += BeginCountdown;
             }
             
+            ChoiceChampionSystem choiceChampionSystem =
+                DefaultGameObjectInjectionWorld.GetExistingSystemManaged<ChoiceChampionSystem>();
+            if (choiceChampionSystem == null) return;
+            choiceChampionSystem.OnReadyToChoice += BeginChoice;
+            
+            ClientRequestGameEntrySystem entryRequestSystem =
+                DefaultGameObjectInjectionWorld.GetExistingSystemManaged<ClientRequestGameEntrySystem>();
+            if (entryRequestSystem == null) return;
+            ChampionChoiceIcon[] icons = _championsList.GetComponentsInChildren<ChampionChoiceIcon>();
+            for (int i = 0; i < icons.Length; ++i)
+            {
+                int currentId = i;
+                icons[i].OnChosen += Choice;
+                
+                void Choice() => entryRequestSystem.ChoiceChampion((uint)_championDatabase.Configs[currentId].Id);
+            }
+            _confirmChoiceButton.onClick.AddListener(entryRequestSystem.ConfirmChampion);
+
             CountdownToGameStartSystem countdownSystem = DefaultGameObjectInjectionWorld
                 .GetExistingSystemManaged<CountdownToGameStartSystem>();
             if (countdownSystem != null)
@@ -53,6 +76,14 @@ namespace Logic.Client
                 countdownSystem.OnUpdateCountdownText += UpdateCountdownText;
                 countdownSystem.OnCountdownEnd += EndCountdown;
             }
+        }
+
+        private void BeginCountdown()
+        {
+            _beginGamePanel.SetActive(false);
+            _confirmQuitPanel.SetActive(false);
+            _choiceChampionPanel.SetActive(false);
+            _countdownPanel.SetActive(true);
         }
 
         private void OnDisable()
@@ -74,6 +105,20 @@ namespace Logic.Client
             if (countdownSystem == null) return;
             countdownSystem.OnUpdateCountdownText -= UpdateCountdownText;
             countdownSystem.OnCountdownEnd -= EndCountdown;
+            
+            _choiceChampionPanel.SetActive(false);
+            ClientRequestGameEntrySystem entryRequestSystem =
+                DefaultGameObjectInjectionWorld.GetExistingSystemManaged<ClientRequestGameEntrySystem>();
+            if(entryRequestSystem == null) return;
+            ChampionChoiceIcon[] icons = _championsList.GetComponentsInChildren<ChampionChoiceIcon>();
+            for (int i = 0; i < icons.Length; i++)
+                icons[i].RemoveAllListeners();
+            _confirmChoiceButton.onClick.RemoveAllListeners();
+            
+            ChoiceChampionSystem choiceChampionSystem =
+                DefaultGameObjectInjectionWorld.GetExistingSystemManaged<ChoiceChampionSystem>();
+            if (choiceChampionSystem == null) return;
+            choiceChampionSystem.OnReadyToChoice -= BeginChoice;
         }
 
         private void UpdatePlayerRemainingText(int remainingPlayers)
@@ -115,11 +160,12 @@ namespace Logic.Client
             _beginGamePanel.SetActive(true);
         }
 
-        private void BeginCountdown()
+        private void BeginChoice()
         {
             _beginGamePanel.SetActive(false);
             _confirmQuitPanel.SetActive(false);
-            _countdownPanel.SetActive(true);
+            _countdownPanel.SetActive(false);
+            _choiceChampionPanel.SetActive(true);
         }
 
         private void EndCountdown()
