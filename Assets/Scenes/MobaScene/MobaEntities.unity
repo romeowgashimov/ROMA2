@@ -352,6 +352,79 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!1 &213097632
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 213097634}
+  - component: {fileID: 213097633}
+  m_Layer: 0
+  m_Name: ChampionsContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &213097633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 213097632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6517fa760b6c4c7481d8389a2a6708b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HeroRegistryAuthoring
+  ChampionPrefabs:
+  - {fileID: 403193853099150282, guid: 2fe49a526567fdc46a55b0b1094bd406, type: 3}
+  - {fileID: 403193853099150282, guid: dc014915911b35949b432e1fb4ccdafb, type: 3}
+  ChampionPrefabReferences:
+  - Id:
+      GlobalId:
+        SceneObjectIdentifier0: 0
+        SceneObjectIdentifier1: 0
+        AssetGUID:
+          Value:
+            x: 631852786
+            y: 1289713238
+            z: 453727654
+            w: 1615705232
+        IdentifierType: 1
+      GenerationType: 5
+  - Id:
+      GlobalId:
+        SceneObjectIdentifier0: 0
+        SceneObjectIdentifier1: 0
+        AssetGUID:
+          Value:
+            x: 1368658125
+            y: 1230221593
+            z: 4058133689
+            w: 3215838283
+        IdentifierType: 1
+      GenerationType: 5
+  Refresh: 0
+--- !u!4 &213097634
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 213097632}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &272302956
 GameObject:
   m_ObjectHideFlags: 0
@@ -1242,8 +1315,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cef929a8ecb96c94abc816d8ab7d8cff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Logic.Common.MobaPrefabsAuthoring
-  Champion: {fileID: 403193853099150282, guid: 2fe49a526567fdc46a55b0b1094bd406, type: 3}
+  Champion: {fileID: 0}
   Minion: {fileID: 3608237881302961655, guid: 99194622db1b196499c57b33645cfe56, type: 3}
+  GameOverEntity: {fileID: 7908483376331410307, guid: b5f35df348945e04296c63d625a3e45a,
+    type: 3}
+  RespawnEntity: {fileID: 3807522330216363009, guid: af2237048064d1b4199811d5d8cfd683,
+    type: 3}
   HealthBarPrefab: {fileID: 6246730936639062891, guid: 8aadaf8ffd0c86343a26b96a6d7bb1fd,
     type: 3}
   SkillShotAimPrefab: {fileID: 907054830368013773, guid: 660bbd0c07689ab4da9d13040d620316,
@@ -1344,7 +1421,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.GameStartPropertiesAuthoring
   MaxPlayersPerTeam: 5
-  MinPlayersToStartGame: 1
+  MinPlayersToStartGame: 2
   CountdownTime: 3
   SpawnOffsets:
   - {x: 0, y: 0, z: 0}
@@ -1808,3 +1885,4 @@ SceneRoots:
   - {fileID: 1290515403}
   - {fileID: 1329835357}
   - {fileID: 1646246677}
+  - {fileID: 213097634}

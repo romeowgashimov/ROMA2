@@ -28,6 +28,7 @@ namespace Logic.Common
                 AddComponent<FollowPathIndex>(entity);
                 AddComponent<AbilityInput>(entity);
                 AddComponent<AimInput>(entity);
+                AddComponent<NetworkEntityReference>(entity);
             }
         }
     }

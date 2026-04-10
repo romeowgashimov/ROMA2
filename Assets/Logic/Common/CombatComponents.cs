@@ -120,7 +120,7 @@ namespace Logic.Common
         }
     }
 
-        public struct AimSkillShotTag : IComponentData { }
+    public struct AimSkillShotTag : IComponentData { }
 
     public struct AbilityMoveSpeed : IComponentData
     {
@@ -149,4 +149,6 @@ namespace Logic.Common
         public NetworkTick Tick { get; set; }
         public NetworkTick Value;
     }
+
+    public struct GameOverOnDestroyTag : IComponentData { }
 }

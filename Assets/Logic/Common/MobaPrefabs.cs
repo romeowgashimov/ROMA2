@@ -7,6 +7,8 @@ namespace Logic.Common
     {
         public Entity Champion;
         public Entity Minion;
+        public Entity GameOverEntity;
+        public Entity RespawnEntity;
     }
 
     public class UIPrefabs : IComponentData

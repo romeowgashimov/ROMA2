@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 1830789450377393214}
   - component: {fileID: 4568716967356504705}
   - component: {fileID: 6402601007678475366}
+  - component: {fileID: -4786637120621914483}
   m_Layer: 0
   m_Name: Base
   m_TagString: Untagged
@@ -86,6 +87,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &6379725683829381411
 MeshFilter:
@@ -330,3 +332,15 @@ MonoBehaviour:
   UseSingleBaseline: 0
   RollbackPredictedSpawnedGhostState: 0
   RollbackPredictionOnStructuralChanges: 1
+--- !u!114 &-4786637120621914483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5326781307255034168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4aebd9bb3ead48cda4de5ef5a67661bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.GameOverOnDestroyAuthoring

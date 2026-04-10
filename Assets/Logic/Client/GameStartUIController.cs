@@ -3,7 +3,6 @@ using Logic.Common;
 using TMPro;
 using Unity.Entities;
 using Unity.NetCode;
-using Unity.Networking.Transport;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -37,7 +36,7 @@ namespace Logic.Client
 
             if (DefaultGameObjectInjectionWorld == null) return;
             _entityManager = DefaultGameObjectInjectionWorld.EntityManager;
-            _networkConnectionQuery = _entityManager.CreateEntityQuery(typeof(NetworkConnection));
+            _networkConnectionQuery = _entityManager.CreateEntityQuery(typeof(NetworkStreamConnection));
             
             ClientStartGameSystem startGameSystem = DefaultGameObjectInjectionWorld
                 .GetExistingSystemManaged<ClientStartGameSystem>();

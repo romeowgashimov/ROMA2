@@ -1,4 +1,5 @@
 using Unity.Entities;
+using Unity.Entities.Serialization;
 using Unity.Mathematics;
 using Unity.NetCode;
 
@@ -9,6 +10,11 @@ namespace Logic.Common
     public struct NewChampTag : IComponentData { }
     
     public struct OwnerChampTag : IComponentData { }
+    
+    public struct ChampionPrefabElement : IBufferElementData
+    {
+        public EntityPrefabReference Value;
+    }
     
     public struct Team : IComponentData
     {
@@ -29,8 +35,8 @@ namespace Logic.Common
 
     public struct MoveTargetPosition : IComponentData
     {
-        //Убрал синхронизацию с сервером, pathfinding у клиента срабатывал раньше,
-        //чем синхронизация, поэтому находился путь к не той точке 
+        /*Убрал синхронизацию с сервером, pathfinding у клиента срабатывал раньше,
+        чем синхронизация, поэтому находился путь к не той точке */
         public float3 Value;
         public bool Flag;
     } 

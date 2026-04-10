@@ -1,10 +1,32 @@
-﻿using Unity.NetCode;
+﻿using Unity.Entities;
+using Unity.Mathematics;
+using Unity.NetCode;
 
 namespace Logic.Common
 {
-    public struct TeamRequest : IRpcCommand
+    public struct EntryConnectionRequest : IRpcCommand
     {
-        public TeamType Value;
+        public TeamType Team;
+        public uint ChampionId;
+    }
+    
+    public struct PendingSpawn : IComponentData
+    {
+        public Entity RequestSourceConnection;
+        public float3 SpawnPos;
+        public int CharacterId;
+        public TeamType Team;
+        public int ClientId;
+    }
+
+    public struct LoadCharacterRequest : IRpcCommand
+    {
+        public uint CharacterId;
+    }
+
+    public struct LoadedEntity : IComponentData
+    {
+        public Entity Value;
     }
 
     public struct PlayersRemainingToStart : IRpcCommand
