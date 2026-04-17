@@ -2,7 +2,6 @@ using Unity.Entities;
 using Unity.Entities.Serialization;
 using Unity.Mathematics;
 using Unity.NetCode;
-using UnityEngine;
 
 namespace Logic.Common
 {
@@ -46,9 +45,23 @@ namespace Logic.Common
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     public struct AbilityInput : IInputComponentData
     {
-        [GhostField] public InputEvent AoeAbility;
-        [GhostField] public InputEvent SkillShotAbility;
-        [GhostField] public InputEvent ConfirmSkillShotAbility;
+        [GhostField] public InputEvent Ability1;
+        [GhostField] public InputEvent Ability2;
+        [GhostField] public InputEvent Ability3;
+        [GhostField] public InputEvent Ability4;
+        [GhostField] public InputEvent ConfirmAbility;
+        [GhostField] public InputEvent CancelAbility;
+        public bool NeedToConfirmAbilities;
+        public int Length => 4;
+        
+        public InputEvent this[int index] => index switch
+        {
+            0 => Ability1,
+            1 => Ability2,
+            2 => Ability3,
+            3 => Ability4,
+            _ => ConfirmAbility
+        };
     }
 
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]

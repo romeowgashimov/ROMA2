@@ -16,28 +16,37 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "AoeAblility",
+                    "name": "Ability1",
                     "type": "Button",
                     "id": "34eba5d6-7a82-428e-9bc2-b610923d2085",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "SkillShotAbility",
+                    "name": "Ability2",
                     "type": "Button",
                     "id": "2cf4bb36-eee2-447b-b759-e79873fc86cd",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "ConfirmSkillShotAbility",
+                    "name": "ConfirmAbility",
                     "type": "Button",
                     "id": "9235f2aa-029b-46a9-b190-d0af96b298c5",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CancelAbility",
+                    "type": "Button",
+                    "id": "0ae66ed1-a592-4a4d-a075-ac70aba9efe8",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -62,7 +71,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "AoeAblility",
+                    "action": "Ability1",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -73,7 +82,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "SkillShotAbility",
+                    "action": "Ability2",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -84,7 +93,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "ConfirmSkillShotAbility",
+                    "action": "ConfirmAbility",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0b535a66-12e2-46a5-bd22-2923d9fda28f",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CancelAbility",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -357,4 +357,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5261b185628d44d8b903e23bbb831764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.DamageOnTriggerAuthoring
-  DamageOnTrigger: 20
+  DamageOnTrigger: 200

@@ -30,8 +30,21 @@ namespace Logic.Common
 
     public struct AbilityPrefabs : IComponentData
     {
-        public Entity AoeAbility;
-        public Entity SkillShotAbility;
+        public Entity Ability1;
+        public Entity Ability2;
+        public Entity Ability3;
+        public Entity Ability4;
+        
+        public int Length => 4;
+        
+        public Entity this[int index] => index switch
+        {
+            0 => Ability1,
+            1 => Ability2,
+            2 => Ability3,
+            3 => Ability4,
+            _ => default
+        };
     }
 
     public struct DestroyOnTimer : IComponentData
@@ -68,13 +81,6 @@ namespace Logic.Common
             1 => SkillShotAbility,
             _ => uint.MaxValue
         };
-        
-        public uint this[AbilityType index] => index switch
-        {
-            AbilityType.AoeAbility => AoeAbility,
-            AbilityType.SkillShotAbility => SkillShotAbility,
-            _ => uint.MaxValue
-        };
     }
 
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
@@ -85,23 +91,15 @@ namespace Logic.Common
         public NetworkTick SkillShotAbility;
 
         public int Length => 2;
-
-        public NetworkTick this[int index] =>
-            index switch
-            {
-                0 => AoeAbility,
-                1 => SkillShotAbility,
-                _ => NetworkTick.Invalid
-            };
-
-        public NetworkTick this[AbilityType index]
+        
+        public NetworkTick this[int index]
         {
             get
             {
                 return index switch
                 {
-                    AbilityType.AoeAbility => AoeAbility,
-                    AbilityType.SkillShotAbility => SkillShotAbility,
+                    0 => AoeAbility,
+                    1 => SkillShotAbility,
                     _ => NetworkTick.Invalid
                 };
             }
@@ -109,10 +107,10 @@ namespace Logic.Common
             {
                 switch (index)
                 {
-                    case AbilityType.AoeAbility:
+                    case 0:
                         AoeAbility = value;
                         break;
-                    case AbilityType.SkillShotAbility:
+                    case 1:
                         SkillShotAbility = value;
                         break;
                 }

@@ -691,7 +691,8 @@ MonoBehaviour:
   _confirmQuitButton: {fileID: 1347971011}
   _cancelQuitButton: {fileID: 1464990059}
   _waitingText: {fileID: 2088007927}
-  _countdownText: {fileID: 407582865}
+  _countdownText: {fileID: 2033418513}
+  _countdownNumber: {fileID: 407582865}
   _championDatabase: {fileID: 11400000, guid: 1ee62af5bf15ffd42abac2b9de976edf, type: 2}
 --- !u!114 &111262451
 MonoBehaviour:
@@ -2081,7 +2082,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 3
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 79459efec17a4d00a321bdcc27bbc385, type: 2}
@@ -9460,7 +9461,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Game starts in:'
+  m_text: "\u041E\u0436\u0438\u0434\u0430\u0435\u043C \u0432\u044B\u0431\u043E\u0440\u0430
+    \u0438\u0433\u0440\u043E\u043A\u043E\u0432"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 79459efec17a4d00a321bdcc27bbc385, type: 2}

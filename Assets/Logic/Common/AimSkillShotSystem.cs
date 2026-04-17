@@ -27,13 +27,11 @@ namespace Logic.Common
 
         public void OnUpdate(ref SystemState state)
         {
-            foreach ((RefRW<AimInput> aimInput, RefRW<LocalTransform> localTransform,
-                         SkillShotUIReference skillShotUIReference) in SystemAPI
-                         .Query<RefRW<AimInput>, RefRW<LocalTransform>, SkillShotUIReference>()
-                         .WithAll<AimSkillShotTag, OwnerChampTag>())
+            foreach ((RefRO<LocalTransform> localTransform, RefRW<AimInput> aimInput, Entity commandEntity) in SystemAPI
+                         .Query<RefRO<LocalTransform>, RefRW<AimInput>>()
+                         .WithAll<AimingTag, OwnerChampTag>()
+                         .WithEntityAccess())
             {
-                skillShotUIReference.Value.transform.position = localTransform.ValueRO.Position;
-                
                 CollisionWorld collisionFilter = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
                 Entity cameraEntity = SystemAPI.GetSingletonEntity<MainCameraTag>();
                 Camera mainCamera = state.EntityManager.GetComponentObject<MainCamera>(cameraEntity).Value;
@@ -52,13 +50,9 @@ namespace Logic.Common
                 if(collisionFilter.CastRay(selectionInput, out Unity.Physics.RaycastHit closestHit))
                 {
                     Vector3 direction = closestHit.Position - localTransform.ValueRO.Position;
-                    direction.y = localTransform.ValueRO.Position.y;
+                    direction.y = 1;
                     direction = math.normalize(direction);
                     aimInput.ValueRW.Value = direction;
-                    
-                    float angleRag = math.atan2(direction.z, direction.x);
-                    float angleDeg = math.degrees(angleRag);
-                    skillShotUIReference.Value.transform.rotation = Quaternion.Euler(0, -angleDeg, 0);
                 }
             }
         }

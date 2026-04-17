@@ -6,7 +6,7 @@ namespace Logic.Common
     public static class CooldownTicksExtensions
     {
         public static bool IsOnCooldown(this DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
-            NetworkTime networkTime, AbilityType abilityType)
+            NetworkTime networkTime, int abilityIndex)
         {
             NetworkTick currentTick = networkTime.ServerTick;
             bool isOnCooldown = true;
@@ -17,10 +17,10 @@ namespace Logic.Common
                 testTick.Subtract(i);
 
                 if (!cooldownTargetTicks.GetDataAtTick(testTick, out AbilityCooldownTargetTicks curTargetTicks))
-                    curTargetTicks[abilityType] = NetworkTick.Invalid;
+                    curTargetTicks[abilityIndex] = NetworkTick.Invalid;
 
-                if (curTargetTicks[abilityType] != NetworkTick.Invalid &&
-                    curTargetTicks[abilityType].IsNewerThan(currentTick)) continue;
+                if (curTargetTicks[abilityIndex] != NetworkTick.Invalid &&
+                    curTargetTicks[abilityIndex].IsNewerThan(currentTick)) continue;
                 
                 isOnCooldown = false;
                 break;
@@ -30,15 +30,15 @@ namespace Logic.Common
         }
 
         public static void UpdateCooldown(this DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
-            AbilityCooldownTicks cooldownTicks, NetworkTime networkTime, AbilityType abilityType)
+            AbilityCooldownTicks cooldownTicks, NetworkTime networkTime, int abilityIndex)
         {
             NetworkTick currentTick = networkTime.ServerTick;
             
             cooldownTargetTicks.GetDataAtTick(currentTick, out AbilityCooldownTargetTicks curTargetTicks);
             
             NetworkTick newCooldownTargetTicks = currentTick;
-            newCooldownTargetTicks.Add(cooldownTicks[abilityType]);
-            curTargetTicks[abilityType] = newCooldownTargetTicks;
+            newCooldownTargetTicks.Add(cooldownTicks[abilityIndex]);
+            curTargetTicks[abilityIndex] = newCooldownTargetTicks;
 
             NetworkTick nextTick = currentTick;
             nextTick.Add(1u);

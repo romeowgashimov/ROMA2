@@ -1,5 +1,6 @@
 ﻿using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
 
@@ -16,7 +17,9 @@ namespace Logic.Common
                          .WithAll<Simulate>())
             {
                 float deltaTime = SystemAPI.Time.DeltaTime;
-                transform.ValueRW.Position += transform.ValueRW.Forward() * abilityMoveSpeed.Value * deltaTime;
+                float3 newPos = transform.ValueRW.Forward() * abilityMoveSpeed.Value * deltaTime;
+                newPos.y = 0;
+                transform.ValueRW.Position += newPos;
             }
         }
     }

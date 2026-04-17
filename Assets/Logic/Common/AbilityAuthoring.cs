@@ -23,8 +23,8 @@ namespace Logic.Common
                 Entity entity = GetEntity(TransformUsageFlags.Dynamic);
                 AddComponent(entity, new AbilityPrefabs
                 {
-                    AoeAbility = GetEntity(authoring.AoeAbilityPrefab, TransformUsageFlags.Dynamic),
-                    SkillShotAbility = GetEntity(authoring.SkillShotAbilityPrefab, TransformUsageFlags.Dynamic)
+                    Ability1 = GetEntity(authoring.AoeAbilityPrefab, TransformUsageFlags.Dynamic),
+                    Ability2 = GetEntity(authoring.SkillShotAbilityPrefab, TransformUsageFlags.Dynamic)
                 });
                 AddComponent(entity, new AbilityCooldownTicks
                 {

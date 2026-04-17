@@ -25,6 +25,7 @@ namespace Logic.Client
         
         [SerializeField] private TextMeshProUGUI _waitingText;
         [SerializeField] private TextMeshProUGUI _countdownText;
+        [SerializeField] private TextMeshProUGUI _countdownNumber;
         
         [SerializeField] private ChampionDatabase _championDatabase;
         
@@ -48,7 +49,7 @@ namespace Logic.Client
             if (startGameSystem != null)
             {
                 startGameSystem.OnUpdatePlayersRemainingToStart += UpdatePlayerRemainingText;
-                startGameSystem.OnStartGameCountdown += BeginCountdown;
+                //startGameSystem.OnStartGameCountdown += BeginCountdown;
             }
             
             ChoiceChampionSystem choiceChampionSystem =
@@ -68,12 +69,19 @@ namespace Logic.Client
                 void Choice() => entryRequestSystem.ChoiceChampion((uint)_championDatabase.Configs[currentId].Id);
             }
             _confirmChoiceButton.onClick.AddListener(entryRequestSystem.ConfirmChampion);
+            entryRequestSystem.OnChosen += BeginCountdown;
 
             CountdownToGameStartSystem countdownSystem = DefaultGameObjectInjectionWorld
                 .GetExistingSystemManaged<CountdownToGameStartSystem>();
             if (countdownSystem != null)
             {
                 countdownSystem.OnUpdateCountdownText += UpdateCountdownText;
+                void UpdateCountdownText(int _)
+                {
+                    countdownSystem.OnUpdateCountdownText -= UpdateCountdownText;
+                    _countdownText.text = "Игра начнётся через ";
+                }
+                countdownSystem.OnUpdateCountdownText += UpdateCountdownNumber;
                 countdownSystem.OnCountdownEnd += EndCountdown;
             }
         }
@@ -91,21 +99,22 @@ namespace Logic.Client
             _quitWaitingButton.onClick.RemoveAllListeners();
             _confirmQuitButton.onClick.RemoveAllListeners();
             _cancelQuitButton.onClick.RemoveAllListeners();
+            _confirmChoiceButton.onClick.RemoveAllListeners();
 
             if (DefaultGameObjectInjectionWorld == null) return;
-            
+
             ClientStartGameSystem startGameSystem = DefaultGameObjectInjectionWorld
                 .GetExistingSystemManaged<ClientStartGameSystem>();
             if (startGameSystem == null) return;
             startGameSystem.OnUpdatePlayersRemainingToStart -= UpdatePlayerRemainingText;
-            startGameSystem.OnStartGameCountdown -= BeginCountdown;
-            
+            //startGameSystem.OnStartGameCountdown -= BeginCountdown;
+
             CountdownToGameStartSystem countdownSystem = DefaultGameObjectInjectionWorld
                 .GetExistingSystemManaged<CountdownToGameStartSystem>();
             if (countdownSystem == null) return;
-            countdownSystem.OnUpdateCountdownText -= UpdateCountdownText;
+            countdownSystem.OnUpdateCountdownText -= UpdateCountdownNumber;
             countdownSystem.OnCountdownEnd -= EndCountdown;
-            
+
             _choiceChampionPanel.SetActive(false);
             ClientRequestGameEntrySystem entryRequestSystem =
                 DefaultGameObjectInjectionWorld.GetExistingSystemManaged<ClientRequestGameEntrySystem>();
@@ -113,8 +122,8 @@ namespace Logic.Client
             ChampionChoiceIcon[] icons = _championsList.GetComponentsInChildren<ChampionChoiceIcon>();
             for (int i = 0; i < icons.Length; i++)
                 icons[i].RemoveAllListeners();
-            _confirmChoiceButton.onClick.RemoveAllListeners();
-            
+            entryRequestSystem.OnChosen -= BeginCountdown;
+
             ChoiceChampionSystem choiceChampionSystem =
                 DefaultGameObjectInjectionWorld.GetExistingSystemManaged<ChoiceChampionSystem>();
             if (choiceChampionSystem == null) return;
@@ -127,9 +136,9 @@ namespace Logic.Client
             _waitingText.text = $"Waiting for {remainingPlayers.ToString()} more {playersText} to join";
         }
 
-        private void UpdateCountdownText(int countdownTime)
+        private void UpdateCountdownNumber(int countdownTime)
         {
-            _countdownText.text = countdownTime.ToString();
+            _countdownNumber.text = countdownTime.ToString();
         }
 
         private void AttemptQuitWaiting()

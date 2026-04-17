@@ -102,28 +102,37 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""AoeAblility"",
+                    ""name"": ""Ability1"",
                     ""type"": ""Button"",
                     ""id"": ""34eba5d6-7a82-428e-9bc2-b610923d2085"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""SkillShotAbility"",
+                    ""name"": ""Ability2"",
                     ""type"": ""Button"",
                     ""id"": ""2cf4bb36-eee2-447b-b759-e79873fc86cd"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""ConfirmSkillShotAbility"",
+                    ""name"": ""ConfirmAbility"",
                     ""type"": ""Button"",
                     ""id"": ""9235f2aa-029b-46a9-b190-d0af96b298c5"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CancelAbility"",
+                    ""type"": ""Button"",
+                    ""id"": ""0ae66ed1-a592-4a4d-a075-ac70aba9efe8"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -148,7 +157,7 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""AoeAblility"",
+                    ""action"": ""Ability1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -159,7 +168,7 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""SkillShotAbility"",
+                    ""action"": ""Ability2"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -170,7 +179,18 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ConfirmSkillShotAbility"",
+                    ""action"": ""ConfirmAbility"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0b535a66-12e2-46a5-bd22-2923d9fda28f"",
+                    ""path"": ""<Keyboard>/c"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CancelAbility"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -182,9 +202,10 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
         // GameplayMap
         m_GameplayMap = asset.FindActionMap("GameplayMap", throwIfNotFound: true);
         m_GameplayMap_SelectMovePosition = m_GameplayMap.FindAction("SelectMovePosition", throwIfNotFound: true);
-        m_GameplayMap_AoeAblility = m_GameplayMap.FindAction("AoeAblility", throwIfNotFound: true);
-        m_GameplayMap_SkillShotAbility = m_GameplayMap.FindAction("SkillShotAbility", throwIfNotFound: true);
-        m_GameplayMap_ConfirmSkillShotAbility = m_GameplayMap.FindAction("ConfirmSkillShotAbility", throwIfNotFound: true);
+        m_GameplayMap_Ability1 = m_GameplayMap.FindAction("Ability1", throwIfNotFound: true);
+        m_GameplayMap_Ability2 = m_GameplayMap.FindAction("Ability2", throwIfNotFound: true);
+        m_GameplayMap_ConfirmAbility = m_GameplayMap.FindAction("ConfirmAbility", throwIfNotFound: true);
+        m_GameplayMap_CancelAbility = m_GameplayMap.FindAction("CancelAbility", throwIfNotFound: true);
     }
 
     ~@MobaInputActions()
@@ -266,9 +287,10 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_GameplayMap;
     private List<IGameplayMapActions> m_GameplayMapActionsCallbackInterfaces = new List<IGameplayMapActions>();
     private readonly InputAction m_GameplayMap_SelectMovePosition;
-    private readonly InputAction m_GameplayMap_AoeAblility;
-    private readonly InputAction m_GameplayMap_SkillShotAbility;
-    private readonly InputAction m_GameplayMap_ConfirmSkillShotAbility;
+    private readonly InputAction m_GameplayMap_Ability1;
+    private readonly InputAction m_GameplayMap_Ability2;
+    private readonly InputAction m_GameplayMap_ConfirmAbility;
+    private readonly InputAction m_GameplayMap_CancelAbility;
     /// <summary>
     /// Provides access to input actions defined in input action map "GameplayMap".
     /// </summary>
@@ -285,17 +307,21 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @SelectMovePosition => m_Wrapper.m_GameplayMap_SelectMovePosition;
         /// <summary>
-        /// Provides access to the underlying input action "GameplayMap/AoeAblility".
+        /// Provides access to the underlying input action "GameplayMap/Ability1".
         /// </summary>
-        public InputAction @AoeAblility => m_Wrapper.m_GameplayMap_AoeAblility;
+        public InputAction @Ability1 => m_Wrapper.m_GameplayMap_Ability1;
         /// <summary>
-        /// Provides access to the underlying input action "GameplayMap/SkillShotAbility".
+        /// Provides access to the underlying input action "GameplayMap/Ability2".
         /// </summary>
-        public InputAction @SkillShotAbility => m_Wrapper.m_GameplayMap_SkillShotAbility;
+        public InputAction @Ability2 => m_Wrapper.m_GameplayMap_Ability2;
         /// <summary>
-        /// Provides access to the underlying input action "GameplayMap/ConfirmSkillShotAbility".
+        /// Provides access to the underlying input action "GameplayMap/ConfirmAbility".
         /// </summary>
-        public InputAction @ConfirmSkillShotAbility => m_Wrapper.m_GameplayMap_ConfirmSkillShotAbility;
+        public InputAction @ConfirmAbility => m_Wrapper.m_GameplayMap_ConfirmAbility;
+        /// <summary>
+        /// Provides access to the underlying input action "GameplayMap/CancelAbility".
+        /// </summary>
+        public InputAction @CancelAbility => m_Wrapper.m_GameplayMap_CancelAbility;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -325,15 +351,18 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
             @SelectMovePosition.started += instance.OnSelectMovePosition;
             @SelectMovePosition.performed += instance.OnSelectMovePosition;
             @SelectMovePosition.canceled += instance.OnSelectMovePosition;
-            @AoeAblility.started += instance.OnAoeAblility;
-            @AoeAblility.performed += instance.OnAoeAblility;
-            @AoeAblility.canceled += instance.OnAoeAblility;
-            @SkillShotAbility.started += instance.OnSkillShotAbility;
-            @SkillShotAbility.performed += instance.OnSkillShotAbility;
-            @SkillShotAbility.canceled += instance.OnSkillShotAbility;
-            @ConfirmSkillShotAbility.started += instance.OnConfirmSkillShotAbility;
-            @ConfirmSkillShotAbility.performed += instance.OnConfirmSkillShotAbility;
-            @ConfirmSkillShotAbility.canceled += instance.OnConfirmSkillShotAbility;
+            @Ability1.started += instance.OnAbility1;
+            @Ability1.performed += instance.OnAbility1;
+            @Ability1.canceled += instance.OnAbility1;
+            @Ability2.started += instance.OnAbility2;
+            @Ability2.performed += instance.OnAbility2;
+            @Ability2.canceled += instance.OnAbility2;
+            @ConfirmAbility.started += instance.OnConfirmAbility;
+            @ConfirmAbility.performed += instance.OnConfirmAbility;
+            @ConfirmAbility.canceled += instance.OnConfirmAbility;
+            @CancelAbility.started += instance.OnCancelAbility;
+            @CancelAbility.performed += instance.OnCancelAbility;
+            @CancelAbility.canceled += instance.OnCancelAbility;
         }
 
         /// <summary>
@@ -348,15 +377,18 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
             @SelectMovePosition.started -= instance.OnSelectMovePosition;
             @SelectMovePosition.performed -= instance.OnSelectMovePosition;
             @SelectMovePosition.canceled -= instance.OnSelectMovePosition;
-            @AoeAblility.started -= instance.OnAoeAblility;
-            @AoeAblility.performed -= instance.OnAoeAblility;
-            @AoeAblility.canceled -= instance.OnAoeAblility;
-            @SkillShotAbility.started -= instance.OnSkillShotAbility;
-            @SkillShotAbility.performed -= instance.OnSkillShotAbility;
-            @SkillShotAbility.canceled -= instance.OnSkillShotAbility;
-            @ConfirmSkillShotAbility.started -= instance.OnConfirmSkillShotAbility;
-            @ConfirmSkillShotAbility.performed -= instance.OnConfirmSkillShotAbility;
-            @ConfirmSkillShotAbility.canceled -= instance.OnConfirmSkillShotAbility;
+            @Ability1.started -= instance.OnAbility1;
+            @Ability1.performed -= instance.OnAbility1;
+            @Ability1.canceled -= instance.OnAbility1;
+            @Ability2.started -= instance.OnAbility2;
+            @Ability2.performed -= instance.OnAbility2;
+            @Ability2.canceled -= instance.OnAbility2;
+            @ConfirmAbility.started -= instance.OnConfirmAbility;
+            @ConfirmAbility.performed -= instance.OnConfirmAbility;
+            @ConfirmAbility.canceled -= instance.OnConfirmAbility;
+            @CancelAbility.started -= instance.OnCancelAbility;
+            @CancelAbility.performed -= instance.OnCancelAbility;
+            @CancelAbility.canceled -= instance.OnCancelAbility;
         }
 
         /// <summary>
@@ -405,25 +437,32 @@ public partial class @MobaInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSelectMovePosition(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "AoeAblility" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Ability1" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnAoeAblility(InputAction.CallbackContext context);
+        void OnAbility1(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "SkillShotAbility" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Ability2" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnSkillShotAbility(InputAction.CallbackContext context);
+        void OnAbility2(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "ConfirmSkillShotAbility" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "ConfirmAbility" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnConfirmSkillShotAbility(InputAction.CallbackContext context);
+        void OnConfirmAbility(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CancelAbility" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCancelAbility(InputAction.CallbackContext context);
     }
 }

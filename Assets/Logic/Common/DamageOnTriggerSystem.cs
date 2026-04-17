@@ -7,7 +7,7 @@ using Unity.Physics;
 namespace Logic.Common
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-    [UpdateAfter(typeof(BeginAoeAbilitySystem))]
+    [UpdateAfter(typeof(AbilityCommandSystemGroup))]
     public partial struct DamageOnTriggerSystem : ISystem
     {
         public void OnCreate(ref SystemState state)

@@ -25,17 +25,23 @@ namespace Logic.Client
 
         protected override void OnUpdate()
         {
-            AbilityInput newAbilityInput = new();
+            AbilityInput newAbilityInput = new()
+            {
+                NeedToConfirmAbilities = true
+            };
             
-            if(_inputActions.GameplayMap.AoeAblility.WasPressedThisFrame())
-                newAbilityInput.AoeAbility.Set();
+            if(_inputActions.GameplayMap.Ability1.WasPressedThisFrame())
+                newAbilityInput.Ability1.Set();
             
-            if(_inputActions.GameplayMap.SkillShotAbility.WasPressedThisFrame())
-                newAbilityInput.SkillShotAbility.Set();
+            if(_inputActions.GameplayMap.Ability2.WasPressedThisFrame())
+                newAbilityInput.Ability2.Set();
             
-            if(_inputActions.GameplayMap.ConfirmSkillShotAbility.WasPressedThisFrame())
-                newAbilityInput.ConfirmSkillShotAbility.Set();
+            if(_inputActions.GameplayMap.ConfirmAbility.WasPressedThisFrame())
+                newAbilityInput.ConfirmAbility.Set();
             
+            if(_inputActions.GameplayMap.CancelAbility.WasPressedThisFrame())
+                newAbilityInput.CancelAbility.Set();
+
             foreach(RefRW<AbilityInput> abilityInput in SystemAPI.Query<RefRW<AbilityInput>>())
                 abilityInput.ValueRW = newAbilityInput;
         }

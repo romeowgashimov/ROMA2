@@ -11,6 +11,12 @@ namespace Logic.Common
         public Entity RespawnEntity;
     }
 
+    public struct PlayerSettings : IComponentData
+    {
+        public bool NeedToConfirmAbilities;
+        public float MouseSpeed;
+    }
+
     public class UIPrefabs : IComponentData
     {
         public GameObject HealthBar;

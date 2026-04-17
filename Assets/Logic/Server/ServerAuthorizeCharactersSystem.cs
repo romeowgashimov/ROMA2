@@ -1,11 +1,11 @@
-﻿using Logic.Server;
+﻿using Logic.Common;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Scenes;
 using Unity.Transforms;
 
-namespace Logic.Common
+namespace Logic.Server
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct ServerAuthorizeCharactersSystem : ISystem
@@ -64,7 +64,7 @@ namespace Logic.Common
                 teamPlayerCounter.InitializedPlayers++;
                 
                 int initializedPlayers =
-                    teamPlayerCounter.TotalPlayers - teamPlayerCounter.InitializedPlayers;
+                    teamPlayerCounter.UninitializedPlayers - teamPlayerCounter.InitializedPlayers;
 
                 Entity gameStartRpc = ecb.CreateEntity();
                 if (initializedPlayers <= 0 && !SystemAPI.HasSingleton<GameplayingTag>())

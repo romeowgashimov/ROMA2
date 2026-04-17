@@ -7,7 +7,7 @@ namespace Logic.Common
     {
         public float MoveSpeed;
         
-        public partial class AbilityMoveSpeedBaker : Baker<AbilityMoveSpeedAuthoring>
+        public class AbilityMoveSpeedBaker : Baker<AbilityMoveSpeedAuthoring>
         {
             public override void Bake(AbilityMoveSpeedAuthoring authoring)
             {
