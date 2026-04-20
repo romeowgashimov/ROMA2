@@ -7,7 +7,7 @@ namespace Logic.Common
 {
     public static class AbilityCommandExtensions
     {
-        public static void AddOrSetAbilityCommand<T>(
+        public static void Send<T>(
             this T anyCommand,
             AbilityCommand mainCommand,
             Entity commandEntity,
@@ -46,7 +46,7 @@ namespace Logic.Common
             ecb.SetComponentEnabled<UpdateAbilityUITag>(owner, false);
         }
 
-        public static void CancelAbilityCommandParallel<T>(
+        public static void CancelParallel<T>(
             this T anyCommand, 
             EntityCommandBuffer.ParallelWriter ecb,
             int key,
@@ -55,11 +55,10 @@ namespace Logic.Common
             where T : unmanaged, IAbilityCommand
         {
             ecb.SetComponentEnabled<T>(key, owner, false);
-            ecb.SetComponentEnabled<AimingTag>(key, owner, false);
             activatedAbilitiesCommands.ValueRW[anyCommand.AbilityIndex] = false;
         }
     
-        public static void InstantiateAbilityParallel<T>(
+        public static void InstantSkillShotParallel<T>(
             this T anyCommand,
             int key, 
             bool isServer,
@@ -75,16 +74,7 @@ namespace Logic.Common
             Entity owner) 
             where T : unmanaged, IAbilityCommand
         {
-            if (anyCommand.NeedToConfirmAbilities)
-            {
-                if (abilityInput.ConfirmAbility.IsSet) { }
-                else if (abilityInput.CancelAbility.IsSet)
-                {
-                    anyCommand.CancelAbilityCommandParallel(ecb, key, owner, activatedAbilitiesCommands);
-                    return;
-                }
-                else return;
-            }
+            if (!anyCommand.IsConfirmParallel(key, ecb, activatedAbilitiesCommands, abilityInput, owner)) return;
             
             Entity skillShot = ecb.Instantiate(key, anyCommand.Prefab);
             LocalTransform newPosition = LocalTransform.FromPositionRotation(transform.Position,
@@ -93,11 +83,27 @@ namespace Logic.Common
             ecb.SetComponent(key, skillShot, team);
             // ECB.SetComponent(key, skillShot, new OwnerTag { Value = owner });
             
-            anyCommand.CancelAbilityCommandParallel(ecb, key, owner, activatedAbilitiesCommands);
+            anyCommand.CancelParallel(ecb, key, owner, activatedAbilitiesCommands);
 
             if (isServer) return;
 
             cooldownTargetTicks.UpdateCooldown(abilityCooldownTicks, netTime, anyCommand.AbilityIndex);
+        }
+
+        public static bool IsConfirmParallel<T>(
+            this T anyCommand,
+            int key,
+            EntityCommandBuffer.ParallelWriter ecb,
+            RefRW<ActivatedAbilitiesCommands> activatedAbilitiesCommands,
+            AbilityInput abilityInput,
+            Entity owner)
+            where T : unmanaged, IAbilityCommand
+        {
+            if (!anyCommand.NeedToConfirmAbilities) return true;
+            if (abilityInput.ConfirmAbility.IsSet) return true;
+            if (abilityInput.CancelAbility.IsSet) 
+                anyCommand.CancelParallel(ecb, key, owner, activatedAbilitiesCommands);
+            return false;
         }
     }
 }

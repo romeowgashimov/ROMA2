@@ -40,7 +40,7 @@ namespace Logic.Common
                          .WithAll<Simulate>()
                          .WithEntityAccess())
             {
-                aoeAbilityCommand.AddOrSetAbilityCommand(
+                aoeAbilityCommand.Send(
                     abilityCommand, commandEntity, state.EntityManager, ecb, isServer);
             }
             
@@ -66,7 +66,7 @@ namespace Logic.Common
             LocalTransform transform, DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
             AimInput aimInput, AoeAbilityCommand aoeAbilityCommand, Entity owner)
         {
-            aoeAbilityCommand.InstantiateAbilityParallel(
+            aoeAbilityCommand.InstantSkillShotParallel(
                 key, IsServer, NetTime, ECB, abilityInput, abilityCooldownTicks, team, activatedAbilitiesCommands, 
                 transform, cooldownTargetTicks, aimInput, owner);
         }

@@ -65,6 +65,8 @@ namespace Logic.Common
         public void Execute([EntityIndexInQuery] int key, Entity entity, in MoveTargetPosition target, 
             LocalTransform transform, ref DynamicBuffer<PathPositionElement> buffer)
         {
+            if (entity == Entity.Null) return;
+            
             // 1. ПЕРЕВОД КООРДИНАТ (Мир -> Сетка)
             // Если мир -60, то в сетке это 0.
             int2 startPos = new((int)math.round(transform.Position.x) + GRID_BIAS, (int)math.round(transform.Position.z) + GRID_BIAS);
@@ -148,12 +150,15 @@ namespace Logic.Common
                 {
                     int2 p = GetPos(curr);
                     // Возвращаем в мировые координаты: вычитаем BIAS
-                    buffer.Add(new() { Value = new int2(p.x - GRID_BIAS, p.y - GRID_BIAS) });
+                    buffer.Add(new() { Value = new(p.x - GRID_BIAS, p.y - GRID_BIAS) });
                     curr = nodeStates[curr].CameFromIndex;
                 }
                 
-                ECB.SetComponentEnabled<NeedPath>(key, entity, false);
-                ECB.SetComponent(key, entity, new FollowPathIndex { Value = buffer.Length - 1 });
+                if (entity != Entity.Null)
+                {
+                    ECB.SetComponentEnabled<NeedPath>(key, entity, false);
+                    ECB.SetComponent(key, entity, new FollowPathIndex { Value = buffer.Length - 1 });
+                }
             }
     
             nodeStates.Dispose();

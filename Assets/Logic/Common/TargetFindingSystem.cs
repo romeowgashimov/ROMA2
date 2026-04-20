@@ -25,11 +25,12 @@ namespace Logic.Common
 
             foreach ((RefRW<LocalTransform> transform, DynamicBuffer<PathPositionElement> pathPositions, 
                          DynamicBuffer<MinionPathPosition> pathMinions, RefRW<MinionPathIndex> pathIndex,
-                         RefRW<MoveTargetPosition> moveTargetPosition, Entity entity) in SystemAPI
+                         RefRW<MoveTargetPosition> moveTargetPosition, RefRW<LastTargetPosition> lastTargetPosition,
+                         Entity entity) in SystemAPI
                          .Query<RefRW<LocalTransform>, DynamicBuffer<PathPositionElement>, 
-                             DynamicBuffer<MinionPathPosition>, RefRW<MinionPathIndex>, RefRW<MoveTargetPosition>>()
-                         .WithDisabled<NeedPath>()
-                         //.WithNone<AggrEnemy>()
+                             DynamicBuffer<MinionPathPosition>, RefRW<MinionPathIndex>, RefRW<MoveTargetPosition>, 
+                             RefRW<LastTargetPosition>>()
+                         .WithDisabled<NeedPath, AggressionTag>()
                          .WithEntityAccess())
             {
                 bool isAtStart = pathPositions.IsEmpty;
@@ -53,8 +54,12 @@ namespace Logic.Common
                     moveTargetPosition.ValueRW.Value = curTarget;
                     ecb.SetComponentEnabled<NeedPath>(entity, true);
                 }
+
+                if (lastTargetPosition.ValueRO.Value.Equals(float3.zero)) continue;
+                lastTargetPosition.ValueRW.Value = float3.zero;
+                moveTargetPosition.ValueRW.Value = curTarget;
+                ecb.SetComponentEnabled<NeedPath>(entity, true);
             }
         }
-
     }
 }

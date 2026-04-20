@@ -14,11 +14,11 @@ namespace Logic.Common
         {
             foreach ((RefRW<LocalTransform> transform, AbilityMoveSpeed abilityMoveSpeed) in SystemAPI
                          .Query<RefRW<LocalTransform>, AbilityMoveSpeed>()
-                         .WithAll<Simulate>())
+                         .WithAll<Simulate>()
+                         .WithNone<DefaultAttackTarget>())
             {
                 float deltaTime = SystemAPI.Time.DeltaTime;
                 float3 newPos = transform.ValueRW.Forward() * abilityMoveSpeed.Value * deltaTime;
-                newPos.y = 0;
                 transform.ValueRW.Position += newPos;
             }
         }

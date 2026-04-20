@@ -25,7 +25,7 @@ namespace Logic.Common
             foreach ((DestroyAtTick destroyAtTick, Entity entity) in SystemAPI
                          .Query<DestroyAtTick>()
                          .WithAll<Simulate>()
-                         .WithNone<DestroyEntityTag>()
+                         .WithNone<DestroyEntityTag, DefaultAttackTarget>()
                          .WithEntityAccess())
             {
                 if(currentTick.Equals(destroyAtTick.Value) || currentTick.IsNewerThan(destroyAtTick.Value))

@@ -125,7 +125,12 @@ namespace Logic.Common
         public float Value;
     }
 
-    public struct NpcTargetRadius : IComponentData
+    public struct NpcAttackRadius : IComponentData
+    {
+        public float Value;
+    }
+    
+    public struct NpcDetectionRadius : IComponentData
     {
         public float Value;
     }
@@ -134,7 +139,16 @@ namespace Logic.Common
     {
         [GhostField] public Entity Value;
     }
+    
+    public struct AggressionTag : IComponentData, IEnableableComponent { }
 
+    public struct LastTargetPosition : IComponentData
+    {
+        public float3 Value;
+    }
+    
+    public struct InAttackArea : IComponentData, IEnableableComponent { }
+    
     public struct NpcAttackProperties : IComponentData
     {
         public float3 FirePointOffset;
@@ -149,4 +163,9 @@ namespace Logic.Common
     }
 
     public struct GameOverOnDestroyTag : IComponentData { }
+
+    public struct DefaultAttackTarget : IComponentData
+    {
+        public Entity Value;
+    }
 }

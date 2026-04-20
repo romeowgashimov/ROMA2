@@ -27,6 +27,8 @@ namespace Logic.Common
                 AddComponent(entity, new MoveTargetPosition { Flag = false });
                 AddComponent<Team>(entity);
                 AddComponent<URPMaterialPropertyBaseColor>(entity);
+                
+                AddComponent<LastTargetPosition>(entity, new() { Value = 0 });
             }
         }
     }

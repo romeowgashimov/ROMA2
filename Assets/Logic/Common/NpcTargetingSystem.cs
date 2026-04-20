@@ -1,9 +1,11 @@
 ﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
+using static Unity.Mathematics.math;
 
 namespace Logic.Common
 {
@@ -12,66 +14,129 @@ namespace Logic.Common
     [UpdateBefore(typeof(ExportPhysicsWorld))]
     public partial struct NpcTargetingSystem : ISystem
     {
-        private CollisionFilter _collisionFilter;
+        private CollisionFilter _filter;
 
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<PhysicsWorldSingleton>();
-            _collisionFilter = new()
+            _filter = new()
             {
-                BelongsTo = 1 << 6, //TargetCast
-                CollidesWith = 1 << 1 | 1 << 2 | 1 << 4 //Champions, minions, structures
+                BelongsTo = 1 << 6,
+                CollidesWith = 1 << 1 | 1 << 2 | 1 << 4
             };
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            // 1. Поиск цели
             state.Dependency = new NpcTargetingJob
             {
-                CollisionFilter = _collisionFilter,
                 CollisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
-                TeamLookup = SystemAPI.GetComponentLookup<Team>(isReadOnly: true)
+                TeamLookup = SystemAPI.GetComponentLookup<Team>(true),
+                TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
+                CollisionFilter = _filter
             }.ScheduleParallel(state.Dependency);
+
+            // 2. Логика миньонов
+            state.Dependency = new MinionBrainJob
+            {
+                TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true)
+            }.ScheduleParallel(state.Dependency);
+
+            // 3. Логика башен
+            state.Dependency = new TowerBrainJob().ScheduleParallel(state.Dependency);
         }
     }
 
     [BurstCompile]
-    [WithAll(typeof(Simulate))]
+    [WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
     public partial struct NpcTargetingJob : IJobEntity
     {
         [ReadOnly] public CollisionFilter CollisionFilter;
         [ReadOnly] public CollisionWorld CollisionWorld;
         [ReadOnly] public ComponentLookup<Team> TeamLookup;
+        [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
 
-        [BurstCompile]
-        private void Execute(Entity npcEntity, ref NpcTargetEntity targetEntity,
-            in LocalTransform transform, in NpcTargetRadius targetRadius)
+        private void Execute(ref NpcTargetEntity target, in LocalTransform xform, 
+            in NpcDetectionRadius detect, in Team team, EnabledRefRW<AggressionTag> aggro)
         {
-            NativeList<DistanceHit> hits = new(Allocator.TempJob);
-
-            if (CollisionWorld.OverlapSphere(transform.Position, targetRadius.Value, ref hits, CollisionFilter))
+            // Проверка текущей цели
+            if (target.Value != Entity.Null && TransformLookup.HasComponent(target.Value))
             {
-                float closestDistance = float.MaxValue;
-                Entity closestEntity = Entity.Null;
+                if (distance(xform.Position, TransformLookup[target.Value].Position) <= detect.Value) return;
+            }
+
+            target.Value = Entity.Null;
+            NativeList<DistanceHit> hits = new(Allocator.Temp);
+            
+            if (CollisionWorld.OverlapSphere(xform.Position, detect.Value, ref hits, CollisionFilter))
+            {
+                Entity closest = Entity.Null;
+                float minDoc = float.MaxValue;
 
                 foreach (DistanceHit hit in hits)
                 {
-                    if (!TeamLookup.TryGetComponent(hit.Entity, out Team team)) continue;
-                    if (team.Value == TeamLookup[npcEntity].Value) continue;
-                    if (hit.Distance < closestDistance)
-                    {
-                        closestDistance = hit.Distance;
-                        closestEntity = hit.Entity;
-                    }
+                    if (!TeamLookup.TryGetComponent(hit.Entity, out Team enemyTeam) 
+                        || enemyTeam.Value == team.Value) continue;
+                    if (hit.Distance < minDoc) { minDoc = hit.Distance; closest = hit.Entity; }
                 }
-                
-                targetEntity.Value = closestEntity;
+                target.Value = closest;
             }
-            else
-                targetEntity.Value = Entity.Null;
             
+            // Включаем агро только если есть цель
+            aggro.ValueRW = target.Value != Entity.Null;
             hits.Dispose();
         }
+    }
+
+    [BurstCompile]
+    [WithAll(typeof(NeedPath), typeof(MoveTargetPosition))]
+    [WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
+    public partial struct MinionBrainJob : IJobEntity
+    {
+        [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
+        
+        private const float DISTANCE_THRESHOLD = 0.5f;
+
+        private void Execute(ref NpcTargetEntity target, ref MoveTargetPosition movePos, 
+            ref LastTargetPosition lastPos, EnabledRefRW<NeedPath> needPath, EnabledRefRW<InAttackArea> inAttackArea,
+            in LocalTransform transform, in NpcAttackRadius attack)
+        {
+            if (target.Value == Entity.Null || !TransformLookup.HasComponent(target.Value))
+            {
+                inAttackArea.ValueRW = false;
+                return;
+            }
+
+            float3 targetPos = TransformLookup[target.Value].Position;
+            float d = distance(transform.Position, targetPos);
+            bool tooFar = d > attack.Value + DISTANCE_THRESHOLD;
+
+            if (tooFar)
+            {
+                float3 idealPos = targetPos + normalize(transform.Position - targetPos) * (attack.Value - DISTANCE_THRESHOLD);
+                movePos.Value = idealPos;
+
+                if (distance(lastPos.Value, idealPos) >= 2f)
+                {
+                    needPath.ValueRW = true;
+                    inAttackArea.ValueRW = false;
+                    lastPos.Value = idealPos;
+                }
+            }
+            else inAttackArea.ValueRW = true;
+        }
+    }
+
+    [BurstCompile]
+    [WithNone(typeof(NeedPath), typeof(MoveTargetPosition))]
+    [WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
+    public partial struct TowerBrainJob : IJobEntity
+    {
+        private void Execute(in NpcTargetEntity target, 
+            EnabledRefRW<InAttackArea> inAttackArea, 
+            EnabledRefRW<AggressionTag> aggro) 
+            => inAttackArea.ValueRW = aggro.ValueRO;
     }
 }

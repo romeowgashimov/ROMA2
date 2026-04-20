@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -36,7 +35,7 @@ namespace Logic.Common
     }
 
     [BurstCompile]
-    [WithAll(typeof(Simulate))]
+    [WithAll(typeof(Simulate), typeof(InAttackArea))]
     public partial struct NpcAttackJob : IJobEntity
     {
         [ReadOnly] public NetworkTick CurrentTick;
@@ -65,7 +64,8 @@ namespace Logic.Common
             
             ECB.SetComponent(sortKey, newAttack, newAttackTransform);
             ECB.SetComponent(sortKey, newAttack, team);
-
+            ECB.SetComponent(sortKey, newAttack, new DefaultAttackTarget { Value = targetEntity.Value });
+            
             NetworkTick newCooldownTick = CurrentTick;
             newCooldownTick.Add(attackProperties.CooldownTickCount);
             attackCooldown.AddCommandData(new() { Tick = CurrentTick, Value = newCooldownTick });

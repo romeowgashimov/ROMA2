@@ -347,9 +347,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7707155b1784fed9cd380edb53ef59b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.AoeAbilityAuthoring
-  AoeAbilityPrefab: {fileID: 2008466357010077448, guid: 89983fd094130ad44afa533d5820871c,
+  AoeAbilityPrefab: {fileID: 3378036069303024400, guid: a0dd3496cb9282a44bb97f9e867ec4d4,
     type: 3}
-  SkillShotAbilityPrefab: {fileID: 3378036069303024400, guid: a0dd3496cb9282a44bb97f9e867ec4d4,
+  SkillShotAbilityPrefab: {fileID: 2008466357010077448, guid: 89983fd094130ad44afa533d5820871c,
     type: 3}
   AoeAbilityCooldown: 4
   SkillShotAbilityCooldown: 4

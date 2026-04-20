@@ -3,10 +3,11 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Physics;
+using static Unity.Entities.SystemAPI;
 
 namespace Logic.Common
 {
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderLast = true)]
     [UpdateAfter(typeof(AbilityCommandSystemGroup))]
     public partial struct DamageOnTriggerSystem : ISystem
     {
@@ -20,15 +21,16 @@ namespace Logic.Common
         public void OnUpdate(ref SystemState state)
         {
             EndPredictedSimulationEntityCommandBufferSystem.Singleton ecbSingleton =
-                SystemAPI.GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
-            SimulationSingleton simulationSingleton = SystemAPI.GetSingleton<SimulationSingleton>();
+                GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
+            SimulationSingleton simulationSingleton = GetSingleton<SimulationSingleton>();
             
             DamageOnTriggerJob job = new()
             {
-                DamageOnTriggerLookup = SystemAPI.GetComponentLookup<DamageOnTrigger>(true),
-                TeamLookup = SystemAPI.GetComponentLookup<Team>(true),
-                AlreadyDamagedLookup = SystemAPI.GetBufferLookup<AlreadyDamagedEntity>(true),
-                DamageBufferLookup = SystemAPI.GetBufferLookup<DamageBufferElement>(true),
+                DamageOnTriggerLookup = GetComponentLookup<DamageOnTrigger>(true),
+                TeamLookup = GetComponentLookup<Team>(true),
+                AlreadyDamagedLookup = GetBufferLookup<AlreadyDamagedEntity>(true),
+                DamageBufferLookup = GetBufferLookup<DamageBufferElement>(true),
+                AttackTargetLookup = GetComponentLookup<DefaultAttackTarget>(true),
                 ECB = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged),
             };
             
@@ -43,6 +45,7 @@ namespace Logic.Common
         [ReadOnly] public ComponentLookup<Team> TeamLookup;
         [ReadOnly] public BufferLookup<AlreadyDamagedEntity> AlreadyDamagedLookup;
         [ReadOnly] public BufferLookup<DamageBufferElement> DamageBufferLookup;
+        [ReadOnly] public ComponentLookup<DefaultAttackTarget> AttackTargetLookup;
 
         public EntityCommandBuffer ECB;
         
@@ -64,6 +67,10 @@ namespace Logic.Common
                 damageDealingEntity = triggerEvent.EntityA;
             }
             else return;
+            
+            if (AttackTargetLookup.TryGetComponent(damageDealingEntity, out DefaultAttackTarget target))
+                if (damageReceivingEntity != target.Value) return;
+                else ECB.AddComponent<DestroyEntityTag>(damageDealingEntity);
             
             DynamicBuffer<AlreadyDamagedEntity> alreadyDamagedBuffer = AlreadyDamagedLookup[damageDealingEntity];
             foreach (AlreadyDamagedEntity alreadyDamagedEntity in alreadyDamagedBuffer)
