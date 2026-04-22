@@ -1,5 +1,4 @@
-﻿using System;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 
@@ -19,6 +18,7 @@ namespace Logic.Common
     public struct DamageBufferElement : IBufferElementData
     {
         public int Value;
+        public Entity DealingDamageEntity;
     }
         
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted, OwnerSendType = SendToOwnerType.SendToNonOwner)]
@@ -168,4 +168,29 @@ namespace Logic.Common
     {
         public Entity Value;
     }
+
+    public interface INpcBufferElement : IBufferElementData 
+    {
+        public Entity Value { get; set; }
+        public bool IsTower { get; set; }
+    }
+    
+    public struct RedNpcBufferElement : INpcBufferElement
+    {
+        public Entity Value { get; set; }
+        public bool IsTower { get; set; }
+    }
+    public struct BlueNpcBufferElement : INpcBufferElement
+    {
+        public Entity Value { get; set; }
+        public bool IsTower { get; set; }
+    }
+    public struct NpcsContainer : IComponentData { }
+
+    public struct ReAggrRequest : IComponentData, IEnableableComponent
+    {
+        public Entity Value;
+    }
+    
+    public struct NewNpcTag : IComponentData, IEnableableComponent { }
 }

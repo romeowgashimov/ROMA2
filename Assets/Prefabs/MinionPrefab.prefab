@@ -627,7 +627,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -643,7 +643,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9546a3726f0a480c85cceab8c824d950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HealthPointsAuthoring
-  MaxHealthPoints: 250
+  MaxHealthPoints: 400
   HealthBarOffset: {x: 0, y: 2, z: 0}
 --- !u!114 &1142406332919421226
 MonoBehaviour:
@@ -657,7 +657,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce31c192a94f4214b2be9a52dd84c8e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.MinionAuthoring
-  MoveSpeed: 2
+  MoveSpeed: 6
 --- !u!114 &359111712131122496
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -671,7 +671,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.NpcAttackAuthoring
   NpcTargetRadius: 8
-  NpcDetectionRadius: 14
+  NpcDetectionRadius: 15
   FirePointOffset: {x: 0, y: 0, z: 0}
   AttackCooldownTime: 3
   AttackPrefab: {fileID: 4375477658151305662, guid: b136942dad4460047b5d1af88a37f71d,

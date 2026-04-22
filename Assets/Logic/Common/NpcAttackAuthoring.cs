@@ -36,6 +36,11 @@ namespace Logic.Common
                 AddComponent(entity, new NpcDetectionRadius { Value = authoring.NpcDetectionRadius });
                 AddComponent<InAttackArea>(entity);
                 SetComponentEnabled<InAttackArea>(entity, false);
+                
+                AddComponent<ReAggrRequest>(entity);
+                SetComponentEnabled<ReAggrRequest>(entity, false);
+                
+                AddComponent<NewNpcTag>(entity);
             }
         }
     }

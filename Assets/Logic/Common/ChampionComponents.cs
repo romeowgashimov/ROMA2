@@ -10,6 +10,11 @@ namespace Logic.Common
     public struct NewChampTag : IComponentData { }
     
     public struct OwnerChampTag : IComponentData { }
+
+    public struct Owner : IComponentData
+    {
+        public Entity Value;
+    } 
     
     public struct ChampionPrefabElement : IBufferElementData
     {

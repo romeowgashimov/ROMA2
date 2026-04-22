@@ -66,9 +66,16 @@ namespace Logic.Common
             LocalTransform transform, DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
             AimInput aimInput, AoeAbilityCommand aoeAbilityCommand, Entity owner)
         {
-            aoeAbilityCommand.InstantSkillShotParallel(
-                key, IsServer, NetTime, ECB, abilityInput, abilityCooldownTicks, team, activatedAbilitiesCommands, 
-                transform, cooldownTargetTicks, aimInput, owner);
+            if (!aoeAbilityCommand.IsConfirmParallel(
+                    key, ECB, activatedAbilitiesCommands, abilityInput, owner)) return;
+
+            aoeAbilityCommand.InstantSkillShotParallel(key,  ECB, team, transform, aimInput, owner);
+            
+            aoeAbilityCommand.CancelParallel(ECB, key, owner, activatedAbilitiesCommands);
+
+            if (IsServer) return;
+
+            cooldownTargetTicks.UpdateCooldown(abilityCooldownTicks, NetTime, aoeAbilityCommand.AbilityIndex);
         }
     }
 }

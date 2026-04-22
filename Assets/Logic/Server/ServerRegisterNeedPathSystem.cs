@@ -23,7 +23,7 @@ namespace Logic.Server
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            _query.SetChangedVersionFilter(ComponentType.ReadOnly<MoveTargetPosition>());
+            //_query.SetChangedVersionFilter(ComponentType.ReadOnly<MoveTargetPosition>());
 
             EndSimulationEntityCommandBufferSystem.Singleton ecbSingleton = 
                 SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();

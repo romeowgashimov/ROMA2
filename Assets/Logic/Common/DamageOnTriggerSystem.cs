@@ -31,6 +31,7 @@ namespace Logic.Common
                 AlreadyDamagedLookup = GetBufferLookup<AlreadyDamagedEntity>(true),
                 DamageBufferLookup = GetBufferLookup<DamageBufferElement>(true),
                 AttackTargetLookup = GetComponentLookup<DefaultAttackTarget>(true),
+                OwnerLookup = GetComponentLookup<Owner>(true),
                 ECB = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged),
             };
             
@@ -46,6 +47,7 @@ namespace Logic.Common
         [ReadOnly] public BufferLookup<AlreadyDamagedEntity> AlreadyDamagedLookup;
         [ReadOnly] public BufferLookup<DamageBufferElement> DamageBufferLookup;
         [ReadOnly] public ComponentLookup<DefaultAttackTarget> AttackTargetLookup;
+        [ReadOnly] public ComponentLookup<Owner> OwnerLookup;
 
         public EntityCommandBuffer ECB;
         
@@ -68,9 +70,10 @@ namespace Logic.Common
             }
             else return;
             
+            bool reachedTheTarget = false;
             if (AttackTargetLookup.TryGetComponent(damageDealingEntity, out DefaultAttackTarget target))
                 if (damageReceivingEntity != target.Value) return;
-                else ECB.AddComponent<DestroyEntityTag>(damageDealingEntity);
+                else reachedTheTarget = true;
             
             DynamicBuffer<AlreadyDamagedEntity> alreadyDamagedBuffer = AlreadyDamagedLookup[damageDealingEntity];
             foreach (AlreadyDamagedEntity alreadyDamagedEntity in alreadyDamagedBuffer)
@@ -81,8 +84,15 @@ namespace Logic.Common
                 if (receivingTeam.Value == dealingTeam.Value) return;
                 
             DamageOnTrigger damageOnTrigger = DamageOnTriggerLookup[damageDealingEntity];
-            ECB.AppendToBuffer(damageReceivingEntity, new DamageBufferElement { Value = damageOnTrigger.Value });
+            OwnerLookup.TryGetComponent(damageDealingEntity, out Owner owner);
+            ECB.AppendToBuffer(damageReceivingEntity, new DamageBufferElement
+            {
+                Value = damageOnTrigger.Value,
+                DealingDamageEntity = owner.Value
+            });
             ECB.AppendToBuffer(damageDealingEntity, new AlreadyDamagedEntity { Value = damageReceivingEntity });
+            
+            if (reachedTheTarget) ECB.AddComponent<DestroyEntityTag>(damageDealingEntity);
         }
     } 
 }

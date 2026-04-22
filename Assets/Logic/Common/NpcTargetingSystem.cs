@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
+using UnityEngine;
 using static Unity.Mathematics.math;
 
 namespace Logic.Common
@@ -46,6 +47,15 @@ namespace Logic.Common
 
             // 3. Логика башен
             state.Dependency = new TowerBrainJob().ScheduleParallel(state.Dependency);
+            
+            state.Dependency = new ReAggrRequestHandlerJob
+            {
+                CollisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
+                TeamLookup = SystemAPI.GetComponentLookup<Team>(true),
+                Champions = SystemAPI.GetComponentLookup<ChampTag>(true),
+                CollisionFilter = _filter
+            }.ScheduleParallel(state.Dependency);
+
         }
     }
 
@@ -63,9 +73,7 @@ namespace Logic.Common
         {
             // Проверка текущей цели
             if (target.Value != Entity.Null && TransformLookup.HasComponent(target.Value))
-            {
                 if (distance(xform.Position, TransformLookup[target.Value].Position) <= detect.Value) return;
-            }
 
             target.Value = Entity.Null;
             NativeList<DistanceHit> hits = new(Allocator.Temp);
@@ -92,6 +100,7 @@ namespace Logic.Common
 
     [BurstCompile]
     [WithAll(typeof(NeedPath), typeof(MoveTargetPosition))]
+    // ignore polnaya huinya
     [WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)]
     public partial struct MinionBrainJob : IJobEntity
     {
@@ -138,5 +147,43 @@ namespace Logic.Common
             EnabledRefRW<InAttackArea> inAttackArea, 
             EnabledRefRW<AggressionTag> aggro) 
             => inAttackArea.ValueRW = aggro.ValueRO;
+    }
+    
+    
+    [BurstCompile]
+    public partial struct ReAggrRequestHandlerJob : IJobEntity
+    {
+        [ReadOnly] public ComponentLookup<ChampTag> Champions;
+        [ReadOnly] public CollisionFilter CollisionFilter;
+        [ReadOnly] public CollisionWorld CollisionWorld;
+        [ReadOnly] public ComponentLookup<Team> TeamLookup;
+
+        private void Execute(ref NpcTargetEntity target, in NpcDetectionRadius detect, in LocalTransform transform, 
+            in Team team, EnabledRefRW<ReAggrRequest> reAggrRequest, ReAggrRequest reAggr, Entity owner)
+        {
+            if (Champions.HasComponent(target.Value))
+            {
+                reAggrRequest.ValueRW = false;
+                return;
+            }            
+            
+            NativeList<DistanceHit> hits = new(Allocator.Temp);
+            if (CollisionWorld.OverlapSphere(transform.Position, detect.Value, ref hits, CollisionFilter))
+            {
+                Entity reAggrEnemy = Entity.Null;
+
+                foreach (DistanceHit hit in hits)
+                {
+                    if (!TeamLookup.TryGetComponent(hit.Entity, out Team enemyTeam) 
+                        || enemyTeam.Value == team.Value) continue;
+                    if (hit.Entity == reAggr.Value) reAggrEnemy = hit.Entity;
+                }
+                target.Value = reAggrEnemy;
+                reAggrRequest.ValueRW = false;
+            }
+            
+            reAggrRequest.ValueRW = false;
+            hits.Dispose();
+        }
     }
 }

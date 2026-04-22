@@ -65,6 +65,7 @@ namespace Logic.Common
             ECB.SetComponent(sortKey, newAttack, newAttackTransform);
             ECB.SetComponent(sortKey, newAttack, team);
             ECB.SetComponent(sortKey, newAttack, new DefaultAttackTarget { Value = targetEntity.Value });
+            ECB.SetComponent(sortKey, newAttack, new Owner { Value = npcEntity });
             
             NetworkTick newCooldownTick = CurrentTick;
             newCooldownTick.Add(attackProperties.CooldownTickCount);

@@ -58,36 +58,24 @@ namespace Logic.Common
             activatedAbilitiesCommands.ValueRW[anyCommand.AbilityIndex] = false;
         }
     
-        public static void InstantSkillShotParallel<T>(
+        public static Entity InstantSkillShotParallel<T>(
             this T anyCommand,
             int key, 
-            bool isServer,
-            NetworkTime netTime,
             EntityCommandBuffer.ParallelWriter ecb,
-            AbilityInput abilityInput,
-            AbilityCooldownTicks abilityCooldownTicks, 
             Team team, 
-            RefRW<ActivatedAbilitiesCommands> activatedAbilitiesCommands,
             LocalTransform transform, 
-            DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
             AimInput aimInput, 
             Entity owner) 
             where T : unmanaged, IAbilityCommand
         {
-            if (!anyCommand.IsConfirmParallel(key, ecb, activatedAbilitiesCommands, abilityInput, owner)) return;
-            
-            Entity skillShot = ecb.Instantiate(key, anyCommand.Prefab);
+            Entity ability = ecb.Instantiate(key, anyCommand.Prefab);
             LocalTransform newPosition = LocalTransform.FromPositionRotation(transform.Position,
                 quaternion.LookRotationSafe(aimInput.Value, math.up()));
-            ecb.SetComponent(key, skillShot, newPosition);
-            ecb.SetComponent(key, skillShot, team);
-            // ECB.SetComponent(key, skillShot, new OwnerTag { Value = owner });
-            
-            anyCommand.CancelParallel(ecb, key, owner, activatedAbilitiesCommands);
+            ecb.SetComponent(key, ability, newPosition);
+            ecb.SetComponent(key, ability, team);
+            ecb.SetComponent(key, ability, new Owner { Value = owner });
 
-            if (isServer) return;
-
-            cooldownTargetTicks.UpdateCooldown(abilityCooldownTicks, netTime, anyCommand.AbilityIndex);
+            return ability;
         }
 
         public static bool IsConfirmParallel<T>(

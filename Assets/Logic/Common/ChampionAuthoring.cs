@@ -32,6 +32,8 @@ namespace Logic.Common
                 AddComponent<AimInput>(entity);
                 AddComponent<ActivatedAbilitiesCommands>(entity);
                 AddComponent<NetworkEntityReference>(entity);
+                
+                AddComponent(entity, new NpcDetectionRadius { Value = 16 });
             }
         }
     }

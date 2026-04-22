@@ -14,6 +14,7 @@ namespace Logic.Common
                 Entity entity = GetEntity(TransformUsageFlags.Dynamic);
                 AddComponent(entity, new DamageOnTrigger { Value =  authoring.DamageOnTrigger });
                 AddBuffer<AlreadyDamagedEntity>(entity);
+                AddComponent<Owner>(entity);
             }
         } 
     }

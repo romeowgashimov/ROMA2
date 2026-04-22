@@ -1,8 +1,10 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
-using UnityEngine;
 using static Unity.Mathematics.math;
 using static Unity.Mathematics.quaternion;
 
@@ -16,32 +18,47 @@ namespace Logic.Common
             state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
         }
 
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             ComponentLookup<LocalTransform> transformLookup = SystemAPI.GetComponentLookup<LocalTransform>(isReadOnly: true);
-            EntityCommandBuffer ecb = SystemAPI
+            EntityCommandBuffer.ParallelWriter ecb = SystemAPI
                 .GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
-                .CreateCommandBuffer(state.WorldUnmanaged);
+                .CreateCommandBuffer(state.WorldUnmanaged)
+                .AsParallelWriter();
             float deltaTime = SystemAPI.Time.DeltaTime;
-            
-            foreach ((RefRW<LocalTransform> transform, AbilityMoveSpeed speed,
-                         DefaultAttackTarget target, Entity attack) in SystemAPI
-                         .Query<RefRW<LocalTransform>, AbilityMoveSpeed, DefaultAttackTarget>()
-                         .WithAll<Simulate>()
-                         .WithEntityAccess())
+
+            state.Dependency = new DefaultAttackTargetingJob
             {
-                if (target.Value == Entity.Null) continue;
+                TransformLookup = transformLookup,
+                DeltaTime = deltaTime,
+                ECB = ecb
+            }.ScheduleParallel(state.Dependency);
+        }
+    }
+
+    [BurstCompile]
+    public partial struct DefaultAttackTargetingJob : IJobEntity
+    {
+        [NativeDisableContainerSafetyRestriction]
+        [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
+        public EntityCommandBuffer.ParallelWriter ECB;
+        public float DeltaTime;
+        
+        private void Execute([ChunkIndexInQuery] int sortKey, RefRW<LocalTransform> transform, AbilityMoveSpeed speed,
+            DefaultAttackTarget target, Entity attack)
+        {
+            if (target.Value == Entity.Null) return;
                 
-                if (!transformLookup.TryGetComponent(target.Value, out LocalTransform targetTransform))
-                {
-                    ecb.AddComponent<DestroyEntityTag>(attack);
-                    continue;
-                }
-                
-                float3 direction = normalize(targetTransform.Position - transform.ValueRO.Position);
-                transform.ValueRW.Position += direction * speed.Value * deltaTime;
-                transform.ValueRW.Rotation = LookRotationSafe(direction, up());
+            if (!TransformLookup.TryGetComponent(target.Value, out LocalTransform targetTransform))
+            {
+                ECB.AddComponent<DestroyEntityTag>(sortKey, attack);
+                return;
             }
+                
+            float3 direction = normalize(targetTransform.Position - transform.ValueRO.Position);
+            transform.ValueRW.Position += direction * speed.Value * DeltaTime;
+            transform.ValueRW.Rotation = LookRotationSafe(direction, up());
         }
     }
 }
