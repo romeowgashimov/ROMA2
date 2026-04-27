@@ -40,7 +40,7 @@ namespace Logic.Common
             foreach ((RefRW<AimInput> aimInput, RefRW<LocalTransform> localTransform,
                          SkillShotUIReference skillShotUIReference) in SystemAPI
                          .Query<RefRW<AimInput>, RefRW<LocalTransform>, SkillShotUIReference>()
-                         .WithAll<AimingTag, UpdateAbilityUITag, OwnerChampTag>())
+                         .WithAll<UpdateAbilityUITag, OwnerChampTag, SkillShotAbilityCommand>())
             {
                 skillShotUIReference.Value.transform.position = localTransform.ValueRO.Position;
                 float3 direction = aimInput.ValueRO.Value;
@@ -53,7 +53,7 @@ namespace Logic.Common
                          SkillShotUIReference skillShotUIReference, Entity owner) in SystemAPI
                          .Query<RefRW<AimInput>, RefRW<LocalTransform>, SkillShotUIReference>()
                          .WithAll<UpdateAbilityUITag, OwnerChampTag>()
-                         .WithNone<AimingTag>()
+                         .WithNone<SkillShotAbilityCommand>()
                          .WithEntityAccess())
             {
                 Object.Destroy(skillShotUIReference.Value);

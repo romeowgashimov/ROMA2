@@ -1,5 +1,4 @@
-﻿using System;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.NetCode;
 using UnityEngine;
 
@@ -39,8 +38,6 @@ namespace Logic.Common
                 
                 AddComponent<ReAggrRequest>(entity);
                 SetComponentEnabled<ReAggrRequest>(entity, false);
-                
-                AddComponent<NewNpcTag>(entity);
             }
         }
     }

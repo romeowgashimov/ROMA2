@@ -19,7 +19,8 @@ namespace Logic.Common
             _query = SystemAPI.QueryBuilder()
                 .WithAll<AbilityInput, AbilityPrefabs, AbilityCooldownTicks, Team,
                     LocalTransform, AbilityCooldownTargetTicks, AimInput>()
-                .WithAll<SkillShotAbilityCommand, AimingTag, ActivatedAbilitiesCommands, Simulate>()
+                .WithAll<SkillShotAbilityCommand, AimingTag, Simulate>()
+                .WithAllRW<ActivatedAbilitiesCommands>()
                 .Build();
         }
 

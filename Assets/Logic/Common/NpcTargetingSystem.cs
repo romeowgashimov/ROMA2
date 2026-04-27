@@ -5,7 +5,6 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
-using UnityEngine;
 using static Unity.Mathematics.math;
 
 namespace Logic.Common
@@ -68,17 +67,17 @@ namespace Logic.Common
         [ReadOnly] public ComponentLookup<Team> TeamLookup;
         [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
 
-        private void Execute(ref NpcTargetEntity target, in LocalTransform xform, 
+        private void Execute(ref NpcTargetEntity target, in LocalTransform transform, 
             in NpcDetectionRadius detect, in Team team, EnabledRefRW<AggressionTag> aggro)
         {
             // Проверка текущей цели
             if (target.Value != Entity.Null && TransformLookup.HasComponent(target.Value))
-                if (distance(xform.Position, TransformLookup[target.Value].Position) <= detect.Value) return;
+                if (distance(transform.Position, TransformLookup[target.Value].Position) <= detect.Value) return;
 
             target.Value = Entity.Null;
             NativeList<DistanceHit> hits = new(Allocator.Temp);
             
-            if (CollisionWorld.OverlapSphere(xform.Position, detect.Value, ref hits, CollisionFilter))
+            if (CollisionWorld.OverlapSphere(transform.Position, detect.Value, ref hits, CollisionFilter))
             {
                 Entity closest = Entity.Null;
                 float minDoc = float.MaxValue;
@@ -92,7 +91,6 @@ namespace Logic.Common
                 target.Value = closest;
             }
             
-            // Включаем агро только если есть цель
             aggro.ValueRW = target.Value != Entity.Null;
             hits.Dispose();
         }
@@ -120,14 +118,15 @@ namespace Logic.Common
 
             float3 targetPos = TransformLookup[target.Value].Position;
             float d = distance(transform.Position, targetPos);
-            bool tooFar = d > attack.Value + DISTANCE_THRESHOLD;
+            bool tooFar = d >= attack.Value;
 
             if (tooFar)
             {
-                float3 idealPos = targetPos + normalize(transform.Position - targetPos) * (attack.Value - DISTANCE_THRESHOLD);
+                float3 idealPos = targetPos;
+                // Точкой назначения должен быть враг
                 movePos.Value = idealPos;
 
-                if (distance(lastPos.Value, idealPos) >= 2f)
+                if (distance(lastPos.Value, idealPos) > 2f)
                 {
                     needPath.ValueRW = true;
                     inAttackArea.ValueRW = false;
@@ -159,7 +158,7 @@ namespace Logic.Common
         [ReadOnly] public ComponentLookup<Team> TeamLookup;
 
         private void Execute(ref NpcTargetEntity target, in NpcDetectionRadius detect, in LocalTransform transform, 
-            in Team team, EnabledRefRW<ReAggrRequest> reAggrRequest, ReAggrRequest reAggr, Entity owner)
+            in Team team, EnabledRefRW<ReAggrRequest> reAggrRequest, ReAggrRequest reAggr)
         {
             if (Champions.HasComponent(target.Value))
             {
@@ -177,6 +176,7 @@ namespace Logic.Common
                     if (!TeamLookup.TryGetComponent(hit.Entity, out Team enemyTeam) 
                         || enemyTeam.Value == team.Value) continue;
                     if (hit.Entity == reAggr.Value) reAggrEnemy = hit.Entity;
+                    break;
                 }
                 target.Value = reAggrEnemy;
                 reAggrRequest.ValueRW = false;

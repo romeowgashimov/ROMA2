@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: -6906729116083896886}
   - component: {fileID: 5998907826215234344}
   - component: {fileID: -2269101407946460892}
-  - component: {fileID: 7619772437397372647}
+  - component: {fileID: -3311513262280386151}
   m_Layer: 0
   m_Name: Tower
   m_TagString: Untagged
@@ -333,7 +333,7 @@ MonoBehaviour:
   UseSingleBaseline: 0
   RollbackPredictedSpawnedGhostState: 0
   RollbackPredictionOnStructuralChanges: 1
---- !u!114 &7619772437397372647
+--- !u!114 &-3311513262280386151
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -345,8 +345,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8729631d900843168dae5e931c569994, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.NpcAttackAuthoring
-  NpcTargetRadius: 10
-  NpcDetectionRadius: 10
+  NpcTargetRadius: 15
+  NpcDetectionRadius: 15
   FirePointOffset: {x: 0, y: 2.5, z: 0}
   AttackCooldownTime: 3
   AttackPrefab: {fileID: 4375477658151305662, guid: 22daabb38370a494ead1c7f2099aa13e,

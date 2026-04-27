@@ -34,6 +34,7 @@ namespace Logic.Common
 
             if (isServer) return;
 
+            // Вынести в отдельный метод отрисовки
             bool needConfirm = mainCommand.NeedToConfirmAbilities;
             bool hasDraw = mgr.HasComponent<DrawAbilityUITag>(owner);
             bool hasUpdate = mgr.HasComponent<UpdateAbilityUITag>(owner);

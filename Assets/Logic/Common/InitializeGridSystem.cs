@@ -27,11 +27,8 @@ namespace Logic.Common
                 {
                         PathNode pathNode = new()
                         {
-                            X = x,
-                            Y = y,
                             Index = CalculateIndex(x, y, gridSize.x),
                             IsWalkable = true,
-                            CameFromNodeIndex = -1
                         };
                         buffer[pathNode.Index] = pathNode;
                 }

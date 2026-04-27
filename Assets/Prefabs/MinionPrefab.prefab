@@ -375,9 +375,9 @@ GameObject:
   - component: {fileID: 2765063416711968252}
   - component: {fileID: -8565429031074575625}
   - component: {fileID: 1142406332919421226}
-  - component: {fileID: 359111712131122496}
   - component: {fileID: 264661276538271592}
   - component: {fileID: 7937226222417274391}
+  - component: {fileID: 5372383682555973548}
   m_Layer: 0
   m_Name: MinionPrefab
   m_TagString: Untagged
@@ -630,7 +630,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &-8565429031074575625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -643,7 +643,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9546a3726f0a480c85cceab8c824d950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HealthPointsAuthoring
-  MaxHealthPoints: 400
+  MaxHealthPoints: 250
   HealthBarOffset: {x: 0, y: 2, z: 0}
 --- !u!114 &1142406332919421226
 MonoBehaviour:
@@ -658,25 +658,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.MinionAuthoring
   MoveSpeed: 6
---- !u!114 &359111712131122496
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3608237881302961655}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8729631d900843168dae5e931c569994, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.NpcAttackAuthoring
-  NpcTargetRadius: 8
-  NpcDetectionRadius: 15
-  FirePointOffset: {x: 0, y: 0, z: 0}
-  AttackCooldownTime: 3
-  AttackPrefab: {fileID: 4375477658151305662, guid: b136942dad4460047b5d1af88a37f71d,
-    type: 3}
-  NetCodeConfig: {fileID: 11400000, guid: dce9a8c7da8b8cf4093e70364ed6f4c4, type: 2}
 --- !u!114 &264661276538271592
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -715,3 +696,22 @@ MonoBehaviour:
   UseSingleBaseline: 0
   RollbackPredictedSpawnedGhostState: 0
   RollbackPredictionOnStructuralChanges: 1
+--- !u!114 &5372383682555973548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3608237881302961655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8729631d900843168dae5e931c569994, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.NpcAttackAuthoring
+  NpcTargetRadius: 12
+  NpcDetectionRadius: 16
+  FirePointOffset: {x: 0, y: 0, z: 0}
+  AttackCooldownTime: 3
+  AttackPrefab: {fileID: 4375477658151305662, guid: b136942dad4460047b5d1af88a37f71d,
+    type: 3}
+  NetCodeConfig: {fileID: 11400000, guid: dce9a8c7da8b8cf4093e70364ed6f4c4, type: 2}

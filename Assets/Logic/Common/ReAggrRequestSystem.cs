@@ -1,12 +1,10 @@
 ﻿using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.NetCode;
+using Unity.Physics;
 using Unity.Transforms;
-using UnityEngine;
 using static Unity.Entities.SystemAPI;
-using static Unity.Mathematics.math;
 
 namespace Logic.Common
 {
@@ -15,21 +13,21 @@ namespace Logic.Common
     [BurstCompile]
     public partial struct ReAggrRequestSystem : ISystem
     {
+        private CollisionFilter _filter;
+        
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
-            state.RequireForUpdate<NpcsContainer>();
+            state.RequireForUpdate<PhysicsWorldSingleton>();
+            _filter = new()
+            {
+                BelongsTo = 1 << 6,
+                CollidesWith = 1 << 1 | 1 << 2 | 1 << 4
+            };
         }
         
         public void OnUpdate(ref SystemState state)
         {
-            Entity npcContainer = GetSingletonEntity<NpcsContainer>();
-            DynamicBuffer<RedNpcBufferElement> redNpcs = GetBuffer<RedNpcBufferElement>(npcContainer);
-            DynamicBuffer<BlueNpcBufferElement> blueNpcs = GetBuffer<BlueNpcBufferElement>(npcContainer);
-            
-            ComponentLookup<ChampTag> champTags = GetComponentLookup<ChampTag>();
-            ComponentLookup<LocalTransform> transforms = GetComponentLookup<LocalTransform>();
-
             EntityCommandBuffer.ParallelWriter ecb = 
                 GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>()
                     .CreateCommandBuffer(state.WorldUnmanaged)
@@ -37,10 +35,10 @@ namespace Logic.Common
             
             state.Dependency = new ReAggrRequestJob
             {
-                RedNpcs = redNpcs,
-                BlueNpcs = blueNpcs,
-                Champions = champTags,
-                Transforms = transforms,
+                CollisionWorld = GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
+                TeamLookup = GetComponentLookup<Team>(true),
+                Champions = GetComponentLookup<ChampTag>(true),
+                CollisionFilter = _filter,
                 ECB = ecb
             }.ScheduleParallel(state.Dependency);
         }
@@ -49,58 +47,45 @@ namespace Logic.Common
     [BurstCompile]
     public partial struct ReAggrRequestJob : IJobEntity
     {
-        [ReadOnly] public DynamicBuffer<RedNpcBufferElement> RedNpcs;
-        [ReadOnly] public DynamicBuffer<BlueNpcBufferElement> BlueNpcs;
         [ReadOnly] public ComponentLookup<ChampTag> Champions;
-        [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
+        [ReadOnly] public CollisionFilter CollisionFilter;
+        [ReadOnly] public CollisionWorld CollisionWorld;
+        [ReadOnly] public ComponentLookup<Team> TeamLookup;
         public EntityCommandBuffer.ParallelWriter ECB;
         
         public void Execute(
             [ChunkIndexInQuery] int sortKey,
-            DynamicBuffer<DamageBufferElement> damageBuffer, 
-            Team team, 
-            NpcDetectionRadius detectionRadius,
+            in DynamicBuffer<DamageBufferElement> damageBuffer, 
+            in Team team, 
+            in NpcDetectionRadius detect,
             in LocalTransform transform)
         {
             // Если урон можно получить только от врага, иначе нужна проверка на команды.
-            // Переписать на overlapsphere 
             foreach (DamageBufferElement damageElement in damageBuffer)
             {
                 Entity enemy = damageElement.DealingDamageEntity;
                 if (!Champions.HasComponent(enemy)) continue;
-                LocalTransform enemyTransform = Transforms[enemy];
-                if (distance(transform.Position, enemyTransform.Position) > detectionRadius.Value) continue;
-                switch (team.Value)
+                
+                NativeList<DistanceHit> hits = new(Allocator.Temp);
+                if (CollisionWorld.OverlapSphere(transform.Position, detect.Value, ref hits, CollisionFilter))
                 {
-                    case TeamType.Red:
-                        SendReAggrRequest(RedNpcs, Transforms, transform, 20, 14, sortKey, enemy);
-                        break;
-                    case TeamType.Blue:
-                        SendReAggrRequest(BlueNpcs, Transforms, transform, 20, 14, sortKey, enemy);
-                        break;
-                }
-            }
-        }
+                    using NativeList<Entity> allies = new(Allocator.Temp);
+                    bool enemyInRadius = false;
+                    foreach (DistanceHit hit in hits)
+                    {
+                        if (TeamLookup.TryGetComponent(hit.Entity, out Team entityTeam) 
+                            && entityTeam.Value == team.Value) allies.Add(hit.Entity);
+                        if (hit.Entity == enemy) enemyInRadius = true;
+                    }
 
-        private void SendReAggrRequest<T>(
-            DynamicBuffer<T> npcs,
-            ComponentLookup<LocalTransform> transforms,
-            LocalTransform ownTransform,
-            int towerRadius,
-            int minionRadius,
-            int sortKey,
-            Entity enemy)
-        where T : unmanaged, INpcBufferElement
-        {
-            foreach (T npc in npcs)
-            {
-                float3 npcPosition = transforms[npc.Value].Position;
-                int radius = npc.IsTower ? towerRadius : minionRadius;
-                if (distance(npcPosition, ownTransform.Position) <= radius)
-                {
-                    ECB.SetComponent(sortKey, npc.Value, new ReAggrRequest { Value = enemy });
-                    ECB.SetComponentEnabled<ReAggrRequest>(sortKey, npc.Value, true);
+                    if (enemyInRadius)
+                        foreach (Entity ally in allies)
+                        {
+                            ECB.SetComponent(sortKey, ally, new ReAggrRequest { Value = enemy });
+                            ECB.SetComponentEnabled<ReAggrRequest>(sortKey, ally, true);
+                        }
                 }
+                hits.Dispose();
             }
         }
     }

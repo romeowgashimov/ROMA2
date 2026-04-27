@@ -34,6 +34,10 @@ namespace Logic.Common
                 AddComponent<NetworkEntityReference>(entity);
                 
                 AddComponent(entity, new NpcDetectionRadius { Value = 16 });
+                AddComponent(entity, new NpcAttackRadius { Value = 12 });
+                AddComponent<InAttackArea>(entity);
+                SetComponentEnabled<InAttackArea>(entity, false);
+                AddComponent<NpcTargetEntity>(entity);
             }
         }
     }

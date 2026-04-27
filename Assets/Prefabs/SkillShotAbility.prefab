@@ -96,6 +96,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &8530934920086910296
 MonoBehaviour:
@@ -292,7 +293,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5261b185628d44d8b903e23bbb831764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.DamageOnTriggerAuthoring
-  DamageOnTrigger: 100
+  DamageOnTrigger: 50
 --- !u!114 &-4323266398317425856
 MonoBehaviour:
   m_ObjectHideFlags: 0
