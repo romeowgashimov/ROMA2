@@ -103,8 +103,6 @@ namespace Logic.Common
     public partial struct MinionBrainJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
-        
-        private const float DISTANCE_THRESHOLD = 0.5f;
 
         private void Execute(ref NpcTargetEntity target, ref MoveTargetPosition movePos, 
             ref LastTargetPosition lastPos, EnabledRefRW<NeedPath> needPath, EnabledRefRW<InAttackArea> inAttackArea,
@@ -122,15 +120,14 @@ namespace Logic.Common
 
             if (tooFar)
             {
-                float3 idealPos = targetPos;
                 // Точкой назначения должен быть враг
-                movePos.Value = idealPos;
+                movePos.Value = targetPos;
 
-                if (distance(lastPos.Value, idealPos) > 2f)
+                if (distance(lastPos.Value, targetPos) > 2f)
                 {
                     needPath.ValueRW = true;
                     inAttackArea.ValueRW = false;
-                    lastPos.Value = idealPos;
+                    lastPos.Value = targetPos;
                 }
             }
             else inAttackArea.ValueRW = true;

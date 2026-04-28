@@ -1,4 +1,5 @@
-﻿using Unity.Burst;
+﻿using System.Runtime.CompilerServices;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -6,9 +7,10 @@ using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
 using Unity.Physics;
+using static Unity.Mathematics.float3;
 using static Unity.Mathematics.math;
+using static Unity.Mathematics.quaternion;
 using float3 = Unity.Mathematics.float3;
-using quaternion = Unity.Mathematics.quaternion;
 
 namespace Logic.Common
 {
@@ -16,7 +18,6 @@ namespace Logic.Common
     {
         public float2 Position;
         public float2 Velocity;
-        public float Radius;
     }
 
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
@@ -58,9 +59,10 @@ namespace Logic.Common
             state.Dependency = new MinionMoveJob
             {
                 AllAgents = allAgents,
-                K = 25.0f,      // Константа из Eq. 8 (влияет на дистанцию реагирования)
-                MaxSamples = 10, // Количество лучей для поиска лучшей скорости
-                TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true)
+                K = 3.5f,
+                MaxSamples = 12,
+                TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
+                DeltaTime = SystemAPI.Time.DeltaTime
             }.ScheduleParallel(_mainQuery, state.Dependency);
             
             // Очистка после выполнения всех зависимостей
@@ -78,7 +80,6 @@ namespace Logic.Common
             {
                 Position = transform.Position.xz,
                 Velocity = velocity.Linear.xz,
-                Radius = radius.Value
             };
         }
     }
@@ -86,135 +87,143 @@ namespace Logic.Common
     [BurstCompile]
     public partial struct MinionMoveJob : IJobEntity
     {
-        [ReadOnly]
         [NativeDisableContainerSafetyRestriction]
-        public ComponentLookup<LocalTransform> TransformLookup;
+        [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
         [ReadOnly] public NativeArray<AgentData> AllAgents;
         public float K;
         public int MaxSamples;
-
+        public float DeltaTime;
+    
         private void Execute(
             ref LocalTransform transform,
             ref PhysicsVelocity velocity,
             in MoveSpeed moveSpeed,
-            ref FollowPathIndex followPathIndex, 
+            ref FollowPathIndex followPathIndex,
             in DynamicBuffer<PathPositionElement> pathPositions,
             in NpcAttackRadius radius,
             in NpcTargetEntity attackTarget)
         {
             if (pathPositions.IsEmpty || followPathIndex.Value < 0)
             {
-                velocity.Linear = float3.zero;
+                velocity.Linear = zero;
                 return;
             }
-            
+    
+            float3 myPos = transform.Position;
+    
             if (attackTarget.Value != Entity.Null)
             {
                 float3 targetPos = TransformLookup[attackTarget.Value].Position;
-                if (distance(targetPos, transform.Position) <= radius.Value - 1f)
+                float distSq = distancesq(targetPos, myPos);
+                float stopDist = radius.Value - 1f;
+    
+                if (distSq <= stopDist * stopDist)
                 {
-                    velocity.Linear = float3.zero;
+                    velocity.Linear = zero;
+                    float3 dir = normalizesafe(targetPos - myPos);
+                    quaternion targetRot = LookRotationSafe(new(dir.x, 0, dir.z), up());
+                    transform.Rotation = slerp(transform.Rotation, targetRot, DeltaTime * 10f);
                     return;
                 }
             }
-
-            const float bodyRadius = 0.5f; // Фиксированный радиус тела миньона
-            float2 selfPos = transform.Position.xz;
-            float2 currentV = velocity.Linear.xz;
-            int currentIndex = followPathIndex.Value;
-            float2 targetPath = pathPositions[currentIndex].Value;
+    
+            float2 selfPosXZ = myPos.xz;
+            float2 currentVXZ = velocity.Linear.xz;
+            float2 targetPathXZ = pathPositions[followPathIndex.Value].Value;
             
-            float2 vGoal = normalizesafe(targetPath - selfPos) * moveSpeed.Value;
+            float2 vGoal = math.normalizesafe(targetPathXZ - selfPosXZ) * moveSpeed.Value;
             float2 vBest = vGoal;
             float minPenalty = float.MaxValue;
     
-            // Добавляем текущую скорость в сэмплы, чтобы уменьшить тряску
+            // Постоянные для RVO
+            const float bodyRadius = 0.5f;
+            const float combinedRadius = bodyRadius + 0.5f;
+            const float combinedRadiusSq = combinedRadius * combinedRadius;
+    
+            // Кэшируем данные, чтобы не пересчитывать в цикле
+            int agentsCount = AllAgents.Length;
+    
             for (int i = 0; i <= MaxSamples; i++)
             {
-                float2 vCandidate;
-                if (i == 0) vCandidate = vGoal; // Сначала проверяем идеальный путь
-                else 
+                float2 vCand;
+                if (i == 0) vCand = vGoal;
+                else
                 {
-                    float angle = (PI * 2f / MaxSamples) * i;
-                    vCandidate = new float2(cos(angle), sin(angle)) * moveSpeed.Value;
+                    sincos(PI2 / MaxSamples * i, out float sin, out float cos);
+                    vCand = new float2(cos, sin) * moveSpeed.Value;
                 }
     
-                // ВАЖНО: Передаем bodyRadius (0.5)
-                float penalty = CalculatePenalty(vCandidate, vGoal, selfPos, currentV, bodyRadius);
-                
-                penalty += distance(vCandidate, currentV) * 1.2f; 
+                float penalty = CalculatePenalty(vCand, vGoal, selfPosXZ, currentVXZ, combinedRadiusSq, agentsCount);
+                penalty += distance(vCand, currentVXZ) * 1.2f;
+    
                 if (penalty < minPenalty)
                 {
                     minPenalty = penalty;
-                    vBest = vCandidate;
+                    vBest = vCand;
                 }
             }
     
-            // --- 4. ПРИМЕНЕНИЕ И ПЛАВНОСТЬ ---
-            // Плавная интерполяция скорости, чтобы убрать тряску (lerp)
-            float2 finalV = lerp(currentV, vBest, 0.2f); 
+            float2 finalV = lerp(currentVXZ, vBest, 0.2f);
             velocity.Linear = new(finalV.x, velocity.Linear.y, finalV.y);
-            
+    
             if (lengthsq(finalV) > 0.01f)
-                transform.Rotation = quaternion.LookRotationSafe(new float3(finalV.x, 0, finalV.y), math.up()); 
-            
-            // --- Логика переключения вейпоинтов (Dot Product) ---
-            float2 futurePos = currentIndex > 0 && currentIndex < pathPositions.Length
-                ? pathPositions[currentIndex - 1].Value 
-                : selfPos;
-
-            float2 segmentDir = normalize(targetPath - futurePos);
-            float2 vectorToTarget = targetPath - selfPos;
-
-            // Если пролетели плоскость вейпоинта (даже если RVO оттолкнул в бок)
-            if (dot(vectorToTarget, segmentDir) >= -0.2f)
+                transform.Rotation = LookRotationSafe(new(finalV.x, 0, finalV.y), math.up());
+    
+            // Логика переключения (без изменений)
+            float2 futurePos = followPathIndex.Value > 0 && followPathIndex.Value < pathPositions.Length
+                ? pathPositions[followPathIndex.Value - 1].Value
+                : selfPosXZ;
+            float2 segmentDir = normalize(targetPathXZ - futurePos);
+            float2 vectorToTarget = targetPathXZ - selfPosXZ;
+    
+            if (math.dot(vectorToTarget, segmentDir) >= -0.2f)
             {
                 followPathIndex.Value--;
-                if (followPathIndex.Value < 0)
-                {
-                    velocity.Linear = float3.zero;
-                }
-            } 
+                if (followPathIndex.Value < 0) velocity.Linear = zero;
+            }
         }
-
-        private float CalculatePenalty(float2 vCand, float2 vGoal, float2 posA, float2 vA, float radA)
-        {
-            float tc = 5.0f; // Уменьшим горизонт планирования для резкости
     
-            for (int i = 0; i < AllAgents.Length; i++)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private float CalculatePenalty(float2 vCand, float2 vGoal, float2 posA, float2 vA, float combinedRadiusSq, int agentsCount)
+        {
+            float tc = 5.0f;
+            float2 vRVO = (vCand + vA) * 0.5f;
+    
+            for (int i = 0; i < agentsCount; i++)
             {
                 AgentData agentB = AllAgents[i];
                 float2 relPos = agentB.Position - posA;
-                float distSq = lengthsq(relPos);
-                
-                // Игнорируем себя и тех, кто далеко
-                if (distSq < 0.001f || distSq > 16f) continue; 
+                float distSq = math.lengthsq(relPos);
     
-                // Используем МАЛЕНЬКИЙ радиус для всех (0.5 + 0.5 = 1.0)
-                float combinedRadius = radA + 0.5f; 
-                
-                float2 vRVO = (vCand + vA) * 0.5f; 
+                // Оптимизация: быстрый отсев по дистанции (4.0 м -> 16.0 м^2)
+                if (distSq < 0.001f || distSq > 16f) continue;
+    
                 float2 relVel = vRVO - agentB.Velocity;
-    
-                float dist = sqrt(distSq);
-                float alphaAB = atan2(relPos.y, relPos.x);
-                float phiAB = asin(clamp(combinedRadius / dist, -1f, 1f));
-                float betaAB = atan2(relVel.y, relVel.x);
-    
-                float psiAB = abs(betaAB - alphaAB);
-                if (psiAB > PI) psiAB = 2f * PI - psiAB;
-    
-                if (psiAB < phiAB)
+                
+                // Векторная проверка на столкновение (Ray-Sphere Intersection)
+                float dotRV = dot(relVel, relPos);
+                
+                // Если движемся в сторону друг друга
+                if (dotRV > 0)
                 {
-                    float vRelMag = length(relVel);
-                    // Формула времени до столкновения
-                    float tcCand = (dist * cos(psiAB) - sqrt(max(0, combinedRadius * combinedRadius - distSq * sin(psiAB) * sin(psiAB)))) / max(vRelMag, 0.01f);
-                    
-                    if (tcCand > 0 && tcCand < tc) tc = tcCand;
+                    float2 rayClosest = relPos - dotRV / lengthsq(relVel) * relVel;
+                    if (lengthsq(rayClosest) < combinedRadiusSq)
+                    {
+                        // Вычисляем точное время до касания через дискриминант (упрощенно)
+                        float vMagSq = lengthsq(relVel);
+                        float b = -2f * dotRV;
+                        float c = distSq - combinedRadiusSq;
+                        float disc = b * b - 4f * vMagSq * c;
+    
+                        if (disc >= 0)
+                        {
+                            float t = (dotRV - sqrt(disc)) / vMagSq;
+                            if (t > 0 && t < tc) tc = t;
+                        }
+                    }
                 }
             }
     
-            // Увеличиваем значимость отклонения от vGoal, чтобы меньше "гуляли"
             return K / tc + distance(vCand, vGoal) * 1.5f;
         }
     }

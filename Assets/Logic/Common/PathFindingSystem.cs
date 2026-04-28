@@ -147,8 +147,7 @@ namespace Logic.Common
             openList.Dispose();
             closedSet.Dispose();
         }
-    
-        #region Heap Logic
+        
         private void PushHeap(ref NativeList<HeapNode> heap, HeapNode node)
         {
             heap.Add(node);
@@ -181,7 +180,6 @@ namespace Logic.Common
             }
             return root;
         }
-        #endregion
     
         private float GetH(int2 a, int2 b)
         {
