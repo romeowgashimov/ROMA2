@@ -13,7 +13,7 @@ namespace Logic.Server
         public void OnCreate(ref SystemState state)
         {
             _query = SystemAPI.QueryBuilder()
-                .WithAll<InputMoveTargetPosition, MoveTargetPosition, NeedPath>()
+                .WithAll<InputMoveTargetPosition, MoveTargetPosition, PathFindingRequest>()
                 .WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)
                 .Build();
 
@@ -49,7 +49,7 @@ namespace Logic.Server
         {
             if (register.Flag == input.Flag) return;
             ECB.SetComponent<MoveTargetPosition>(key, entity, new() { Value = input.Value, Flag = input.Flag });
-            ECB.SetComponentEnabled<NeedPath>(key, entity, true);
+            ECB.SetComponentEnabled<PathFindingRequest>(key, entity, true);
         }
     }
 }

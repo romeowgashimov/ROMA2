@@ -41,6 +41,10 @@ namespace Logic.Client
             
             if(_inputActions.GameplayMap.CancelAbility.WasPressedThisFrame())
                 newAbilityInput.CancelAbility.Set();
+            
+            // Будет срабатывать, когда игрок нажал "Идти" на противника
+            if (_inputActions.GameplayMap.SelectMovePosition.WasPressedThisFrame())
+                newAbilityInput.BasicAttack.Set();
 
             foreach(RefRW<AbilityInput> abilityInput in SystemAPI.Query<RefRW<AbilityInput>>())
                 abilityInput.ValueRW = newAbilityInput;

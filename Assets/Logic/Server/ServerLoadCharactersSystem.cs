@@ -33,7 +33,11 @@ namespace Logic.Server
             {
                 EntityPrefabReference reference = default;
                 foreach (ChampionPrefabElement element in heroesPrefabs)
-                    if (element.Id == pending[i].CharacterId) reference = element.Value;
+                    if (element.Id == pending[i].CharacterId)
+                    {
+                        reference = element.Value;
+                        break;
+                    }
                 
                 Entity loadRequest = LoadPrefabAsync(state.WorldUnmanaged, reference);
                 ecb.AddComponent<LoadedEntity>(entities[i], new() { Value = loadRequest });

@@ -5,8 +5,10 @@ namespace Logic.Common
 {
     public static class CooldownTicksExtensions
     {
-        public static bool IsOnCooldown(this DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
-            NetworkTime networkTime, int abilityIndex)
+        public static bool IsOnCooldown(
+            this DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
+            NetworkTime networkTime, 
+            int abilityIndex)
         {
             NetworkTick currentTick = networkTime.ServerTick;
             bool isOnCooldown = true;
@@ -29,11 +31,16 @@ namespace Logic.Common
             return isOnCooldown;
         }
 
-        public static void UpdateCooldown(this DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
-            AbilityCooldownTicks cooldownTicks, NetworkTime networkTime, int abilityIndex)
+        public static void UpdateCooldown(
+            this DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
+            AbilityCooldownTicks cooldownTicks, 
+            NetworkTime networkTime, 
+            int abilityIndex,
+            bool isServer)
         {
-            NetworkTick currentTick = networkTime.ServerTick;
+            if (isServer) return;
             
+            NetworkTick currentTick = networkTime.ServerTick;
             cooldownTargetTicks.GetDataAtTick(currentTick, out AbilityCooldownTargetTicks curTargetTicks);
             
             NetworkTick newCooldownTargetTicks = currentTick;

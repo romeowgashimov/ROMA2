@@ -280,7 +280,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c2d3dab5bba44a8b6c90b45c6bade40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.AbilityMoveSpeedAuthoring
-  MoveSpeed: 5
+  MoveSpeed: 15
 --- !u!114 &3946147944570645188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -344,7 +344,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5261b185628d44d8b903e23bbb831764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.DamageOnTriggerAuthoring
-  DamageOnTrigger: 150
+  DamageOnTrigger: 10
 --- !u!114 &1941329638542265070
 MonoBehaviour:
   m_ObjectHideFlags: 0

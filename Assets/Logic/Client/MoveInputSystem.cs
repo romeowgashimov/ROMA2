@@ -70,7 +70,7 @@ namespace Logic.Client
                     Flag = !flag
                 });
                 EntityManager.SetComponentData<MoveTargetPosition>(owner, new() { Value = closestHit.Position});
-                EntityManager.SetComponentEnabled<NeedPath>(owner, true);
+                EntityManager.SetComponentEnabled<PathFindingRequest>(owner, true);
             }
         }
     }

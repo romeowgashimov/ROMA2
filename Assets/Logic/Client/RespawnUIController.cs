@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine;
 using static Unity.Entities.World;
+using RespawnChampionSystem = Logic.Common.Systems.RespawnChampionSystem;
 
 namespace Logic.Client
 {

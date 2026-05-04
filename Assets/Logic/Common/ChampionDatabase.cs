@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Logic.Common
 {
     [Serializable]
-    public struct HeroConfigEntry
+    public struct ChampionConfigEntry
     {
         public int Id;
         public GameObject Prefab;
@@ -14,6 +14,6 @@ namespace Logic.Common
     [CreateAssetMenu(fileName = "ChampionDatabase", menuName = "ROMA2/Champion Database")]
     public class ChampionDatabase : ScriptableObject
     {
-        public List<HeroConfigEntry> Configs;
+        public List<ChampionConfigEntry> Configs;
     }
 }

@@ -25,7 +25,7 @@ namespace Logic.Client
             .WithEntityAccess())
             {
                 ecb.AddComponent<OwnerChampTag>(owner);
-                ecb.SetComponentEnabled<NeedPath>(owner, false);
+                ecb.SetComponentEnabled<PathFindingRequest>(owner, false);
                 ecb.SetComponent(owner, new InputMoveTargetPosition
                 {
                     Value = localTransform.ValueRO.Position, Flag = false

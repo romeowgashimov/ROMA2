@@ -291,7 +291,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9546a3726f0a480c85cceab8c824d950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HealthPointsAuthoring
-  MaxHealthPoints: 500
+  MaxHealthPoints: 100
   HealthBarOffset: {x: 0, y: 3, z: 0}
 --- !u!114 &4568716967356504705
 MonoBehaviour:

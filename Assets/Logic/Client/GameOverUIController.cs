@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static Unity.Entities.World;
+using GameOverSystem = Logic.Common.Systems.GameOverSystem;
 
 namespace Logic.Client
 {
