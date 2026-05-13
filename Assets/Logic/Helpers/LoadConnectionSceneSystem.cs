@@ -3,7 +3,7 @@
 using Unity.Entities;
 using static UnityEngine.SceneManagement.SceneManager;
 
-namespace Assets.Logic.Helpers
+namespace ROMA2.Logic.Helpers
 {
     public partial class LoadConnectionSceneSystem : SystemBase
     {
@@ -17,10 +17,7 @@ namespace Assets.Logic.Helpers
             LoadScene(0);
         }
 
-        protected override void OnUpdate()
-        {
-            
-        }
+        protected override void OnUpdate() { }
     }
 }
 

@@ -482,6 +482,7 @@ GameObject:
   - component: {fileID: 7937226222417274391}
   - component: {fileID: 5372383682555973548}
   - component: {fileID: 5446924024742331872}
+  - component: {fileID: 4454480072757716460}
   m_Layer: 0
   m_Name: MinionPrefab
   m_TagString: Untagged
@@ -748,7 +749,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9546a3726f0a480c85cceab8c824d950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HealthPointsAuthoring
-  MaxHealthPoints: 150
+  MaxHealthPoints: 500
   HealthBarOffset: {x: 0, y: 2, z: 0}
 --- !u!114 &1142406332919421226
 MonoBehaviour:
@@ -816,7 +817,7 @@ MonoBehaviour:
   AttackRadius: 8
   DetectionRadius: 12
   FirePointOffset: {x: 0, y: 1.5, z: 0}
-  AttackCooldownTime: 3
+  AttackSpeed: 2
   AttackPrefab: {fileID: 4375477658151305662, guid: b136942dad4460047b5d1af88a37f71d,
     type: 3}
   NetCodeConfig: {fileID: 11400000, guid: dce9a8c7da8b8cf4093e70364ed6f4c4, type: 2}
@@ -833,3 +834,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Client.OutlineAuthoring
   OutlinePrefab: {fileID: 3439293031272843358}
+--- !u!114 &4454480072757716460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3608237881302961655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58423d50b78f4f94b173f6bae11a703c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ROMA2.Logic.Client.Models.RenderAuthoring
+  Offset: {x: 0, y: 2, z: 0}

@@ -3543,7 +3543,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.GameStartPropertiesAuthoring
   MaxPlayersPerTeam: 5
   MinPlayersToStartGame: 1
-  CountdownTime: 3
+  CountdownTime: 0
   SpawnOffsets:
   - {x: 0, y: 0, z: 0}
   - {x: -2, y: 0, z: 2}
@@ -3951,9 +3951,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e65d3ed16be446c0a9618bb95cf15a87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.MinionSpawnPropertiesAuthoring
-  TimeBetweenWaves: 5
+  TimeBetweenWaves: 10
   TimeBetweenMinions: 1
-  CountToSpawnInWave: 4
+  CountToSpawnInWave: 6
 --- !u!114 &1646246679
 MonoBehaviour:
   m_ObjectHideFlags: 0
