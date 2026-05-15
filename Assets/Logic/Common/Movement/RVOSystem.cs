@@ -175,16 +175,16 @@ namespace ROMA2.Logic.Common.Movement
             if (lengthsq(finalV) > 0.01f)
                 transform.Rotation = LookRotationSafe(new(finalV.x, 0, finalV.y), up());
     
-            // Логика переключения точек пути для стабильной работы RVO
+            /* Логика переключения точек пути для стабильной работы RVO.
+             Могут быть проблемы, если радиус слишком большой, то может быть пропущена важная часть пути,
+             например: уклонение от препятствий на сетке */
             float2 target = pathPositions[followPathIndex.Value].Value;
             float2 self = transform.Position.xz;
             float dist = lengthsq(target - self);
             while (dist <= radius.Value * radius.Value && followPathIndex.Value > 0)
             {
                 followPathIndex.Value--;
-                if (followPathIndex.Value < 0) velocity.Linear = zero;
-
-                self = transform.Position.xz + target;
+                self += target;
                 target = pathPositions[followPathIndex.Value].Value;
                 dist = length(target - self);
             }
