@@ -14,7 +14,7 @@ using static Unity.Mathematics.quaternion;
 using float2 = Unity.Mathematics.float2;
 using float3 = Unity.Mathematics.float3;
 
-namespace ROMA2.Logic.Common.Behaviour
+namespace ROMA2.Logic.Common.Movement
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct MoveSystem : ISystem
@@ -47,8 +47,7 @@ namespace ROMA2.Logic.Common.Behaviour
     [BurstCompile]
     public partial struct MoveJob : IJobEntity
     {
-        [ReadOnly]
-        [NativeDisableContainerSafetyRestriction]
+        [ReadOnly] [NativeDisableContainerSafetyRestriction]
         public ComponentLookup<LocalTransform> TransformLookup;
         public float DeltaTime;
         

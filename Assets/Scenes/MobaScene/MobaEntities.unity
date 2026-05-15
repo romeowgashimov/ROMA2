@@ -3951,7 +3951,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e65d3ed16be446c0a9618bb95cf15a87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.MinionSpawnPropertiesAuthoring
-  TimeBetweenWaves: 10
+  TimeBetweenWaves: 5
   TimeBetweenMinions: 1
   CountToSpawnInWave: 6
 --- !u!114 &1646246679

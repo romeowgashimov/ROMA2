@@ -1,18 +1,21 @@
 ﻿using System.Runtime.CompilerServices;
+using Logic.Common;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
-using Unity.Transforms;
 using Unity.Physics;
+using Unity.Transforms;
+using static Unity.Entities.SystemAPI;
 using static Unity.Mathematics.float3;
 using static Unity.Mathematics.math;
 using static Unity.Mathematics.quaternion;
+using float2 = Unity.Mathematics.float2;
 using float3 = Unity.Mathematics.float3;
 
-namespace Logic.Common
+namespace ROMA2.Logic.Common.Movement
 {
     public struct AgentData
     {
@@ -28,14 +31,14 @@ namespace Logic.Common
 
         public void OnCreate(ref SystemState state)
         {
-            _mainQuery = SystemAPI.QueryBuilder()
+            _mainQuery = QueryBuilder()
                 .WithAll<LocalTransform, MoveTargetPosition, MoveSpeed, 
                          PathPositionElement, FollowPathIndex, PhysicsVelocity, AttackRadius>()
                 .WithAll<MinionTag, TargetEntity>()
                 .WithNone<PathFindingRequest>()
                 .Build();
 
-            _allAgentsQuery = SystemAPI.QueryBuilder()
+            _allAgentsQuery = QueryBuilder()
                 .WithAll<LocalTransform, PhysicsVelocity, AttackRadius>()
                 .Build();
 
@@ -58,8 +61,8 @@ namespace Logic.Common
                 AllAgents = allAgents,
                 K = 3.5f,
                 MaxSamples = 12,
-                TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
-                DeltaTime = SystemAPI.Time.DeltaTime
+                TransformLookup = GetComponentLookup<LocalTransform>(true),
+                DeltaTime = Time.DeltaTime
             }.ScheduleParallel(_mainQuery, state.Dependency);
             
             // Очистка после выполнения всех зависимостей
@@ -89,8 +92,8 @@ namespace Logic.Common
     [BurstCompile]
     public partial struct MinionMoveJob : IJobEntity
     {
-        [NativeDisableContainerSafetyRestriction]
-        [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
+        [NativeDisableContainerSafetyRestriction] [ReadOnly] 
+        public ComponentLookup<LocalTransform> TransformLookup;
         [ReadOnly] public NativeArray<AgentData> AllAgents;
         public float K;
         public int MaxSamples;
@@ -112,7 +115,6 @@ namespace Logic.Common
             }
     
             float3 myPos = transform.Position;
-    
             if (attackTarget.Value != Entity.Null)
             {
                 float3 targetPos = TransformLookup[attackTarget.Value].Position;
@@ -133,7 +135,8 @@ namespace Logic.Common
             float2 currentVXZ = velocity.Linear.xz;
             float2 targetPathXZ = pathPositions[followPathIndex.Value].Value;
             
-            float2 vGoal = math.normalizesafe(targetPathXZ - selfPosXZ) * moveSpeed.Value;
+            // Интерполированную точку можно использовать сразу здесь
+            float2 vGoal = normalizesafe(targetPathXZ - selfPosXZ) * moveSpeed.Value;
             float2 vBest = vGoal;
             float minPenalty = float.MaxValue;
     
@@ -156,6 +159,7 @@ namespace Logic.Common
                 }
     
                 float penalty = CalculatePenalty(vCand, vGoal, selfPosXZ, currentVXZ, combinedRadiusSq, agentsCount);
+                // Штраф за отклонение от нынешнего вектора, направления
                 penalty += distance(vCand, currentVXZ) * 1.2f;
     
                 if (penalty < minPenalty)
@@ -169,19 +173,20 @@ namespace Logic.Common
             velocity.Linear = new(finalV.x, velocity.Linear.y, finalV.y);
     
             if (lengthsq(finalV) > 0.01f)
-                transform.Rotation = LookRotationSafe(new(finalV.x, 0, finalV.y), math.up());
+                transform.Rotation = LookRotationSafe(new(finalV.x, 0, finalV.y), up());
     
-            // Логика переключения (без изменений)
-            float2 futurePos = followPathIndex.Value > 0 && followPathIndex.Value < pathPositions.Length
-                ? pathPositions[followPathIndex.Value - 1].Value
-                : selfPosXZ;
-            float2 segmentDir = normalize(targetPathXZ - futurePos);
-            float2 vectorToTarget = targetPathXZ - selfPosXZ;
-    
-            if (math.dot(vectorToTarget, segmentDir) >= -0.2f)
+            // Логика переключения точек пути для стабильной работы RVO
+            float2 target = pathPositions[followPathIndex.Value].Value;
+            float2 self = transform.Position.xz;
+            float dist = lengthsq(target - self);
+            while (dist <= radius.Value * radius.Value && followPathIndex.Value > 0)
             {
                 followPathIndex.Value--;
                 if (followPathIndex.Value < 0) velocity.Linear = zero;
+
+                self = transform.Position.xz + target;
+                target = pathPositions[followPathIndex.Value].Value;
+                dist = length(target - self);
             }
         }
     
@@ -189,17 +194,22 @@ namespace Logic.Common
         private float CalculatePenalty(float2 vCand, float2 vGoal, float2 posA, float2 vA, float combinedRadiusSq, int agentsCount)
         {
             float tc = 5.0f;
-            float2 vRVO = (vCand + vA) * 0.5f;
-    
+
             for (int i = 0; i < agentsCount; i++)
             {
                 AgentData agentB = AllAgents[i];
                 float2 relPos = agentB.Position - posA;
-                float distSq = math.lengthsq(relPos);
+                float distSq = lengthsq(relPos);
     
                 // Оптимизация: быстрый отсев по дистанции (4.0 м -> 16.0 м^2)
                 if (distSq < 0.001f || distSq > 16f) continue;
-    
+
+                /* Если цель статична, то 100% ответственности за уклонение.
+                 Статичные цели могут быть с большим радиусом, чем у миньонов, это нужно будет учесть */
+                float2 vRVO;
+                if (!agentB.Velocity.Equals(float2.zero))
+                    vRVO = (vCand + vA) * 0.5f;
+                else vRVO = vCand + vA;
                 float2 relVel = vRVO - agentB.Velocity;
                 
                 // Векторная проверка на столкновение (Ray-Sphere Intersection)
@@ -208,12 +218,12 @@ namespace Logic.Common
                 // Если движемся в сторону друг друга
                 if (dotRV >= 0)
                 {
-                    float vMagSq = math.lengthsq(relVel);
+                    float vMagSq = lengthsq(relVel);
                     if (vMagSq < 0.001f) continue;
                     
                     float2 rayClosest = relPos - dotRV / vMagSq * relVel;
 
-                    if (math.lengthsq(rayClosest) < combinedRadiusSq)
+                    if (lengthsq(rayClosest) < combinedRadiusSq)
                     {
                         float b = -2f * dotRV;
                         float c = distSq - combinedRadiusSq;
@@ -221,13 +231,13 @@ namespace Logic.Common
 
                         if (disc >= 0)
                         {
-                            float t = (-b - math.sqrt(disc)) / (2f * vMagSq);
+                            float t = (-b - sqrt(disc)) / (2f * vMagSq);
                             if (t > 0 && t < tc) tc = t;
                         }
                     }
                 }
             }
-    
+            
             return K / tc + distance(vCand, vGoal) * 1.5f;
         }
     }
