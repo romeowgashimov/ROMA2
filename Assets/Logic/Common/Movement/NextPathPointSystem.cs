@@ -1,7 +1,6 @@
 ﻿using Logic.Common;
 using Unity.Burst;
 using Unity.Entities;
-using Unity.NetCode;
 using Unity.Transforms;
 using static Unity.Mathematics.float3;
 using static Unity.Mathematics.math;
@@ -9,7 +8,7 @@ using float3 = Unity.Mathematics.float3;
 
 namespace ROMA2.Logic.Common.Behaviour
 {
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct NextPathPointSystem : ISystem
     {
         public void OnCreate(ref SystemState state)

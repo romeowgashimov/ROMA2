@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.NetCode;
 using Unity.Physics;
 using Unity.Physics.Systems;
 using Unity.Transforms;
@@ -40,7 +41,7 @@ namespace ROMA2.Logic.Common.Behaviour
             
             state.Dependency = new MoveableBehaviourJob
             {
-                TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true)
+                TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
             }.ScheduleParallel(state.Dependency);
             
             state.Dependency = new NonMoveableBehaviourJob().ScheduleParallel(state.Dependency);
@@ -111,7 +112,7 @@ namespace ROMA2.Logic.Common.Behaviour
                 // Точкой назначения должен быть враг
                 movePos.Value = targetPos;
 
-                if (distancesq(lastPos.Value, targetPos) > 4f) // 2^2
+                if (distancesq(lastPos.Value, targetPos) > 4f && !needPath.ValueRO) // 2^2
                 {
                     needPath.ValueRW = true;
                     inAttackArea.ValueRW = false;
