@@ -14,6 +14,7 @@ using static Unity.Mathematics.math;
 
 namespace ROMA2.Logic.Common.Movement
 {
+    // Нужно переделать на иерархический поиск пути A*
     [BurstCompile]
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct PathFindingSystem : ISystem
@@ -136,6 +137,8 @@ namespace ROMA2.Logic.Common.Movement
             int startIndex = CalculateIndex(startPos.x, startPos.y, GridSize.x);
             int endIndex = CalculateIndex(endPos.x, endPos.y, GridSize.x);
 
+            // Я могу пойти на недоступную клетку,
+            // потому что поиск пути никак не уведомляет о невозможности построить путь
             if (!Grid[endIndex].IsWalkable)
             {
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
@@ -210,7 +213,7 @@ namespace ROMA2.Logic.Common.Movement
                     curr = visitedNodes[curr].CameFromIndex;
                 }
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
-                ECB.SetComponent(key, entity, new FollowPathIndex { Value = buffer.Length - 1 });
+                ECB.SetComponent(key, entity, new FollowPathProperties { Index = buffer.Length - 1 });
             }
             else
                 // Если путь не найден за лимит итераций, выключаем запрос

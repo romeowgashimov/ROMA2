@@ -94,7 +94,7 @@ namespace ROMA2.Logic.Common.Behaviour
         [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
 
         private void Execute(ref TargetEntity target, ref MoveTargetPosition movePos, 
-            ref LastTargetPosition lastPos, EnabledRefRW<PathFindingRequest> needPath, EnabledRefRW<InAttackArea> inAttackArea,
+            ref LastTargetEntityPosition lastPos, EnabledRefRW<PathFindingRequest> needPath, EnabledRefRW<InAttackArea> inAttackArea,
             in LocalTransform transform, in AttackRadius attack)
         {
             if (target.Value == Entity.Null || !TransformLookup.HasComponent(target.Value))

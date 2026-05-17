@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using ROMA2.Logic.Helpers.Bakers;
+using Unity.Entities;
 using UnityEngine;
 
 namespace Logic.Common.Authorings
@@ -11,12 +12,8 @@ namespace Logic.Common.Authorings
         {
             public override void Bake(AoeAbilityCommandAuthoring commandAuthoring)
             {
-                Entity entity = GetEntity(TransformUsageFlags.None);
-                AddComponent<AbilityCommand>(entity);
-                AddComponent(entity, new AoeAbilityCommand
-                {
-                    Prefab = GetEntity(commandAuthoring.AoeAbilityPrefab, TransformUsageFlags.Dynamic)
-                });
+                this.BakeAbilityCommand<AoeAbilityCommandAuthoring, 
+                    AoeAbilityCommand>(commandAuthoring.AoeAbilityPrefab);
             }
         }
     }

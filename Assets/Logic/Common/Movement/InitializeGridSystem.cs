@@ -1,8 +1,9 @@
 using Logic.Client;
+using Logic.Common;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace Logic.Common.PathFindingDirectory
+namespace ROMA2.Logic.Common.Movement
 {
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial class InitializeGridSystem : SystemBase

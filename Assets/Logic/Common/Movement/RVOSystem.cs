@@ -33,7 +33,7 @@ namespace ROMA2.Logic.Common.Movement
         {
             _mainQuery = QueryBuilder()
                 .WithAll<LocalTransform, MoveTargetPosition, MoveSpeed, 
-                         PathPositionElement, FollowPathIndex, PhysicsVelocity, AttackRadius>()
+                         PathPositionElement, FollowPathProperties, PhysicsVelocity, AttackRadius>()
                 .WithAll<MinionTag, TargetEntity>()
                 .WithNone<PathFindingRequest>()
                 .Build();
@@ -103,12 +103,12 @@ namespace ROMA2.Logic.Common.Movement
             ref LocalTransform transform,
             ref PhysicsVelocity velocity,
             in MoveSpeed moveSpeed,
-            ref FollowPathIndex followPathIndex,
+            ref FollowPathProperties followPathProperties,
             in DynamicBuffer<PathPositionElement> pathPositions,
             in AttackRadius radius,
             in TargetEntity attackTarget)
         {
-            if (pathPositions.IsEmpty || followPathIndex.Value < 0)
+            if (pathPositions.IsEmpty || followPathProperties.Index < 0)
             {
                 velocity.Linear = zero;
                 return;
@@ -133,7 +133,7 @@ namespace ROMA2.Logic.Common.Movement
     
             float2 selfPosXZ = myPos.xz;
             float2 currentVXZ = velocity.Linear.xz;
-            float2 targetPathXZ = pathPositions[followPathIndex.Value].Value;
+            float2 targetPathXZ = pathPositions[followPathProperties.Index].Value;
             
             // Интерполированную точку можно использовать сразу здесь
             float2 vGoal = normalizesafe(targetPathXZ - selfPosXZ) * moveSpeed.Value;
@@ -178,14 +178,14 @@ namespace ROMA2.Logic.Common.Movement
             /* Логика переключения точек пути для стабильной работы RVO.
              Могут быть проблемы, если радиус слишком большой, то может быть пропущена важная часть пути,
              например: уклонение от препятствий на сетке */
-            float2 target = pathPositions[followPathIndex.Value].Value;
+            float2 target = pathPositions[followPathProperties.Index].Value;
             float2 self = transform.Position.xz;
             float dist = lengthsq(target - self);
-            while (dist <= radius.Value * radius.Value && followPathIndex.Value > 0)
+            while (dist <= radius.Value * radius.Value && followPathProperties.Index > 0)
             {
-                followPathIndex.Value--;
+                followPathProperties.Index--;
                 self += target;
-                target = pathPositions[followPathIndex.Value].Value;
+                target = pathPositions[followPathProperties.Index].Value;
                 dist = length(target - self);
             }
         }

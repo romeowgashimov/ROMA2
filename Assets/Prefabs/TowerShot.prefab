@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: -6930819370897403528}
   - component: {fileID: -6294835866424340397}
   - component: {fileID: 1941329638542265070}
+  - component: {fileID: 2246231525815394197}
   m_Layer: 0
   m_Name: TowerShot
   m_TagString: Untagged
@@ -357,3 +358,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4315cbf06ece4288bd192d6837bdaaa4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.DefaultAttackTargetAuthoring
+--- !u!114 &2246231525815394197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4375477658151305662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71e71f5e5c854763b21b03e6fe2a9594, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Logic.Helpers::ROMA2.Logic.Helpers.Bakers.IgnoreAuthorizationInGridAuthoring
+  Flag: 2

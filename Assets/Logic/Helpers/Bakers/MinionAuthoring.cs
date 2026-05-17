@@ -27,12 +27,12 @@ namespace ROMA2.Logic.Helpers.Bakers
                 AddComponent<PathFindingRequest>(entity);
                 SetComponentEnabled<PathFindingRequest>(entity, false);
 //#endif
-                AddComponent<FollowPathIndex>(entity);
+                AddComponent<FollowPathProperties>(entity);
                 DynamicBuffer<PathPositionElement> pathPositions = AddBuffer<PathPositionElement>(entity);
                 pathPositions.Capacity = 120;
                 AddComponent(entity, new MoveTargetPosition { Flag = false });
                 AddComponent<Team>(entity);
-                AddComponent<LastTargetPosition>(entity, new() { Value = 0 });
+                AddComponent<LastTargetEntityPosition>(entity, new() { Value = 0 });
                 
 #if !UNITY_SERVER
                 AddComponent<URPMaterialPropertyBaseColor>(entity);

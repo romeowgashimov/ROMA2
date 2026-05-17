@@ -36,14 +36,15 @@ namespace ROMA2.Logic.Helpers.Bakers
                 AddComponent(entity, new MoveTargetPosition { Flag = false });
                 DynamicBuffer<PathPositionElement> pathPositions = AddBuffer<PathPositionElement>(entity);
                 pathPositions.Capacity = authoring.PathPositionsCapacity;
-                AddComponent<FollowPathIndex>(entity);
+                AddComponent<FollowPathProperties>(entity);
+                
                 AddComponent<AbilityInput>(entity);
                 AddComponent<AimingTag>(entity);
                 AddComponent<AimInput>(entity);
                 AddComponent<ActivatedAbilitiesCommands>(entity);
                 AddComponent<NetworkEntityReference>(entity);
                 AddComponent<SelectedEntity>(entity);
-                AddComponent<LastTargetPosition>(entity);
+                AddComponent<LastTargetEntityPosition>(entity);
                 
                 this.BakeHealth(config.HealthPoints);
                 this.BakeBehaviour(

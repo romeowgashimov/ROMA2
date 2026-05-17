@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 6337206203329382095}
   - component: {fileID: 3778857652509032201}
   - component: {fileID: -1794782140057881931}
+  - component: {fileID: -989521828780419985}
   m_Layer: 0
   m_Name: SkillShotAbility
   m_TagString: Untagged
@@ -358,3 +359,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.AbilityMoveSpeedAuthoring
   MoveSpeed: 7.5
+--- !u!114 &-989521828780419985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7632189609624789992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71e71f5e5c854763b21b03e6fe2a9594, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Logic.Helpers::ROMA2.Logic.Helpers.Bakers.IgnoreAuthorizationInGridAuthoring
+  Flag: 2

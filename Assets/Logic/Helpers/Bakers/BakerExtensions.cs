@@ -55,5 +55,20 @@ namespace ROMA2.Logic.Helpers.Bakers
                 baker.SetComponentEnabled<ReAggrRequest>(entity, false);
             }
         }
+
+        public static void BakeAbilityCommand<T, V>(
+            this Baker<T> baker,
+            GameObject commandPrefab)
+            where T : MonoBehaviour
+            where V : unmanaged, IAbilityCommand
+        {
+            Entity entity = baker.GetEntity(TransformUsageFlags.None);
+            baker.AddComponent<AbilityCommand>(entity);
+            baker.AddComponent(entity, new V
+            {
+                Prefab = baker.GetEntity(commandPrefab, TransformUsageFlags.Dynamic)
+            });
+            baker.AddComponent<IgnoreRegistrationInGrid>(entity);
+        }
     }
 }

@@ -4,16 +4,26 @@ using Unity.Mathematics;
 namespace Logic.Common
 {
     public struct PathFindingRequest : IEnableableComponent, IComponentData { }
- 
-    // Может быть проблема с плавностью ходьбы именно из-за синхронизации
+    
+    public struct PathFindingProcessing  : IEnableableComponent, IComponentData { }
+
+    public struct CleanPath : IEnableableComponent, IComponentData { }
+
+    public struct IncorrectPathProperties : IEnableableComponent, IComponentData { }
+    
     [InternalBufferCapacity(4)]
     public struct PathPositionElement : IBufferElementData
     {
         public int2 Value;
     }
     
-    public struct FollowPathIndex : IComponentData
+    public struct FollowPathProperties : IComponentData
     {
-        public int Value;
+        public int Index;
+        public float2 FuturePosition;
     }
+    
+    public struct RegisteredObstacleInGrid : IComponentData { }
+    
+    public struct IgnoreRegistrationInGrid :  IComponentData { }
 }

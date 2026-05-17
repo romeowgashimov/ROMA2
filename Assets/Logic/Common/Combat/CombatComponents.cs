@@ -138,7 +138,7 @@ namespace Logic.Common
         [GhostField] public Entity Value;
     }
 
-    public struct LastTargetPosition : IComponentData
+    public struct LastTargetEntityPosition : IComponentData
     {
         public float3 Value;
     }

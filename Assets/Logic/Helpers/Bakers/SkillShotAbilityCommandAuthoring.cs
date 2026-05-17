@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using ROMA2.Logic.Helpers.Bakers;
+using Unity.Entities;
 using UnityEngine;
 
 namespace Logic.Common.ACs
@@ -11,12 +12,8 @@ namespace Logic.Common.ACs
         {
             public override void Bake(SkillShotAbilityCommandAuthoring commandAuthoring)
             {
-                Entity entity = GetEntity(TransformUsageFlags.None);
-                AddComponent<AbilityCommand>(entity);
-                AddComponent(entity, new SkillShotAbilityCommand
-                {
-                    Prefab = GetEntity(commandAuthoring.SkillShotAbilityPrefab, TransformUsageFlags.Dynamic)
-                });
+                this.BakeAbilityCommand<SkillShotAbilityCommandAuthoring,
+                    SkillShotAbilityCommand>(commandAuthoring.SkillShotAbilityPrefab);
             }
         }
     }
