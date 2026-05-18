@@ -58,8 +58,11 @@ namespace ROMA2.Logic.Common.Behaviour
         [ReadOnly] public ComponentLookup<Team> TeamLookup;
         [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
 
-        private void Execute(ref TargetEntity target, in LocalTransform transform, 
-            in DetectionRadius detect, in Team team)
+        private void Execute(
+            ref TargetEntity target, 
+            in LocalTransform transform, 
+            in DetectionRadius detect, 
+            in Team team)
         {
             // Проверка текущей цели
             if (target.Value != Entity.Null && TransformLookup.HasComponent(target.Value))
@@ -68,7 +71,6 @@ namespace ROMA2.Logic.Common.Behaviour
 
             target.Value = Entity.Null;
             NativeList<DistanceHit> hits = new(Allocator.Temp);
-            
             if (CollisionWorld.OverlapSphere(transform.Position, detect.Value, ref hits, CollisionFilter))
             {
                 Entity closest = Entity.Null;
@@ -93,27 +95,28 @@ namespace ROMA2.Logic.Common.Behaviour
     {
         [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
 
-        private void Execute(ref TargetEntity target, ref MoveTargetPosition movePos, 
-            ref LastTargetEntityPosition lastPos, EnabledRefRW<PathFindingRequest> needPath, EnabledRefRW<InAttackArea> inAttackArea,
-            in LocalTransform transform, in AttackRadius attack)
+        private void Execute(
+            ref TargetEntity target, 
+            ref MoveTargetPosition movePos, 
+            ref LastTargetEntityPosition lastPos, 
+            EnabledRefRW<PathFindingRequest> needPath, 
+            EnabledRefRW<InAttackArea> inAttackArea,
+            in LocalTransform transform, 
+            in AttackRadius attack)
         {
-            if (target.Value == Entity.Null || !TransformLookup.HasComponent(target.Value))
+            if (target.Value == Entity.Null)
             {
                 inAttackArea.ValueRW = false;
                 return;
             }
 
-            float3 targetPos = TransformLookup[target.Value].Position;
-            float d = distancesq(transform.Position, targetPos);
-            bool tooFar = d >= attack.Value * attack.Value;
-
-            if (tooFar)
+            if (!TransformLookup.TryGetComponent(target.Value, out LocalTransform targetTransform)) return;
+            float3 targetPos = targetTransform.Position;
+            if (distancesq(transform.Position, targetPos) >= attack.Value * attack.Value)
             {
-                // Точкой назначения должен быть враг
-                movePos.Value = targetPos;
-
                 if (distancesq(lastPos.Value, targetPos) > 4f && !needPath.ValueRO) // 2^2
                 {
+                    movePos.Value = targetPos;
                     needPath.ValueRW = true;
                     inAttackArea.ValueRW = false;
                     lastPos.Value = targetPos;

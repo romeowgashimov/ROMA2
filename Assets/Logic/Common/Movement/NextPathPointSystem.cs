@@ -1,6 +1,7 @@
 ﻿using Logic.Common;
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
 using static Unity.Mathematics.float3;
@@ -58,6 +59,11 @@ namespace ROMA2.Logic.Common.Movement
             {
                 curTarget = pathMinions[pathIndex.ValueRO.Value].Value;
                 dist = distancesq(curTarget, transform.ValueRO.Position);
+
+                // Я так ахуенно сделал поиск пути, что он находит путь быстрее, чем определяется точка назначения
+                if (targetEntity.Value == Entity.Null)
+                    if (lengthsq(pathPositions[0].Value - (int2)moveTargetPosition.ValueRO.Value.xz) >= 1) 
+                        Ecb.SetComponentEnabled<PathFindingRequest>(chunkIndex, entity, true);
             }
 
             if (isAtStart || dist <= 64f) // 8^2

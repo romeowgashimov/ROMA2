@@ -5,7 +5,6 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
@@ -14,67 +13,37 @@ using static Unity.Mathematics.math;
 
 namespace ROMA2.Logic.Common.Movement
 {
-    // Нужно переделать на иерархический поиск пути A*
     [BurstCompile]
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct PathFindingSystem : ISystem
     {
         private EntityQuery _query;
-        
-        // Кэшированные структуры на каждый поток для исключения аллокаций в кадре
-        private NativeArray<UnsafeHashMap<int, NodeSearchData>> _perThreadVisitedNodes;
-        private NativeArray<UnsafeList<HeapNode>> _perThreadOpenLists;
-        private NativeArray<UnsafeHashSet<int>> _perThreadClosedSets;
 
         public void OnCreate(ref SystemState state)
         {
             _query = QueryBuilder()
                 .WithAll<MoveTargetPosition, LocalTransform, MoveSpeed, 
                     PathPositionElement, PathFindingRequest, Simulate>()
+                .WithNone<DestroyEntityTag>()
                 .Build();
 
             state.RequireForUpdate(_query);
             state.RequireForUpdate<GridTag>();
             state.RequireForUpdate<PathNode>();
-            state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
-
-            // Выделяем контейнеры под максимальное число потоков в пуле Unity
-            int maxThreadCount = JobsUtility.MaxJobThreadCount;
-            _perThreadVisitedNodes = new(maxThreadCount, Allocator.Persistent);
-            _perThreadOpenLists = new(maxThreadCount, Allocator.Persistent);
-            _perThreadClosedSets = new(maxThreadCount, Allocator.Persistent);
-
-            for (int i = 0; i < maxThreadCount; i++)
-            {
-                _perThreadVisitedNodes[i] = new(1024, Allocator.Persistent);
-                _perThreadOpenLists[i] = new(1024, Allocator.Persistent);
-                _perThreadClosedSets[i] = new(1024, Allocator.Persistent);
-            }
-        }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-            if (!_perThreadVisitedNodes.IsCreated) return;
-            for (int i = 0; i < _perThreadVisitedNodes.Length; i++)
-            {
-                _perThreadVisitedNodes[i].Dispose();
-                _perThreadOpenLists[i].Dispose();
-                _perThreadClosedSets[i].Dispose();
-            }
-            _perThreadVisitedNodes.Dispose();
-            _perThreadOpenLists.Dispose();
-            _perThreadClosedSets.Dispose();
+            state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             Entity gridEntity = GetSingletonEntity<GridTag>();
-            int2 gridSize = state.EntityManager.GetComponentData<GridSize>(gridEntity).Value;
-            NativeArray<PathNode> buffer = state.EntityManager.GetBuffer<PathNode>(gridEntity, true).AsNativeArray();
+            int2 gridSize = state.EntityManager
+                .GetComponentData<GridSize>(gridEntity).Value;
+            NativeArray<PathNode> buffer = state.EntityManager
+                .GetBuffer<PathNode>(gridEntity, true)
+                .AsNativeArray();
 
-            EntityCommandBuffer.ParallelWriter ecb = GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
+            EntityCommandBuffer.ParallelWriter ecb = GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged)
                 .AsParallelWriter();
 
@@ -84,9 +53,7 @@ namespace ROMA2.Logic.Common.Movement
                 GridSize = gridSize,
                 Grid = buffer,
                 ECB = ecb,
-                PerThreadVisitedNodes = _perThreadVisitedNodes,
-                PerThreadOpenLists = _perThreadOpenLists,
-                PerThreadClosedSets = _perThreadClosedSets
+                ProcessingLookup = GetComponentLookup<PathFindingRequest>(true)
             }.ScheduleParallel(_query, state.Dependency);
         }
     }
@@ -112,15 +79,7 @@ namespace ROMA2.Logic.Common.Movement
         [ReadOnly] public int2 GridSize;
         [ReadOnly] public NativeArray<PathNode> Grid;
         public EntityCommandBuffer.ParallelWriter ECB;
-
-        [NativeSetThreadIndex] private int _threadIndex;
-
-        [NativeDisableParallelForRestriction] 
-        public NativeArray<UnsafeHashMap<int, NodeSearchData>> PerThreadVisitedNodes;
-        [NativeDisableParallelForRestriction] 
-        public NativeArray<UnsafeList<HeapNode>> PerThreadOpenLists;
-        [NativeDisableParallelForRestriction] 
-        public NativeArray<UnsafeHashSet<int>> PerThreadClosedSets;
+        [ReadOnly] public ComponentLookup<PathFindingRequest> ProcessingLookup;
 
         private void Execute(
             [EntityIndexInQuery] int key, 
@@ -129,6 +88,8 @@ namespace ROMA2.Logic.Common.Movement
             in LocalTransform transform, 
             ref DynamicBuffer<PathPositionElement> buffer)
         {
+            if (!ProcessingLookup.HasComponent(entity)) return;
+            
             int2 startPos = (int2)round(transform.Position.xz) + GRID_BIAS;
             int2 endPos = (int2)round(target.Value.xz) + GRID_BIAS;
 
@@ -139,24 +100,16 @@ namespace ROMA2.Logic.Common.Movement
 
             // Я могу пойти на недоступную клетку,
             // потому что поиск пути никак не уведомляет о невозможности построить путь
-            if (!Grid[endIndex].IsWalkable)
+            if (!Grid[endIndex].IsWalkable && ProcessingLookup.HasComponent(entity))
             {
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
                 return;
             }
-
-            // Безопасное получение индекса потока (защита от выхода за пределы массива пула Unity)
-            int safeThreadIndex = clamp(_threadIndex, 0, PerThreadVisitedNodes.Length - 1);
-
-            UnsafeHashMap<int, NodeSearchData> visitedNodes = PerThreadVisitedNodes[safeThreadIndex];
-            UnsafeList<HeapNode> openList = PerThreadOpenLists[safeThreadIndex];
-            UnsafeHashSet<int> closedSet = PerThreadClosedSets[safeThreadIndex];
-
-            // Быстрая очистка под текущего юнита
-            visitedNodes.Clear();
-            openList.Clear();
-            closedSet.Clear();
-
+            
+            UnsafeHashMap<int, NodeSearchData> visitedNodes = new(1024, Allocator.Temp);
+            UnsafeList<HeapNode> openList = new(1024, Allocator.Temp);
+            UnsafeHashSet<int> closedSet = new(1024, Allocator.Temp);
+            
             visitedNodes.TryAdd(startIndex, new() { GCost = 0, CameFromIndex = -1 });
             PushHeap(ref openList, new() { Index = startIndex, FCost = GetH(startPos, endPos) });
 
@@ -177,21 +130,20 @@ namespace ROMA2.Logic.Common.Movement
                 int currentGCost = visitedNodes[currentIndex].GCost;
 
                 for (int x = -1; x <= 1; x++)
-                {
                     for (int y = -1; y <= 1; y++)
                     {
                         if (x == 0 && y == 0) continue;
-
+    
                         int2 nPos = curPos + new int2(x, y);
                         if (IsOutside(nPos)) continue;
-
+    
                         int nIdx = CalculateIndex(nPos.x, nPos.y, GridSize.x);
                         if (closedSet.Contains(nIdx) || !Grid[nIdx].IsWalkable) continue;
-
+    
                         // Оптимизация стоимости перемещения: 10 за прямые, 14 за диагонали
                         int moveCost = x != 0 && y != 0 ? 14 : 10; 
                         int newGCost = currentGCost + moveCost;
-
+    
                         if (!visitedNodes.TryGetValue(nIdx, out NodeSearchData neighborData) || newGCost < neighborData.GCost)
                         {
                             int hCost = GetH(nPos, endPos);
@@ -199,10 +151,10 @@ namespace ROMA2.Logic.Common.Movement
                             PushHeap(ref openList, new() { Index = nIdx, FCost = newGCost + hCost });
                         }
                     }
-                }
             }
 
-            if (pathFound)
+            bool hasComponent = ProcessingLookup.HasComponent(entity);
+            if (pathFound && hasComponent)
             {
                 buffer.Clear();
                 int curr = endIndex;
@@ -215,9 +167,13 @@ namespace ROMA2.Logic.Common.Movement
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
                 ECB.SetComponent(key, entity, new FollowPathProperties { Index = buffer.Length - 1 });
             }
-            else
+            else if (hasComponent)
                 // Если путь не найден за лимит итераций, выключаем запрос
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
+            
+            visitedNodes.Dispose();
+            openList.Dispose();
+            closedSet.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -19,6 +19,7 @@ namespace ROMA2.Logic.Common.Movement
 {
     [BurstCompile]
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateAfter(typeof(PathFindingSystem))]
     public partial struct MoveSystem : ISystem
     {
         private EntityQuery _query;
@@ -27,14 +28,14 @@ namespace ROMA2.Logic.Common.Movement
         {
             _query = QueryBuilder()
                 .WithAll<LocalTransform, MoveTargetPosition, MoveSpeed,
-                    PathPositionElement, FollowPathProperties, Simulate, 
-                    PhysicsVelocity>()
+                    PathPositionElement, FollowPathProperties, Simulate, PhysicsVelocity>()
                 .WithAll<AttackRadius, TargetEntity>()
                 .WithNone<PathFindingRequest, MinionTag, IncorrectPathProperties, CleanPath>()
                 .Build();
             
             state.RequireForUpdate<GameplayingTag>();
             state.RequireForUpdate(_query);
+            state.Enabled = false;
         }
         
         public void OnUpdate(ref SystemState state)
@@ -47,10 +48,6 @@ namespace ROMA2.Logic.Common.Movement
         }       
     }
     
-    /* Может быть, стоит рассмотреть простой пропуск одного индекса впереди
-     вместо нынешней проверки границы с окружностью. 
-     Потому что в любом случае пропускается один-два индекса максимум, 
-     чтобы не пропустить препятствия размером одну-две клетки на границах */
     [BurstCompile]
     public partial struct MoveJob : IJobEntity
     {
@@ -61,7 +58,7 @@ namespace ROMA2.Logic.Common.Movement
         private void Execute(
             ref LocalTransform transform,
             ref PhysicsVelocity velocity,
-            in MoveTargetPosition goalPos, 
+            ref MoveTargetPosition goalPos, 
             in MoveSpeed moveSpeed,
             ref FollowPathProperties followPathProperties, 
             ref DynamicBuffer<PathPositionElement> pathPositions,
@@ -85,6 +82,7 @@ namespace ROMA2.Logic.Common.Movement
     
                 if (distSq <= stopDist * stopDist)
                 {
+                    pathPositions.Clear();
                     velocity.Linear = zero;
                     float3 dir = normalizesafe(targetPos - selfPosition);
                     quaternion targetRot = LookRotationSafe(new(dir.x, 0, dir.z), up());
@@ -92,42 +90,24 @@ namespace ROMA2.Logic.Common.Movement
                     return;
                 }
             }
-            else attackTarget.Value = Null;
             
-            // Инициализируем стартовую позицию для проверки "застревания"
-            if (followPathProperties.Index == pathPositions.Length - 1)
-            {
-                followPathProperties.FuturePosition = selfPosition.xz;
-                // Чтобы после обновления пути персонаж не дрифтил
-                velocity.Linear = zero;
-            }
-            // Логика переключения вейпоинтов через окружности
-            float2 target = pathPositions[followPathProperties.Index].Value;
-            float2 self = transform.Position.xz;
-            float2 move = normalizesafe(target - self);
-            float dist = lengthsq(target - self);
-            // Опережаем на 1.6 вейпоинта
-            while (dist <= 4.41 // 2.1^2
-                   && followPathProperties.Index > 0
-                   // Обновляем будущий вейпоинт, когда дойдём до позиции опережающего вейпоинта
-                   && lengthsq(followPathProperties.FuturePosition - selfPosition.xz) <= 0.25) // 0.5^2
-            {
-                followPathProperties.Index--;
-                self += move * moveSpeed.Value;
-                target = pathPositions[followPathProperties.Index].Value;
-                move = normalizesafe(target - self);
-                dist += lengthsq(target - self);
-            }
-            followPathProperties.FuturePosition = self;
+            if (followPathProperties.Index == pathPositions.Length - 1) velocity.Linear = zero;
 
+            float2 target = pathPositions[followPathProperties.Index].Value;
+
+            // Упростил логику, в любом случае пропускаем два индекса
+            if (lengthsq(target - selfPosition.xz) <= 0.25 && followPathProperties.Index >= 2)
+                followPathProperties.Index -= 2;
+            
             float3 targetFloat3;
-            if (followPathProperties.Index == 0) 
+            // <= 1 обусловлено тем, что при нечётном количестве вейпоинтов концом пути будет 1
+            if (followPathProperties.Index <= 1) 
                 targetFloat3 = new(goalPos.Value.x, selfPosition.y, goalPos.Value.z);
             else targetFloat3 = new(target.x, selfPosition.y, target.y);
             
-            float3 noise = followPathProperties.Index == 0 
-                ? zero 
-                : velocity.Linear / moveSpeed.Value;
+            float3 noise = followPathProperties.Index >= 2 
+                ? velocity.Linear / moveSpeed.Value 
+                : zero;
             
             // Считаем чистый вектор и расстояние до цели БЕЗ ноиза для точной остановки
             float3 vectorToTarget = targetFloat3 - selfPosition;
@@ -139,7 +119,7 @@ namespace ROMA2.Logic.Common.Movement
             // Рассчитываем желаемую скорость
             float desiredSpeed = moveSpeed.Value;
 
-            // Критически важный шаг: скорость за кадр (Speed * DeltaTime) не должна превышать расстояние до цели
+            // Скорость за кадр (Speed * DeltaTime) не должна превышать расстояние до цели
             // Делим расстояние на DeltaTime, чтобы получить максимально допустимую скорость для этого кадра
             float maxAllowedSpeed = distanceToTarget / DeltaTime;
             float finalSpeed = min(desiredSpeed, maxAllowedSpeed);
@@ -148,8 +128,8 @@ namespace ROMA2.Logic.Common.Movement
             velocity.Linear = moveDirection * finalSpeed;
 
             // Поворот
-            if (lengthsq(velocity.Linear) > 0.01) 
-                transform.Rotation = LookRotationSafe(velocity.Linear, up());
+            if (lengthsq(moveDirection) > 0.25) 
+                transform.Rotation = LookRotationSafe(moveDirection, up());
         }
     }
 }

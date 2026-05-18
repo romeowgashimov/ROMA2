@@ -3036,6 +3036,39 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!1 &1255268145 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1514821781506921974, guid: d8f601ceebe958c4dba40e1da9c0d264,
+    type: 3}
+  m_PrefabInstance: {fileID: 5249483911561065462}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &1255268153
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1255268145}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 1
 --- !u!43 &1265201247
 Mesh:
   m_ObjectHideFlags: 0
@@ -3952,7 +3985,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.MinionSpawnPropertiesAuthoring
   TimeBetweenWaves: 10
-  TimeBetweenMinions: 1
+  TimeBetweenMinions: 0.1
   CountToSpawnInWave: 6
 --- !u!114 &1646246679
 MonoBehaviour:
@@ -5190,6 +5223,79 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!1001 &5249483911561065462
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1514821781506921974, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_Name
+      value: WallTest
+      objectReference: {fileID: 0}
+    - target: {fileID: 8047526461474584237, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -29.47
+      objectReference: {fileID: 0}
+    - target: {fileID: 8047526461474584237, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.37
+      objectReference: {fileID: 0}
+    - target: {fileID: 8047526461474584237, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -50.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 8047526461474584237, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8047526461474584237, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8047526461474584237, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8047526461474584237, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8047526461474584237, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8047526461474584237, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8047526461474584237, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 0}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1514821781506921974, guid: d8f601ceebe958c4dba40e1da9c0d264,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1255268153}
+  m_SourcePrefab: {fileID: 100100000, guid: d8f601ceebe958c4dba40e1da9c0d264, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -5203,6 +5309,7 @@ SceneRoots:
   - {fileID: 64836689}
   - {fileID: 115723850}
   - {fileID: 1842991065}
+  - {fileID: 5249483911561065462}
   - {fileID: 878987960}
   - {fileID: 272302958}
   - {fileID: 882232979}

@@ -37,7 +37,10 @@ namespace ROMA2.Logic.Helpers.Bakers
                 DynamicBuffer<PathPositionElement> pathPositions = AddBuffer<PathPositionElement>(entity);
                 pathPositions.Capacity = authoring.PathPositionsCapacity;
                 AddComponent<FollowPathProperties>(entity);
-                
+                AddComponent<RVOAgent>(entity);
+                AddComponent<CleanPath>(entity);
+                SetComponentEnabled<CleanPath>(entity, false);
+
                 AddComponent<AbilityInput>(entity);
                 AddComponent<AimingTag>(entity);
                 AddComponent<AimInput>(entity);

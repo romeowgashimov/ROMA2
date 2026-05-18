@@ -1,8 +1,9 @@
-﻿using Unity.Entities;
+﻿using Logic.Common;
+using Unity.Entities;
 using Unity.NetCode;
 using Unity.Transforms;
 
-namespace Logic.Common.Systems
+namespace ROMA2.Logic.Common.GameProcesses
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderLast = true)]
     public partial struct DestroyEntitySystem : ISystem

@@ -20,10 +20,11 @@ namespace Logic.Common
     public struct FollowPathProperties : IComponentData
     {
         public int Index;
-        public float2 FuturePosition;
     }
     
     public struct RegisteredObstacleInGrid : IComponentData { }
     
-    public struct IgnoreRegistrationInGrid :  IComponentData { }
+    public struct IgnoreRegistrationInGrid : IComponentData { }
+    
+    public struct RVOAgent : IComponentData { }
 }
