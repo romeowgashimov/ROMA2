@@ -1,14 +1,9 @@
 using Logic.Common;
-using ROMA2.Logic.Client.UI;
 using ROMA2.Logic.Common.Databases;
 using Unity.Entities;
 using UnityEngine;
 
-#if !UNITY_SERVER
-using Unity.Rendering;
-#endif
-
-namespace ROMA2.Logic.Helpers.Bakers
+namespace ROMA2.Logic.Common.Bakers
 {
     public class ChampionAuthoring : MonoBehaviour
     {
@@ -40,6 +35,10 @@ namespace ROMA2.Logic.Helpers.Bakers
                 AddComponent<RVOAgent>(entity);
                 AddComponent<CleanPath>(entity);
                 SetComponentEnabled<CleanPath>(entity, false);
+                AddComponent<IncorrectPathProperties>(entity);
+                SetComponentEnabled<IncorrectPathProperties>(entity, false);
+                AddComponent<PathFindingProcessing>(entity);
+                SetComponentEnabled<PathFindingProcessing>(entity, false);
 
                 AddComponent<AbilityInput>(entity);
                 AddComponent<AimingTag>(entity);
@@ -57,11 +56,6 @@ namespace ROMA2.Logic.Helpers.Bakers
                     config.AttackSpeed,
                     true,
                     config.AttackPrefab);
-                
-#if !UNITY_SERVER
-                AddComponent<URPMaterialPropertyBaseColor>(entity);
-                AddComponent<LastOutlinedEntity>(entity);
-#endif
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Logic.Common;
+using ROMA2.Logic.Server.Initialization;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
@@ -8,6 +9,8 @@ using Unity.Transforms;
 namespace Logic.Server
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    [UpdateAfter(typeof(GameStartPropertiesInitializationSystem))]
     public partial struct ServerAuthorizeCharactersSystem : ISystem
     {
         public void OnCreate(ref SystemState state)

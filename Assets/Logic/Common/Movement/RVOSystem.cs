@@ -23,6 +23,7 @@ namespace ROMA2.Logic.Common.Movement
     }
 
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateBefore(typeof(PathFindingSystem))]
     public partial struct RVOSystem : ISystem
     {
         private EntityQuery _mainMinionQuery;
@@ -36,14 +37,14 @@ namespace ROMA2.Logic.Common.Movement
                 .WithAll<LocalTransform, MoveTargetPosition, MoveSpeed, 
                          PathPositionElement, FollowPathProperties, PhysicsVelocity, AttackRadius>()
                 .WithAll<MinionTag, TargetEntity>()
-                .WithNone<PathFindingRequest>()
+                .WithDisabled<PathFindingRequest, IncorrectPathProperties>()
                 .Build();
             
             _mainChampionQuery = QueryBuilder()
                 .WithAll<LocalTransform, MoveTargetPosition, MoveSpeed, 
                     PathPositionElement, FollowPathProperties, PhysicsVelocity, AttackRadius>()
                 .WithAll<ChampTag, TargetEntity>()
-                .WithNone<PathFindingRequest>()
+                .WithDisabled<PathFindingRequest, IncorrectPathProperties>()
                 .Build();
             
             _agentsQueryForMinions = QueryBuilder()
@@ -123,7 +124,11 @@ namespace ROMA2.Logic.Common.Movement
         }
     }
 
+    /* Когда башни уничтожаются, они оставляют за собой закрытые клетки,
+     поэтому некоторые миньоны застревают на позициях уничтоженных башен.
+     Миньонов выталкивают свои же миньоны */
     [BurstCompile]
+    [WithDisabled(typeof(IncorrectPathProperties))]
     public partial struct RVOJob : IJobEntity
     {
         [NativeDisableContainerSafetyRestriction] [ReadOnly] 
@@ -133,6 +138,7 @@ namespace ROMA2.Logic.Common.Movement
         public float K;
         public int MaxSamples;
         public float DeltaTime;
+        public bool IsCharacter; // По этому свойству можем разделять логику миньонов и персонажей
     
         private void Execute(
             ref LocalTransform transform,
@@ -145,23 +151,17 @@ namespace ROMA2.Logic.Common.Movement
             in MoveTargetPosition goalPos,
             Entity owner)
         {
-            if (pathPositions.IsEmpty || followPathProperties.Index < 0)
-            {
-                velocity.Linear = float3.zero;
-                return;
-            }
-    
             float3 myPos = transform.Position;
-            if (attackTarget.Value != Entity.Null && TransformLookup
-                    .TryGetComponent(attackTarget.Value, out LocalTransform targetTransform))
+            if (attackTarget.Value != Entity.Null 
+                && TransformLookup.TryGetComponent(attackTarget.Value, out LocalTransform targetTransform))
             {
                 float3 targetPos = targetTransform.Position;
                 float distSq = distancesq(targetPos, myPos);
-                float stopDist = radius.Value;
+                float stopDist = radius.Value - 1;
     
                 if (distSq <= stopDist * stopDist)
                 {
-                    pathPositions.Clear();
+                    if (!pathPositions.IsEmpty) pathPositions.Clear();
                     velocity.Linear = float3.zero;
                     float3 dir = normalizesafe(targetPos - myPos);
                     quaternion targetRot = LookRotationSafe(new(dir.x, 0, dir.z), up());
@@ -169,29 +169,41 @@ namespace ROMA2.Logic.Common.Movement
                     return;
                 }
             }
+            
+            if (pathPositions.IsEmpty || followPathProperties.Index < 0)
+            {
+                velocity.Linear = float3.zero;
+                return;
+            }
     
             float2 selfPosXZ = myPos.xz;
             float2 currentVXZ = velocity.Linear.xz;
             float2 targetPathXZ;
 
+            // Чтобы не дрифтил
+            if (followPathProperties.IsNewPath)
+            {
+                velocity.Linear = float3.zero;
+                followPathProperties.IsNewPath = false;
+            }
+            
             if (CleanPathLookup.IsComponentEnabled(owner)) targetPathXZ = goalPos.Value.xz;
             else
             {
-                // Чтобы не дрифтил
-                if (followPathProperties.Index == pathPositions.Length - 1) velocity.Linear = float3.zero;
-
                 targetPathXZ = pathPositions[followPathProperties.Index].Value;
 
                 // Упростил логику, в любом случае пропускаем два индекса
-                if (lengthsq(targetPathXZ - selfPosXZ) <= 0.25 && followPathProperties.Index >= 2)
+                if (lengthsq(targetPathXZ - selfPosXZ) <= 2.25 && followPathProperties.Index >= 2)
                     followPathProperties.Index -= 2;
+                
+                // Сделать дополнительную проверку прохождения вейпоинтов через dot
 
                 // <= 1 обусловлено тем, что при нечётном количестве вейпоинтов концом пути будет 1
                 if (followPathProperties.Index <= 1)
                     targetPathXZ = new(goalPos.Value.x, goalPos.Value.z);
             }
             
-            // Считаем чистый вектор и расстояние до цели БЕЗ ноиза для точной остановки
+            // Считаем чистый вектор и расстояние до цели
             float2 vectorToTarget = targetPathXZ - selfPosXZ;
             float distanceToTarget = length(vectorToTarget);
 
@@ -238,8 +250,10 @@ namespace ROMA2.Logic.Common.Movement
                     vBest = vCand;
                 }
             }
-    
-            float2 finalV = lerp(currentVXZ, vBest, 0.2f);
+
+            // Можем разделить логику поворотов на логику миньонов и персонажей булевым признаком при создании джобы 
+            float delta = lengthsq(goalPos.Value.xz - selfPosXZ) > 1 ? 0.2f : 1;
+            float2 finalV = lerp(currentVXZ, vBest, delta);
             velocity.Linear = new(finalV.x, velocity.Linear.y, finalV.y);
     
             if (lengthsq(finalV) > 0.01f)

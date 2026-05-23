@@ -1,10 +1,13 @@
 ﻿using Logic.Common;
+using ROMA2.Logic.Server.Initialization;
 using Unity.Entities;
 using Unity.NetCode;
 
 namespace Logic.Server
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    [UpdateAfter(typeof(GameStartPropertiesInitializationSystem))]
     public partial struct ServerChoiceChampionRequestSystem : ISystem
     {
         private EntityQuery _query;

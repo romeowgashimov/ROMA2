@@ -2,12 +2,7 @@
 using Unity.Entities;
 using UnityEngine;
 
-#if !UNITY_SERVER
-using Unity.Rendering;
-#endif
-
-
-namespace ROMA2.Logic.Helpers.Bakers
+namespace ROMA2.Logic.Common.Bakers
 {
     public class MinionAuthoring : MonoBehaviour
     {
@@ -23,10 +18,8 @@ namespace ROMA2.Logic.Helpers.Bakers
                 AddComponent(entity, new MoveSpeed { Value = authoring.MoveSpeed });
                 AddComponent<MinionPathIndex>(entity);
                 AddComponent<MinionPathPosition>(entity);
-//#if UNITY_SERVER
                 AddComponent<PathFindingRequest>(entity);
                 SetComponentEnabled<PathFindingRequest>(entity, false);
-//#endif
                 AddComponent<FollowPathProperties>(entity);
                 DynamicBuffer<PathPositionElement> pathPositions = AddBuffer<PathPositionElement>(entity);
                 pathPositions.Capacity = 120;
@@ -34,13 +27,13 @@ namespace ROMA2.Logic.Helpers.Bakers
                 AddComponent<RVOAgent>(entity);
                 AddComponent<CleanPath>(entity);
                 SetComponentEnabled<CleanPath>(entity, false);
+                AddComponent<IncorrectPathProperties>(entity);
+                SetComponentEnabled<IncorrectPathProperties>(entity, false);
+                AddComponent<PathFindingProcessing>(entity);
+                SetComponentEnabled<PathFindingProcessing>(entity, false);
                 
                 AddComponent<Team>(entity);
                 AddComponent<LastTargetEntityPosition>(entity, new() { Value = 0 });
-                
-#if !UNITY_SERVER
-                AddComponent<URPMaterialPropertyBaseColor>(entity);
-#endif
             }
         }
     }

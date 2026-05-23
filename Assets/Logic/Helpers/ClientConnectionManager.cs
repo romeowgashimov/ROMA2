@@ -1,14 +1,16 @@
 using Assets.Logic.Client;
 using Logic.Common;
+using ROMA2.Logic.Server.Initialization;
 using TMPro;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Networking.Transport;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Helpers
 {
     public class ClientConnectionManager : MonoBehaviour
     {
@@ -17,9 +19,18 @@ namespace Logic.Client
         [SerializeField] private TMP_Dropdown _connectionModeDropdown;
         [SerializeField] private TMP_Dropdown _teamDropdown;
         [SerializeField] private Button _startButton;
+        [SerializeField] private TMP_InputField _minPlayersToStartField;
 
         private ushort Port => ushort.Parse(_portField.text);
         private string Address => _addressField.text;
+        private int MinPlayersToStart
+        {
+            get
+            {
+                int playersCount = int.Parse(_minPlayersToStartField.text);
+                return math.clamp(playersCount, 1, 10);
+            }
+        }
 
         private void OnEnable()
         {
@@ -95,6 +106,7 @@ namespace Logic.Client
 
         private void StartServer()
         {
+            GameStartSettings.MinPlayersToStart = MinPlayersToStart;
             World serverWorld = ClientServerBootstrap.CreateServerWorld("Server");
 
             NetworkEndpoint serverEndpoint = NetworkEndpoint.AnyIpv4.WithPort(Port);

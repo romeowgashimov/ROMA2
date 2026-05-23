@@ -3,6 +3,7 @@ using Logic.Common.Systems;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
@@ -46,14 +47,13 @@ namespace ROMA2.Logic.Common.Behaviour
             
             state.Dependency = new ReAggrRequestHandlerJob
             {
-                CollisionWorld = GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
                 TeamLookup = GetComponentLookup<Team>(true),
                 Champions = GetComponentLookup<ChampTag>(true),
-                CollisionFilter = _filter
+                TransformLookup = GetComponentLookup<LocalTransform>(true)
+                
             }.ScheduleParallel(state.Dependency);
         }
     }
-    
     
     public partial struct ReAggrRequestSenderJob : IJobEntity
     {
@@ -91,6 +91,8 @@ namespace ROMA2.Logic.Common.Behaviour
                     if (enemyInRadius)
                         foreach (Entity ally in allies)
                         {
+                            if (Champions.HasComponent(ally)) continue;
+                            
                             ECB.SetComponent(sortKey, ally, new ReAggrRequest { Target = enemy });
                             ECB.SetComponentEnabled<ReAggrRequest>(sortKey, ally, true);
                         }
@@ -104,8 +106,7 @@ namespace ROMA2.Logic.Common.Behaviour
     public partial struct ReAggrRequestHandlerJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<ChampTag> Champions;
-        [ReadOnly] public CollisionFilter CollisionFilter;
-        [ReadOnly] public CollisionWorld CollisionWorld;
+        [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
         [ReadOnly] public ComponentLookup<Team> TeamLookup;
 
         private void Execute(ref TargetEntity target, in DetectionRadius detect, in LocalTransform transform, 
@@ -115,27 +116,16 @@ namespace ROMA2.Logic.Common.Behaviour
             {
                 reAggrRequest.ValueRW = false;
                 return;
-            }            
-            
-            NativeList<DistanceHit> hits = new(Allocator.Temp);
-            if (CollisionWorld.OverlapSphere(transform.Position, detect.Value, ref hits, CollisionFilter))
-            {
-                Entity reAggrEnemy = Entity.Null;
-
-                foreach (DistanceHit hit in hits)
-                {
-                    if (!TeamLookup.TryGetComponent(hit.Entity, out Team enemyTeam) 
-                        || enemyTeam.Value == team.Value) continue;
-                    if (hit.Entity != reAggr.Target) continue;
-                    reAggrEnemy = hit.Entity;
-                    break;
-                }
-                target.Value = reAggrEnemy;
-                reAggrRequest.ValueRW = false;
             }
+
+            Entity targetEntity = reAggr.Target;
+            if (TransformLookup.TryGetComponent(targetEntity, out LocalTransform targetTransform) 
+                && TeamLookup.TryGetComponent(targetEntity, out Team targetTeam) 
+                && targetTeam.Value != team.Value 
+                && math.lengthsq(transform.Position - targetTransform.Position) <= detect.Value * detect.Value)
+                target.Value = targetEntity;
             
             reAggrRequest.ValueRW = false;
-            hits.Dispose();
         }
     }
 }

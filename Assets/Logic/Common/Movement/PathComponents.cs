@@ -1,5 +1,6 @@
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.NetCode;
 
 namespace Logic.Common
 {
@@ -8,8 +9,12 @@ namespace Logic.Common
     public struct PathFindingProcessing  : IEnableableComponent, IComponentData { }
 
     public struct CleanPath : IEnableableComponent, IComponentData { }
-
-    public struct IncorrectPathProperties : IEnableableComponent, IComponentData { }
+    
+    public struct IncorrectPathProperties : IEnableableComponent, IComponentData
+    {
+        public bool TargetPositionIsNotWalkable;
+        public bool NotEnoughIterations;
+    }
     
     [InternalBufferCapacity(4)]
     public struct PathPositionElement : IBufferElementData
@@ -20,6 +25,8 @@ namespace Logic.Common
     public struct FollowPathProperties : IComponentData
     {
         public int Index;
+        public bool IsNewPath;
+        public float WaitingTime;
     }
     
     public struct RegisteredObstacleInGrid : IComponentData { }

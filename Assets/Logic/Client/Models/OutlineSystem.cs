@@ -7,7 +7,7 @@ using UnityEngine;
 using static Unity.Entities.Entity;
 using static Unity.Entities.SystemAPI;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Models
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     [UpdateInGroup(typeof(PresentationSystemGroup))]
@@ -42,6 +42,7 @@ namespace Logic.Client
         public ComponentLookup<OutlineColor> OutlineColorLookup;
         [ReadOnly] public ComponentLookup<OutlineEntityContainer> OutlinedEntityLookup;
         [ReadOnly] public ComponentLookup<Team> TeamLookup;
+        public int ID;
 
         private void Execute(in SelectedEntity selectedEntity, 
             in Team team, 
@@ -84,7 +85,5 @@ namespace Logic.Client
             
             outlinedEntity.Value = selected;
         }
-
-        public int ID;
     }
 }

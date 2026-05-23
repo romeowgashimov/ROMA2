@@ -1,10 +1,10 @@
 ﻿using Logic.Common;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
-using static Unity.Mathematics.float3;
 using static Unity.Mathematics.math;
 using float3 = Unity.Mathematics.float3;
 
@@ -15,26 +15,26 @@ namespace ROMA2.Logic.Common.Movement
     {
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
+            state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
             state.RequireForUpdate<GameplayingTag>();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityCommandBuffer.ParallelWriter ecbSingleton = SystemAPI
-                .GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
+            EntityCommandBuffer.ParallelWriter ecb = SystemAPI
+                .GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged)
                 .AsParallelWriter();
             
             state.Dependency = new NextPathPointJob
             {
-                Ecb = ecbSingleton
+                Ecb = ecb
             }.ScheduleParallel(state.Dependency);
         }
     }
     
-    [BurstCompile]
+    [WithNone(typeof(DestroyEntityTag))]
     [WithDisabled(typeof(PathFindingRequest))]
     public partial struct NextPathPointJob : IJobEntity
     {
@@ -47,41 +47,26 @@ namespace ROMA2.Logic.Common.Movement
             DynamicBuffer<PathPositionElement> pathPositions,
             DynamicBuffer<MinionPathPosition> pathMinions, 
             RefRW<MinionPathIndex> pathIndex,
-            RefRW<MoveTargetPosition> moveTargetPosition, 
-            RefRW<LastTargetEntityPosition> lastTargetPosition,
+            RefRW<MoveTargetPosition> moveTargetPosition,
             in TargetEntity targetEntity)
         {
-            bool isAtStart = pathPositions.IsEmpty;
-            float dist = 0;
-            float3 curTarget = zero;
+            if (pathMinions.IsEmpty) return;
 
-            if (!isAtStart)
+            bool isEmpty = pathPositions.IsEmpty;
+            float3 targetPos = pathMinions[pathIndex.ValueRO.Value].Value;
+            bool passed = lengthsq(targetPos - transform.ValueRO.Position) <= 64;
+            if (passed && pathIndex.ValueRO.Value < pathMinions.Length - 1)
             {
-                curTarget = pathMinions[pathIndex.ValueRO.Value].Value;
-                dist = distancesq(curTarget, transform.ValueRO.Position);
-
-                // Я так ахуенно сделал поиск пути, что он находит путь быстрее, чем определяется точка назначения
-                if (targetEntity.Value == Entity.Null)
-                    if (lengthsq(pathPositions[0].Value - (int2)moveTargetPosition.ValueRO.Value.xz) >= 1) 
-                        Ecb.SetComponentEnabled<PathFindingRequest>(chunkIndex, entity, true);
+                pathIndex.ValueRW.Value++;
+                targetPos = pathMinions[pathIndex.ValueRO.Value].Value;
             }
 
-            if (isAtStart || dist <= 64f) // 8^2
+            bool recovery = !isEmpty
+                            && lengthsq(pathPositions[0].Value - (int2)targetPos.xz) >= 4;
+            
+            if (targetEntity.Value == Entity.Null && (isEmpty || passed || recovery))
             {
-                if (!isAtStart && pathIndex.ValueRO.Value < pathMinions.Length - 1)
-                {
-                    pathIndex.ValueRW.Value++;
-                    curTarget = pathMinions[pathIndex.ValueRO.Value].Value;
-                }
-
-                moveTargetPosition.ValueRW.Value = curTarget;
-                Ecb.SetComponentEnabled<PathFindingRequest>(chunkIndex, entity, true);
-            }
-
-            if (!lastTargetPosition.ValueRO.Value.Equals(zero) && targetEntity.Value == Entity.Null)
-            {
-                lastTargetPosition.ValueRW.Value = zero;
-                moveTargetPosition.ValueRW.Value = curTarget;
+                moveTargetPosition.ValueRW.Value = targetPos;
                 Ecb.SetComponentEnabled<PathFindingRequest>(chunkIndex, entity, true);
             }
         }

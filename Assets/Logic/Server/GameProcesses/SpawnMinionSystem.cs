@@ -3,7 +3,6 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
 
-
 namespace Logic.Server
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]

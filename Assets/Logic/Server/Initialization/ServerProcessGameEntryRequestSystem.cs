@@ -1,4 +1,5 @@
 using Logic.Common;
+using ROMA2.Logic.Server.Initialization;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -9,6 +10,8 @@ using UnityEngine;
 namespace Logic.Server
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
+    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    [UpdateAfter(typeof(GameStartPropertiesInitializationSystem))]
     public partial struct ServerProcessGameEntryRequestSystem : ISystem
     {
         public void OnCreate(ref SystemState state)

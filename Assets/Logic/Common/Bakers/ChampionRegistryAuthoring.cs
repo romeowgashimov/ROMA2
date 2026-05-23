@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Logic.Common;
 using ROMA2.Logic.Common.Databases;
 using Unity.Entities;
 using UnityEngine;
 
-namespace Logic.Common.Authorings
+namespace ROMA2.Logic.Common.Bakers
 {
     public class ChampionRegistryAuthoring : MonoBehaviour
     {

@@ -23,7 +23,7 @@ namespace ROMA2.Logic.Common.Movement
         {
             _query = QueryBuilder()
                 .WithAll<MoveTargetPosition, LocalTransform, MoveSpeed, 
-                    PathPositionElement, PathFindingRequest, Simulate>()
+                    PathPositionElement, PathFindingRequest, Simulate, FollowPathProperties>()
                 .WithNone<DestroyEntityTag>()
                 .Build();
 
@@ -52,8 +52,7 @@ namespace ROMA2.Logic.Common.Movement
             {
                 GridSize = gridSize,
                 Grid = buffer,
-                ECB = ecb,
-                ProcessingLookup = GetComponentLookup<PathFindingRequest>(true)
+                ECB = ecb
             }.ScheduleParallel(_query, state.Dependency);
         }
     }
@@ -70,41 +69,49 @@ namespace ROMA2.Logic.Common.Movement
         public int FCost; // Изменено на int для ускорения кучи
     }
 
+    /* Сделать рейкасты, если путь чист, то ecb.SetComponentEnabled<CleanPath>, иначе ищем путь.
+     Сделать систему очередей на создание пути RequestHandler */
     [BurstCompile]
     public partial struct PathFindingJob : IJobEntity
     {
         private const int GRID_BIAS = 60;
-        private const int MAX_ITERATIONS = 500; // Лимит итераций для защиты от зависаний CPU
+        private const int MAX_ITERATIONS = 14400;
 
         [ReadOnly] public int2 GridSize;
         [ReadOnly] public NativeArray<PathNode> Grid;
         public EntityCommandBuffer.ParallelWriter ECB;
-        [ReadOnly] public ComponentLookup<PathFindingRequest> ProcessingLookup;
 
         private void Execute(
-            [EntityIndexInQuery] int key, 
+            [ChunkIndexInQuery] int key, 
             in Entity entity, 
             in MoveTargetPosition target, 
             in LocalTransform transform, 
-            ref DynamicBuffer<PathPositionElement> buffer)
+            ref DynamicBuffer<PathPositionElement> buffer,
+            ref FollowPathProperties pathProperties)
         {
-            if (!ProcessingLookup.HasComponent(entity)) return;
-            
             int2 startPos = (int2)round(transform.Position.xz) + GRID_BIAS;
             int2 endPos = (int2)round(target.Value.xz) + GRID_BIAS;
 
-            if (IsOutside(startPos) || IsOutside(endPos)) return;
+            if (IsOutside(startPos)) return;
 
-            int startIndex = CalculateIndex(startPos.x, startPos.y, GridSize.x);
-            int endIndex = CalculateIndex(endPos.x, endPos.y, GridSize.x);
-
-            // Я могу пойти на недоступную клетку,
-            // потому что поиск пути никак не уведомляет о невозможности построить путь
-            if (!Grid[endIndex].IsWalkable && ProcessingLookup.HasComponent(entity))
+            // 10 клеток — максимальный радиус поиска альтернативной точки 
+            if (!FindNearestWalkablePosition(endPos, 10, out int2 walkableEndPos))
             {
+                // Если даже рядом нет свободных точек, отменяем запрос
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
+                ECB.SetComponent(key, entity, new IncorrectPathProperties
+                {
+                    TargetPositionIsNotWalkable = true,
+                    NotEnoughIterations = false
+                });
+                ECB.SetComponentEnabled<IncorrectPathProperties>(key, entity, true);
                 return;
             }
+
+            // Перезаписываем конечную точку на найденную проходимую
+            endPos = walkableEndPos; 
+            int startIndex = CalculateIndex(startPos.x, startPos.y, GridSize.x);
+            int endIndex = CalculateIndex(endPos.x, endPos.y, GridSize.x);
             
             UnsafeHashMap<int, NodeSearchData> visitedNodes = new(1024, Allocator.Temp);
             UnsafeList<HeapNode> openList = new(1024, Allocator.Temp);
@@ -152,9 +159,8 @@ namespace ROMA2.Logic.Common.Movement
                         }
                     }
             }
-
-            bool hasComponent = ProcessingLookup.HasComponent(entity);
-            if (pathFound && hasComponent)
+            
+            if (pathFound)
             {
                 buffer.Clear();
                 int curr = endIndex;
@@ -165,11 +171,24 @@ namespace ROMA2.Logic.Common.Movement
                     curr = visitedNodes[curr].CameFromIndex;
                 }
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
-                ECB.SetComponent(key, entity, new FollowPathProperties { Index = buffer.Length - 1 });
+                ECB.SetComponent(key, entity, new FollowPathProperties
+                {
+                    // Персонаж дёргается из-за отсечения позиции в int, первая позиция может быть чуть позади
+                    Index = buffer.Length - 2,
+                    IsNewPath = true
+                });
+                ECB.SetComponentEnabled<IncorrectPathProperties>(key, entity, false);
             }
-            else if (hasComponent)
-                // Если путь не найден за лимит итераций, выключаем запрос
+            else
+            {
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
+                ECB.SetComponent(key, entity, new IncorrectPathProperties
+                {
+                    TargetPositionIsNotWalkable = false,
+                    NotEnoughIterations = true
+                });
+                ECB.SetComponentEnabled<IncorrectPathProperties>(key, entity, true);
+            }
             
             visitedNodes.Dispose();
             openList.Dispose();
@@ -229,5 +248,68 @@ namespace ROMA2.Logic.Common.Movement
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int2 GetPos(int i) => new(i % GridSize.x, i / GridSize.x);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool FindNearestWalkablePosition(int2 startPos, int maxRadius, out int2 foundPos)
+        {
+            // Если точка вне сетки, мы не можем проверить её проходимость напрямую
+            if (!IsOutside(startPos))
+            {
+                int startIndex = CalculateIndex(startPos.x, startPos.y, GridSize.x);
+                if (Grid[startIndex].IsWalkable)
+                {
+                    foundPos = startPos;
+                    return true;
+                }
+            }
+        
+            // Поиск по слоям (окружающим квадратам) наружу
+            for (int radius = 1; radius <= maxRadius; radius++)
+            {
+                // Проходим по верхней и нижней сторонам квадрата
+                for (int x = -radius; x <= radius; x++)
+                {
+                    // Верхняя грань
+                    int2 checkPos = startPos + new int2(x, radius);
+                    if (!IsOutside(checkPos) && Grid[CalculateIndex(checkPos.x, checkPos.y, GridSize.x)].IsWalkable)
+                    {
+                        foundPos = checkPos;
+                        return true;
+                    }
+        
+                    // Нижняя грань
+                    checkPos = startPos + new int2(x, -radius);
+                    if (!IsOutside(checkPos) && Grid[CalculateIndex(checkPos.x, checkPos.y, GridSize.x)].IsWalkable)
+                    {
+                        foundPos = checkPos;
+                        return true;
+                    }
+                }
+        
+                // Проходим по левой и правой сторонам квадрата (уголки уже проверены выше)
+                for (int y = -radius + 1; y < radius; y++)
+                {
+                    // Правая грань
+                    int2 checkPos = startPos + new int2(radius, y);
+                    if (!IsOutside(checkPos) && Grid[CalculateIndex(checkPos.x, checkPos.y, GridSize.x)].IsWalkable)
+                    {
+                        foundPos = checkPos;
+                        return true;
+                    }
+        
+                    // Левая грань
+                    checkPos = startPos + new int2(-radius, y);
+                    if (!IsOutside(checkPos) && Grid[CalculateIndex(checkPos.x, checkPos.y, GridSize.x)].IsWalkable)
+                    {
+                        foundPos = checkPos;
+                        return true;
+                    }
+                }
+            }
+        
+            // Если в пределах радиуса ничего не нашли
+            foundPos = startPos;
+            return false;
+        }
     }
 }

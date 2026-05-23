@@ -4,7 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace ROMA2.Logic.Helpers.Bakers
+namespace ROMA2.Logic.Common.Bakers
 {
     public static class BakerExtensions
     {

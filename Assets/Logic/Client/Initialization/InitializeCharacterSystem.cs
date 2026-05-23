@@ -1,4 +1,5 @@
 using Logic.Common;
+using ROMA2.Logic.Client.UI;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -17,7 +18,7 @@ namespace ROMA2.Logic.Client.Network
             foreach((RefRW<PhysicsMass> mass, Team team, Entity newCharacterEntity) in SystemAPI
             .Query<RefRW<PhysicsMass>, Team>()
             .WithAny<NewChampTag, NewMinionTag>()
-            .WithAll<URPMaterialPropertyBaseColor>()
+            .WithNone<URPMaterialPropertyBaseColor>()
             .WithEntityAccess())
             {
                 mass.ValueRW.InverseInertia[0] = 0;
@@ -30,8 +31,9 @@ namespace ROMA2.Logic.Client.Network
                     TeamType.Red => new float4(1, 0, 0, 1),
                     _ => new float4(1)
                 };
-
-                ecb.SetComponent(newCharacterEntity, new URPMaterialPropertyBaseColor { Value = teamColor });
+                
+                ecb.AddComponent<LastOutlinedEntity>(newCharacterEntity);
+                ecb.AddComponent(newCharacterEntity, new URPMaterialPropertyBaseColor { Value = teamColor });
                 ecb.RemoveComponent<NewChampTag>(newCharacterEntity);
                 ecb.RemoveComponent<NewMinionTag>(newCharacterEntity);
             }
