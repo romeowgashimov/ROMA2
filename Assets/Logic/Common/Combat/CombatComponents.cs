@@ -87,33 +87,31 @@ namespace Logic.Common
     public struct AbilityCooldownTargetTicks : ICommandData
     {
         public NetworkTick Tick { get; set; }
-        public NetworkTick AoeAbility;
-        public NetworkTick SkillShotAbility;
+        public NetworkTick Ability1;
+        public NetworkTick Ability2;
 
-        public int Length => 2;
-        
-        public NetworkTick this[int index]
+        public readonly int GetAbilityCount() => 2;
+
+        public readonly NetworkTick GetAbilityByTick(int index)
         {
-            get
+            return index switch
             {
-                return index switch
-                {
-                    0 => AoeAbility,
-                    1 => SkillShotAbility,
-                    _ => NetworkTick.Invalid
-                };
-            }
-            set
+                0 => Ability1,
+                1 => Ability2,
+                _ => NetworkTick.Invalid
+            };
+        }
+
+        public void SetAbilityByTick(int index, NetworkTick value)
+        {
+            switch (index)
             {
-                switch (index)
-                {
-                    case 0:
-                        AoeAbility = value;
-                        break;
-                    case 1:
-                        SkillShotAbility = value;
-                        break;
-                }
+                case 0:
+                    Ability1 = value;
+                    break;
+                case 1:
+                    Ability2 = value;
+                    break;
             }
         }
     }
@@ -136,6 +134,7 @@ namespace Logic.Common
     public struct TargetEntity : IComponentData
     {
         [GhostField] public Entity Value;
+        [GhostField] public bool InAttackArea;
     }
 
     public struct LastTargetEntityPosition : IComponentData

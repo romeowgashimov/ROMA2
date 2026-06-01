@@ -24,13 +24,8 @@ namespace ROMA2.Logic.Common.Bakers
                 DynamicBuffer<PathPositionElement> pathPositions = AddBuffer<PathPositionElement>(entity);
                 pathPositions.Capacity = 120;
                 AddComponent(entity, new MoveTargetPosition { Flag = false });
-                AddComponent<RVOAgent>(entity);
-                AddComponent<CleanPath>(entity);
-                SetComponentEnabled<CleanPath>(entity, false);
                 AddComponent<IncorrectPathProperties>(entity);
                 SetComponentEnabled<IncorrectPathProperties>(entity, false);
-                AddComponent<PathFindingProcessing>(entity);
-                SetComponentEnabled<PathFindingProcessing>(entity, false);
                 
                 AddComponent<Team>(entity);
                 AddComponent<LastTargetEntityPosition>(entity, new() { Value = 0 });

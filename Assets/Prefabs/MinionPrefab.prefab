@@ -590,9 +590,9 @@ MonoBehaviour:
     z: 2
   m_PrimitiveOrientation:
     Value:
-      x: -90
+      x: 90
       y: 0
-      z: -90
+      z: 0
     RotationOrder: 4
   m_Capsule:
     Height: 2
@@ -736,7 +736,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!114 &-8565429031074575625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -749,7 +749,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9546a3726f0a480c85cceab8c824d950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HealthPointsAuthoring
-  MaxHealthPoints: 100
+  MaxHealthPoints: 200
   HealthBarOffset: {x: 0, y: 2, z: 0}
 --- !u!114 &1142406332919421226
 MonoBehaviour:
@@ -820,6 +820,7 @@ MonoBehaviour:
   AttackSpeed: 2
   AttackPrefab: {fileID: 4375477658151305662, guid: b136942dad4460047b5d1af88a37f71d,
     type: 3}
+  BodyRadius: 0
   NetCodeConfig: {fileID: 11400000, guid: dce9a8c7da8b8cf4093e70364ed6f4c4, type: 2}
 --- !u!114 &5446924024742331872
 MonoBehaviour:

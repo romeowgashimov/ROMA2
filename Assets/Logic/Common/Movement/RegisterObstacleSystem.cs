@@ -1,5 +1,4 @@
-﻿using Logic.Client;
-using Logic.Common;
+﻿using Logic.Common;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -16,22 +15,31 @@ namespace ROMA2.Logic.Common.Movement
     [UpdateBefore(typeof(PathFindingSystem))]
     public partial struct RegisterObstacleSystem : ISystem
     {
-        private EntityQuery _nonAuthorizedObstaclesQuery;
+        private EntityQuery _nonRegisteredObstaclesQuery;
+        private EntityQuery _unRegisteringObstaclesQuery;
+        
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
             state.RequireForUpdate<GridTag>();
 
-            _nonAuthorizedObstaclesQuery = QueryBuilder()
+            _nonRegisteredObstaclesQuery = QueryBuilder()
                 .WithAll<PhysicsVelocity, LocalToWorld, PhysicsCollider>()
                 .WithNone<MinionTag, ChampTag, RegisteredObstacleInGrid, IgnoreRegistrationInGrid>()
+                .Build();
+            
+            
+            _unRegisteringObstaclesQuery = QueryBuilder()
+                .WithAll<PhysicsVelocity, LocalToWorld, PhysicsCollider, RegisteredObstacleInGrid, DestroyEntityTag>()
+                .WithNone<MinionTag, ChampTag, IgnoreRegistrationInGrid>()
                 .Build();
         }
 
         public void OnUpdate(ref SystemState state)
         {
             // Вот здесь это реально полезно
-            if (_nonAuthorizedObstaclesQuery.CalculateEntityCount() == 0) return;
+            if (_nonRegisteredObstaclesQuery.CalculateEntityCount() == 0 
+                && _unRegisteringObstaclesQuery.CalculateEntityCount() == 0) return;
 
             Entity gridEntity = GetSingletonEntity<GridTag>();
             int2 gridSize = state.EntityManager.GetComponentData<GridSize>(gridEntity).Value;
@@ -46,8 +54,19 @@ namespace ROMA2.Logic.Common.Movement
                 PathNodes = buffer,
                 GridSize = gridSize,
                 GridBias = -60,
-                ecb = ecb
-            }.Schedule(_nonAuthorizedObstaclesQuery, state.Dependency);
+                ecb = ecb,
+                IsRegistration = true
+            }.Schedule(_nonRegisteredObstaclesQuery, state.Dependency);
+            
+            state.Dependency = new RegisterObstacleJob
+            {
+                PathNodes = buffer,
+                GridSize = gridSize,
+                GridBias = -60,
+                ecb = ecb,
+                IsRegistration = false
+            }.Schedule(_unRegisteringObstaclesQuery, state.Dependency);
+            
             // Никто этого не видит
             state.Dependency.Complete();
         }
@@ -60,6 +79,7 @@ namespace ROMA2.Logic.Common.Movement
         public int2 GridSize;
         public float3 GridBias;
         public EntityCommandBuffer ecb;
+        public bool IsRegistration;
             
         // Добавляем PhysicsCollider в параметры, чтобы прочитать его форму
         private unsafe void Execute(
@@ -91,11 +111,14 @@ namespace ROMA2.Logic.Common.Movement
                     int flatIndex = x + z * GridSize.x;
                         
                     PathNode node = PathNodes[flatIndex];
-                    node.IsWalkable = false;
+                    // Булево значение IsRegistration сделал для понимания, что делает каждая джоба
+                    // Принцип такой, если IsRegistration, то указываем значение IsWalkable = false, это и есть регистрация
+                    // Если !IsRegistration, то это очистка регистрации - IsWalkable = true
+                    node.IsWalkable = !IsRegistration;
                     PathNodes[flatIndex] = node;
                 }
             
-            ecb.AddComponent<RegisteredObstacleInGrid>(obstacle);
+            if (IsRegistration) ecb.AddComponent<RegisteredObstacleInGrid>(obstacle);
         }
     }
 }

@@ -11,9 +11,9 @@ using static Unity.Entities.SystemAPI;
 
 namespace ROMA2.Logic.Common.Behaviour
 {
+    [BurstCompile]
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     [UpdateBefore(typeof(CalculateFrameDamageSystem))]
-    [BurstCompile]
     public partial struct ReAggrSystem : ISystem
     {
         private CollisionFilter _filter;
@@ -55,6 +55,8 @@ namespace ROMA2.Logic.Common.Behaviour
         }
     }
     
+    [BurstCompile]
+    [WithNone(typeof(DestroyEntityTag))]
     public partial struct ReAggrRequestSenderJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<ChampTag> Champions;
@@ -103,6 +105,7 @@ namespace ROMA2.Logic.Common.Behaviour
     }
     
     [BurstCompile]
+    [WithNone(typeof(DestroyEntityTag))]
     public partial struct ReAggrRequestHandlerJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<ChampTag> Champions;

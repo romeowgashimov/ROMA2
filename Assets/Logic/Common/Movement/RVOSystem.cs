@@ -2,28 +2,19 @@
 using Logic.Common;
 using Unity.Burst;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
 using static Unity.Entities.SystemAPI;
 using static Unity.Mathematics.math;
-using static Unity.Mathematics.quaternion;
 using float2 = Unity.Mathematics.float2;
-using float3 = Unity.Mathematics.float3;
 
 namespace ROMA2.Logic.Common.Movement
 {
-    public struct AgentData
-    {
-        public float2 Position;
-        public float2 Velocity;
-    }
-
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-    [UpdateBefore(typeof(PathFindingSystem))]
+    [UpdateAfter(typeof(PathFindingSystem))]
+    [UpdateBefore(typeof(MoveSystem))]
     public partial struct RVOSystem : ISystem
     {
         private EntityQuery _mainMinionQuery;
@@ -36,14 +27,14 @@ namespace ROMA2.Logic.Common.Movement
             _mainMinionQuery = QueryBuilder()
                 .WithAll<LocalTransform, MoveTargetPosition, MoveSpeed, 
                          PathPositionElement, FollowPathProperties, PhysicsVelocity, AttackRadius>()
-                .WithAll<MinionTag, TargetEntity>()
+                .WithAll<MinionTag, TargetEntity, RVOAgent>()
                 .WithDisabled<PathFindingRequest, IncorrectPathProperties>()
                 .Build();
             
             _mainChampionQuery = QueryBuilder()
                 .WithAll<LocalTransform, MoveTargetPosition, MoveSpeed, 
                     PathPositionElement, FollowPathProperties, PhysicsVelocity, AttackRadius>()
-                .WithAll<ChampTag, TargetEntity>()
+                .WithAll<ChampTag, TargetEntity, RVOAgent>()
                 .WithDisabled<PathFindingRequest, IncorrectPathProperties>()
                 .Build();
             
@@ -55,7 +46,7 @@ namespace ROMA2.Logic.Common.Movement
             // их обход легче реализовать через RVO. Например: деревья из доты
             _agentsQueryForChampions = QueryBuilder()
                 .WithAll<LocalTransform, PhysicsVelocity, RVOAgent>()
-                .WithNone<MinionTag>()
+                .WithNone<MinionTag, ChampTag>()
                 .Build();
             
             state.RequireForUpdate<GameplayingTag>();
@@ -85,9 +76,7 @@ namespace ROMA2.Logic.Common.Movement
                 AllAgents = agentsForMinions,
                 K = 3.5f,
                 MaxSamples = 12,
-                TransformLookup = GetComponentLookup<LocalTransform>(true),
-                DeltaTime = Time.DeltaTime,
-                CleanPathLookup = GetComponentLookup<CleanPath>(true)
+                DeltaTime = Time.DeltaTime
             }.ScheduleParallel(_mainMinionQuery, state.Dependency);
             
             state.Dependency = new RVOJob
@@ -95,9 +84,7 @@ namespace ROMA2.Logic.Common.Movement
                 AllAgents = agentsForChampions,
                 K = 3.5f,
                 MaxSamples = 12,
-                TransformLookup = GetComponentLookup<LocalTransform>(true),
-                DeltaTime = Time.DeltaTime,
-                CleanPathLookup = GetComponentLookup<CleanPath>(true)
+                DeltaTime = Time.DeltaTime
             }.ScheduleParallel(_mainChampionQuery, state.Dependency);
             
             // Очистка после выполнения всех зависимостей
@@ -114,7 +101,8 @@ namespace ROMA2.Logic.Common.Movement
         private void Execute(
             [EntityIndexInQuery] int index, 
             in LocalTransform transform, 
-            in PhysicsVelocity velocity)
+            in PhysicsVelocity velocity,
+            in RVOAgent agent)
         {
             Data[index] = new()
             {
@@ -123,86 +111,57 @@ namespace ROMA2.Logic.Common.Movement
             };
         }
     }
-
-    /* Когда башни уничтожаются, они оставляют за собой закрытые клетки,
-     поэтому некоторые миньоны застревают на позициях уничтоженных башен.
-     Миньонов выталкивают свои же миньоны */
+    
     [BurstCompile]
-    [WithDisabled(typeof(IncorrectPathProperties))]
     public partial struct RVOJob : IJobEntity
     {
-        [NativeDisableContainerSafetyRestriction] [ReadOnly] 
-        public ComponentLookup<LocalTransform> TransformLookup;
         [ReadOnly] public NativeArray<AgentData> AllAgents;
-        [ReadOnly] public ComponentLookup<CleanPath> CleanPathLookup;
         public float K;
         public int MaxSamples;
         public float DeltaTime;
-        public bool IsCharacter; // По этому свойству можем разделять логику миньонов и персонажей
-    
+
         private void Execute(
-            ref LocalTransform transform,
-            ref PhysicsVelocity velocity,
+            in LocalTransform transform,
+            in PhysicsVelocity velocity,
             in MoveSpeed moveSpeed,
             ref FollowPathProperties followPathProperties,
-            ref DynamicBuffer<PathPositionElement> pathPositions,
-            in AttackRadius radius,
-            in TargetEntity attackTarget,
+            in DynamicBuffer<PathPositionElement> pathPositions,
             in MoveTargetPosition goalPos,
-            Entity owner)
+            in TargetEntity targetEntity,
+            ref RVOAgent agent)
         {
-            float3 myPos = transform.Position;
-            if (attackTarget.Value != Entity.Null 
-                && TransformLookup.TryGetComponent(attackTarget.Value, out LocalTransform targetTransform))
-            {
-                float3 targetPos = targetTransform.Position;
-                float distSq = distancesq(targetPos, myPos);
-                float stopDist = radius.Value - 1;
-    
-                if (distSq <= stopDist * stopDist)
-                {
-                    if (!pathPositions.IsEmpty) pathPositions.Clear();
-                    velocity.Linear = float3.zero;
-                    float3 dir = normalizesafe(targetPos - myPos);
-                    quaternion targetRot = LookRotationSafe(new(dir.x, 0, dir.z), up());
-                    transform.Rotation = slerp(transform.Rotation, targetRot, DeltaTime * 10f);
-                    return;
-                }
-            }
-            
-            if (pathPositions.IsEmpty || followPathProperties.Index < 0)
-            {
-                velocity.Linear = float3.zero;
-                return;
-            }
-    
-            float2 selfPosXZ = myPos.xz;
+            // Если дошли до цели, останавливаемся и отключаем RVO
+            if (targetEntity.InAttackArea || followPathProperties.ReachedTheTarget
+                || (pathPositions.IsEmpty && !followPathProperties.IsCleanPath)) return;
+
+            float2 selfPosXZ = transform.Position.xz;
             float2 currentVXZ = velocity.Linear.xz;
             float2 targetPathXZ;
 
-            // Чтобы не дрифтил
-            if (followPathProperties.IsNewPath)
-            {
-                velocity.Linear = float3.zero;
-                followPathProperties.IsNewPath = false;
-            }
-            
-            if (CleanPathLookup.IsComponentEnabled(owner)) targetPathXZ = goalPos.Value.xz;
+            // <= 1 обусловлено тем, что при нечётном количестве вейпоинтов концом пути будет 1
+            if (followPathProperties.IsCleanPath || followPathProperties.Index <= 1) targetPathXZ = goalPos.Value.xz;
             else
             {
                 targetPathXZ = pathPositions[followPathProperties.Index].Value;
-
                 // Упростил логику, в любом случае пропускаем два индекса
                 if (lengthsq(targetPathXZ - selfPosXZ) <= 2.25 && followPathProperties.Index >= 2)
-                    followPathProperties.Index -= 2;
-                
-                // Сделать дополнительную проверку прохождения вейпоинтов через dot
-
-                // <= 1 обусловлено тем, что при нечётном количестве вейпоинтов концом пути будет 1
-                if (followPathProperties.Index <= 1)
-                    targetPathXZ = new(goalPos.Value.x, goalPos.Value.z);
+                    followPathProperties.Index -= 2; 
+                // Дополнительная проверка прохождения вейпоинтов через dot,
+                // если случайно промазали и не попали в радиус
+                else
+                {
+                    // Гарантируем, что не выйдем за массив, так как index - 2 в pathfinding
+                    float2 pastTargetPathXZ = pathPositions[followPathProperties.Index + 1].Value;
+                    float2 pastVector = normalizesafe(targetPathXZ - pastTargetPathXZ);
+                    float2 currentVector = normalizesafe(selfPosXZ - targetPathXZ);
+                    if (dot(currentVector, pastVector) >= 0)
+                    {
+                        followPathProperties.Index -= 1;
+                        targetPathXZ = pathPositions[followPathProperties.Index].Value;
+                    }
+                }
             }
-            
+
             // Считаем чистый вектор и расстояние до цели
             float2 vectorToTarget = targetPathXZ - selfPosXZ;
             float distanceToTarget = length(vectorToTarget);
@@ -223,9 +182,8 @@ namespace ROMA2.Logic.Common.Movement
             float minPenalty = float.MaxValue;
     
             // Постоянные для RVO
-            const float bodyRadius = 0.5f;
-            const float combinedRadius = bodyRadius + 0.5f;
-            const float combinedRadiusSq = combinedRadius * combinedRadius;
+            float combinedRadius = agent.BodyRadius + 0.5f;
+            float combinedRadiusSq = combinedRadius * combinedRadius;
     
             // Кэшируем данные, чтобы не пересчитывать в цикле
             int agentsCount = AllAgents.Length;
@@ -240,7 +198,8 @@ namespace ROMA2.Logic.Common.Movement
                     vCand = new float2(cos, sin) * moveSpeed.Value;
                 }
     
-                float penalty = CalculatePenalty(vCand, vGoal, selfPosXZ, currentVXZ, combinedRadiusSq, agentsCount);
+                float penalty = 
+                    CalculatePenalty(vCand, vGoal, selfPosXZ, currentVXZ, combinedRadiusSq, agentsCount);
                 // Штраф за отклонение от нынешнего вектора, направления
                 penalty += distance(vCand, currentVXZ) * 1.2f;
     
@@ -251,17 +210,12 @@ namespace ROMA2.Logic.Common.Movement
                 }
             }
 
-            // Можем разделить логику поворотов на логику миньонов и персонажей булевым признаком при создании джобы 
-            float delta = lengthsq(goalPos.Value.xz - selfPosXZ) > 1 ? 0.2f : 1;
-            float2 finalV = lerp(currentVXZ, vBest, delta);
-            velocity.Linear = new(finalV.x, velocity.Linear.y, finalV.y);
-    
-            if (lengthsq(finalV) > 0.01f)
-                transform.Rotation = LookRotationSafe(new(finalV.x, 0, finalV.y), up());
+            agent.BestVelocity = new(vBest.x, velocity.Linear.y, vBest.y);
         }
-    
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private float CalculatePenalty(float2 vCand, float2 vGoal, float2 posA, float2 vA, float combinedRadiusSq, int agentsCount)
+        private float CalculatePenalty(float2 vCand, float2 vGoal, float2 posA, 
+            float2 vA, float combinedRadiusSq, int agentsCount)
         {
             float tc = 5.0f;
 

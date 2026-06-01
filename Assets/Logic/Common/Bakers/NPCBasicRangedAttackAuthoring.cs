@@ -1,10 +1,9 @@
-﻿using Logic.Common;
-using ROMA2.Logic.Common.Bakers;
+﻿using ROMA2.Logic.Common.Extensions;
 using Unity.Entities;
 using Unity.NetCode;
 using UnityEngine;
 
-namespace ROMA2.Logic.Helpers.Bakers
+namespace ROMA2.Logic.Common.Bakers
 {
     public class NPCBasicRangedAttackAuthoring : MonoBehaviour
     {
@@ -13,6 +12,7 @@ namespace ROMA2.Logic.Helpers.Bakers
         public Vector3 FirePointOffset;
         public float AttackSpeed;
         public GameObject AttackPrefab;
+        public float BodyRadius;
 
         public NetCodeConfig NetCodeConfig;
         public int SimulationTickRate => NetCodeConfig.ClientServerTickRate.SimulationTickRate;

@@ -1,8 +1,8 @@
-﻿using Unity.Entities;
+﻿using Logic.Common;
+using Unity.Entities;
 using Unity.NetCode;
-using UnityEngine;
 
-namespace Logic.Common
+namespace ROMA2.Logic.Common.Extensions
 {
     public static class CooldownTicksExtensions
     {
@@ -20,10 +20,11 @@ namespace Logic.Common
                 testTick.Subtract(i);
 
                 if (!cooldownTargetTicks.GetDataAtTick(testTick, out AbilityCooldownTargetTicks curTargetTicks))
-                    curTargetTicks[abilityIndex] = NetworkTick.Invalid;
+                    curTargetTicks.SetAbilityByTick(abilityIndex, NetworkTick.Invalid);
 
-                if (curTargetTicks[abilityIndex] != NetworkTick.Invalid &&
-                    curTargetTicks[abilityIndex].IsNewerThan(currentTick)) continue;
+                NetworkTick abilityTick = curTargetTicks.GetAbilityByTick(abilityIndex);
+                if (abilityTick != NetworkTick.Invalid &&
+                    abilityTick.IsNewerThan(currentTick)) continue;
                 
                 isOnCooldown = false;
                 break;
@@ -46,7 +47,7 @@ namespace Logic.Common
             
             NetworkTick newCooldownTargetTicks = currentTick;
             newCooldownTargetTicks.Add(cooldownTicks[abilityIndex]);
-            curTargetTicks[abilityIndex] = newCooldownTargetTicks;
+            curTargetTicks.SetAbilityByTick(abilityIndex, newCooldownTargetTicks);
 
             NetworkTick nextTick = currentTick;
             nextTick.Add(1u);

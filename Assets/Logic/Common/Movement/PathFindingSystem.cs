@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Logic.Client;
 using Logic.Common;
 using Unity.Burst;
 using Unity.Collections;
@@ -7,6 +6,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
+using Unity.Physics;
 using Unity.Transforms;
 using static Unity.Entities.SystemAPI;
 using static Unity.Mathematics.math;
@@ -18,15 +18,23 @@ namespace ROMA2.Logic.Common.Movement
     public partial struct PathFindingSystem : ISystem
     {
         private EntityQuery _query;
-
+        private CollisionFilter _filter;
+        
         public void OnCreate(ref SystemState state)
         {
+            state.RequireForUpdate<PhysicsWorldSingleton>();
             _query = QueryBuilder()
                 .WithAll<MoveTargetPosition, LocalTransform, MoveSpeed, 
                     PathPositionElement, PathFindingRequest, Simulate, FollowPathProperties>()
                 .WithNone<DestroyEntityTag>()
                 .Build();
 
+            _filter = new()
+            {
+                BelongsTo = 1 << 5, // RayCast
+                CollidesWith = 1 << 4 // Structures
+            };
+            
             state.RequireForUpdate(_query);
             state.RequireForUpdate<GridTag>();
             state.RequireForUpdate<PathNode>();
@@ -46,13 +54,14 @@ namespace ROMA2.Logic.Common.Movement
             EntityCommandBuffer.ParallelWriter ecb = GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged)
                 .AsParallelWriter();
-
-            // Передаем управление памятью внутрь Execute. Цикл очистки на главном потоке УДАЛЕН.
+            
             state.Dependency = new PathFindingJob
             {
                 GridSize = gridSize,
                 Grid = buffer,
-                ECB = ecb
+                ECB = ecb,
+                CollisionWorld = GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
+                CollisionFilter = _filter
             }.ScheduleParallel(_query, state.Dependency);
         }
     }
@@ -68,18 +77,18 @@ namespace ROMA2.Logic.Common.Movement
         public int Index;
         public int FCost; // Изменено на int для ускорения кучи
     }
-
-    /* Сделать рейкасты, если путь чист, то ecb.SetComponentEnabled<CleanPath>, иначе ищем путь.
-     Сделать систему очередей на создание пути RequestHandler */
+    
     [BurstCompile]
     public partial struct PathFindingJob : IJobEntity
     {
         private const int GRID_BIAS = 60;
-        private const int MAX_ITERATIONS = 14400;
+        private const int MAX_ITERATIONS = 2000;
 
         [ReadOnly] public int2 GridSize;
         [ReadOnly] public NativeArray<PathNode> Grid;
         public EntityCommandBuffer.ParallelWriter ECB;
+        [ReadOnly] public CollisionWorld CollisionWorld;
+        [ReadOnly] public CollisionFilter CollisionFilter;
 
         private void Execute(
             [ChunkIndexInQuery] int key, 
@@ -92,16 +101,34 @@ namespace ROMA2.Logic.Common.Movement
             int2 startPos = (int2)round(transform.Position.xz) + GRID_BIAS;
             int2 endPos = (int2)round(target.Value.xz) + GRID_BIAS;
 
-            if (IsOutside(startPos)) return;
+            if (IsOutside(endPos)) return;
+            
+            RaycastInput input = new()
+            {
+                Start = transform.Position,
+                End = target.Value,
+                Filter = CollisionFilter
+            };
+            
+            // Путь чист, если ни по кому не попал
+            if (!CollisionWorld.CastRay(input, out RaycastHit _))
+            {
+                ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
+                pathProperties.IsCleanPath = true;
+                pathProperties.IsNewPath = true;
+                pathProperties.ReachedTheTarget = false;
+                return;
+            }
 
             // 10 клеток — максимальный радиус поиска альтернативной точки 
-            if (!FindNearestWalkablePosition(endPos, 10, out int2 walkableEndPos))
+            if (!FindNearestWalkablePosition(startPos, 10, out int2 walkableStartPos) 
+                || !FindNearestWalkablePosition(endPos, 10, out int2 walkableEndPos))
             {
                 // Если даже рядом нет свободных точек, отменяем запрос
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
                 ECB.SetComponent(key, entity, new IncorrectPathProperties
                 {
-                    TargetPositionIsNotWalkable = true,
+                    PositionIsNotWalkable = true,
                     NotEnoughIterations = false
                 });
                 ECB.SetComponentEnabled<IncorrectPathProperties>(key, entity, true);
@@ -109,13 +136,18 @@ namespace ROMA2.Logic.Common.Movement
             }
 
             // Перезаписываем конечную точку на найденную проходимую
-            endPos = walkableEndPos; 
+            startPos = walkableStartPos;
+            endPos = walkableEndPos;
+            
+            // Путь не чист
+            pathProperties.IsCleanPath = false;
+            pathProperties.ReachedTheTarget = false;
             int startIndex = CalculateIndex(startPos.x, startPos.y, GridSize.x);
             int endIndex = CalculateIndex(endPos.x, endPos.y, GridSize.x);
             
-            UnsafeHashMap<int, NodeSearchData> visitedNodes = new(1024, Allocator.Temp);
-            UnsafeList<HeapNode> openList = new(1024, Allocator.Temp);
-            UnsafeHashSet<int> closedSet = new(1024, Allocator.Temp);
+            UnsafeHashMap<int, NodeSearchData> visitedNodes = new(2048, Allocator.Temp);
+            UnsafeList<HeapNode> openList = new(2048, Allocator.Temp);
+            UnsafeHashSet<int> closedSet = new(2048, Allocator.Temp);
             
             visitedNodes.TryAdd(startIndex, new() { GCost = 0, CameFromIndex = -1 });
             PushHeap(ref openList, new() { Index = startIndex, FCost = GetH(startPos, endPos) });
@@ -171,12 +203,10 @@ namespace ROMA2.Logic.Common.Movement
                     curr = visitedNodes[curr].CameFromIndex;
                 }
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
-                ECB.SetComponent(key, entity, new FollowPathProperties
-                {
-                    // Персонаж дёргается из-за отсечения позиции в int, первая позиция может быть чуть позади
-                    Index = buffer.Length - 2,
-                    IsNewPath = true
-                });
+                // Персонаж дёргается из-за отсечения позиции в int, первая позиция может быть чуть позади
+                pathProperties.Index = buffer.Length - 2;
+                pathProperties.IsNewPath = true;
+                pathProperties.ReachedTheTarget = false;
                 ECB.SetComponentEnabled<IncorrectPathProperties>(key, entity, false);
             }
             else
@@ -184,7 +214,7 @@ namespace ROMA2.Logic.Common.Movement
                 ECB.SetComponentEnabled<PathFindingRequest>(key, entity, false);
                 ECB.SetComponent(key, entity, new IncorrectPathProperties
                 {
-                    TargetPositionIsNotWalkable = false,
+                    PositionIsNotWalkable = false,
                     NotEnoughIterations = true
                 });
                 ECB.SetComponentEnabled<IncorrectPathProperties>(key, entity, true);

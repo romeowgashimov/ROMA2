@@ -33,7 +33,7 @@ namespace ROMA2.Logic.Client.Models
 
     public partial struct OutlineJob : IJobEntity
     {
-        private const float OUTLINE_WIDTH = 1.14F;
+        private const float OUTLINE_WIDTH = 1.12F;
         private static readonly Color OUTLINE_COLOR_RED = new(1f, 0.3f, 0.3f, 1f);
         private static readonly Color OUTLINE_COLOR_BLUE = new(0.3f, 0.7f, 1f, 1f);
         private static readonly Color OUTLINE_COLOR_DEFAULT = new(1f, 0.7f, 1f, 1f);

@@ -1,5 +1,6 @@
 using Logic.Common;
 using ROMA2.Logic.Common.Databases;
+using ROMA2.Logic.Common.Extensions;
 using Unity.Entities;
 using UnityEngine;
 
@@ -32,13 +33,8 @@ namespace ROMA2.Logic.Common.Bakers
                 DynamicBuffer<PathPositionElement> pathPositions = AddBuffer<PathPositionElement>(entity);
                 pathPositions.Capacity = authoring.PathPositionsCapacity;
                 AddComponent<FollowPathProperties>(entity);
-                AddComponent<RVOAgent>(entity);
-                AddComponent<CleanPath>(entity);
-                SetComponentEnabled<CleanPath>(entity, false);
                 AddComponent<IncorrectPathProperties>(entity);
                 SetComponentEnabled<IncorrectPathProperties>(entity, false);
-                AddComponent<PathFindingProcessing>(entity);
-                SetComponentEnabled<PathFindingProcessing>(entity, false);
 
                 AddComponent<AbilityInput>(entity);
                 AddComponent<AimingTag>(entity);

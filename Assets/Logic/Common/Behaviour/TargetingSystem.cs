@@ -106,6 +106,7 @@ namespace ROMA2.Logic.Common.Behaviour
             if (target.Value == Entity.Null)
             {
                 inAttackArea.ValueRW = false;
+                target.InAttackArea = false;
                 return;
             }
 
@@ -118,10 +119,15 @@ namespace ROMA2.Logic.Common.Behaviour
                     movePos.Value = targetPos;
                     needPath.ValueRW = true;
                     inAttackArea.ValueRW = false;
+                    target.InAttackArea = false;
                     lastPos.Value = targetPos;
                 }
             }
-            else inAttackArea.ValueRW = true;
+            else
+            {
+                inAttackArea.ValueRW = true;
+                target.InAttackArea = true;
+            }
         }
     }
 

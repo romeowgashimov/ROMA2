@@ -1,16 +1,14 @@
 ﻿using Logic.Common;
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
 using Unity.Transforms;
 using static Unity.Mathematics.math;
 using float3 = Unity.Mathematics.float3;
 
-namespace ROMA2.Logic.Common.Movement
+namespace ROMA2.Logic.Server.GameProcesses
 {
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct NextPathPointSystem : ISystem
     {
         public void OnCreate(ref SystemState state)
@@ -48,11 +46,11 @@ namespace ROMA2.Logic.Common.Movement
             DynamicBuffer<MinionPathPosition> pathMinions, 
             RefRW<MinionPathIndex> pathIndex,
             RefRW<MoveTargetPosition> moveTargetPosition,
-            in TargetEntity targetEntity)
+            in TargetEntity targetEntity,
+            in FollowPathProperties pathProperties)
         {
             if (pathMinions.IsEmpty) return;
-
-            bool isEmpty = pathPositions.IsEmpty;
+            
             float3 targetPos = pathMinions[pathIndex.ValueRO.Value].Value;
             bool passed = lengthsq(targetPos - transform.ValueRO.Position) <= 64;
             if (passed && pathIndex.ValueRO.Value < pathMinions.Length - 1)
@@ -61,10 +59,9 @@ namespace ROMA2.Logic.Common.Movement
                 targetPos = pathMinions[pathIndex.ValueRO.Value].Value;
             }
 
-            bool recovery = !isEmpty
-                            && lengthsq(pathPositions[0].Value - (int2)targetPos.xz) >= 4;
+            if (targetEntity.Value != Entity.Null) return;
             
-            if (targetEntity.Value == Entity.Null && (isEmpty || passed || recovery))
+            if (passed || lengthsq(moveTargetPosition.ValueRO.Value.xz - (int2)targetPos.xz) >= 4)
             {
                 moveTargetPosition.ValueRW.Value = targetPos;
                 Ecb.SetComponentEnabled<PathFindingRequest>(chunkIndex, entity, true);

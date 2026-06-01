@@ -4,7 +4,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace ROMA2.Logic.Common.Bakers
+namespace ROMA2.Logic.Common.Extensions
 {
     public static class BakerExtensions
     {
@@ -27,7 +27,8 @@ namespace ROMA2.Logic.Common.Bakers
             float3 firePointOffset,
             float attackSpeed,
             bool isChampion,
-            GameObject attackPrefab = null)
+            GameObject attackPrefab = null,
+            float RVORadius = 0.5f)
             where T : MonoBehaviour
         {
             Entity entity = baker.GetEntity(TransformUsageFlags.Dynamic);
@@ -42,7 +43,7 @@ namespace ROMA2.Logic.Common.Bakers
             }
             
             baker.AddComponent<AttackSpeed>(entity, new() { Value = attackSpeed });
-            baker.AddComponent<TargetEntity>(entity);
+            baker.AddComponent<TargetEntity>(entity, new() { InAttackArea = false });
             baker.AddBuffer<AttackCooldown>(entity);
                 
             baker.AddComponent(entity, new DetectionRadius { Value = detectionRadius });
@@ -54,6 +55,8 @@ namespace ROMA2.Logic.Common.Bakers
                 baker.AddComponent<ReAggrRequest>(entity);
                 baker.SetComponentEnabled<ReAggrRequest>(entity, false);
             }
+            
+            baker.AddComponent<RVOAgent>(entity, new() { BodyRadius = RVORadius });
         }
 
         public static void BakeAbilityCommand<T, V>(

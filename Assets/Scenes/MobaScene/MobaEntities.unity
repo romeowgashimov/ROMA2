@@ -3985,7 +3985,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.MinionSpawnPropertiesAuthoring
   TimeBetweenWaves: 10
-  TimeBetweenMinions: 0.1
+  TimeBetweenMinions: 1
   CountToSpawnInWave: 6
 --- !u!114 &1646246679
 MonoBehaviour:

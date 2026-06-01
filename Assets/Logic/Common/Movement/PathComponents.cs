@@ -1,18 +1,14 @@
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
 
 namespace Logic.Common
 {
     public struct PathFindingRequest : IEnableableComponent, IComponentData { }
     
-    public struct PathFindingProcessing  : IEnableableComponent, IComponentData { }
-
-    public struct CleanPath : IEnableableComponent, IComponentData { }
-    
     public struct IncorrectPathProperties : IEnableableComponent, IComponentData
     {
-        public bool TargetPositionIsNotWalkable;
+        // Ради дебага святое дело
+        public bool PositionIsNotWalkable;
         public bool NotEnoughIterations;
     }
     
@@ -26,12 +22,23 @@ namespace Logic.Common
     {
         public int Index;
         public bool IsNewPath;
-        public float WaitingTime;
+        public bool IsCleanPath;
+        public bool ReachedTheTarget;
     }
     
     public struct RegisteredObstacleInGrid : IComponentData { }
     
     public struct IgnoreRegistrationInGrid : IComponentData { }
+
+    public struct RVOAgent : IComponentData
+    {
+        public float3 BestVelocity;
+        public float BodyRadius;
+    }
     
-    public struct RVOAgent : IComponentData { }
+    public struct AgentData
+    {
+        public float2 Position;
+        public float2 Velocity;
+    }
 }

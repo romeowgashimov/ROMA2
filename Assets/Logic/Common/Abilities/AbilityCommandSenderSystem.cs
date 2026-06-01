@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using ROMA2.Logic.Common.Extensions;
+using Unity.Entities;
 using Unity.NetCode;
 using Unity.Transforms;
 

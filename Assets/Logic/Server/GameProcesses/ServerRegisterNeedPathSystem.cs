@@ -14,6 +14,7 @@ namespace Logic.Server
         {
             _query = SystemAPI.QueryBuilder()
                 .WithAll<InputMoveTargetPosition, MoveTargetPosition, PathFindingRequest>()
+                .WithNone<DestroyEntityTag>()
                 .WithOptions(EntityQueryOptions.IgnoreComponentEnabledState)
                 .Build();
 

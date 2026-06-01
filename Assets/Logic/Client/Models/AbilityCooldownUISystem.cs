@@ -24,20 +24,21 @@ namespace Logic.Client
             {
                 if (!targetTicks.GetDataAtTick(currentTick, out AbilityCooldownTargetTicks curTargetTicks))
                 {
-                    curTargetTicks.AoeAbility = NetworkTick.Invalid;
-                    curTargetTicks.SkillShotAbility = NetworkTick.Invalid;
+                    curTargetTicks.Ability1 = NetworkTick.Invalid;
+                    curTargetTicks.Ability2 = NetworkTick.Invalid;
                 }
 
-                for (int i = 0; i < curTargetTicks.Length; i++)
+                for (int i = 0; i < curTargetTicks.GetAbilityCount(); i++)
                 {
                     float fillAmount;
-                    if (curTargetTicks[i] == NetworkTick.Invalid ||
-                        currentTick.IsNewerThan(curTargetTicks[i]))
+                    NetworkTick abilityTick = curTargetTicks.GetAbilityByTick(i);
+                    if (abilityTick == NetworkTick.Invalid ||
+                        currentTick.IsNewerThan(abilityTick))
                         fillAmount = 0;
                     else
                     {
-                        uint remainTickCount = curTargetTicks[i].TickIndexForValidTick -
-                                                  currentTick.TickIndexForValidTick;
+                        uint remainTickCount = abilityTick.TickIndexForValidTick -
+                                               currentTick.TickIndexForValidTick;
                         fillAmount = (float)remainTickCount / cooldownTicks[i];
                     }
                     abilityCooldownUIController.UpdateMask(i, fillAmount);
