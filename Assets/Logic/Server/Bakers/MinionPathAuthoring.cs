@@ -1,9 +1,10 @@
-﻿using Logic.Common;
+﻿using ROMA2.Logic.Data;
+using ROMA2.Logic.Server.GameProcesses;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Logic.Server
+namespace ROMA2.Logic.Server.Bakers
 {
     public class MinionPathAuthoring : MonoBehaviour
     {

@@ -1,7 +1,8 @@
-﻿using Unity.Entities;
+﻿using ROMA2.Logic.Data;
+using Unity.Entities;
 using UnityEngine;
 
-namespace Logic.Common.Authorings
+namespace ROMA2.Logic.Common.Bakers
 {
     public class HealthPointsAuthoring : MonoBehaviour
     {
@@ -13,8 +14,8 @@ namespace Logic.Common.Authorings
             public override void Bake(HealthPointsAuthoring authoring)
             {
                 Entity entity = GetEntity(TransformUsageFlags.Dynamic);
-                AddComponent(entity, new MaxHealthPoints() { Value = authoring.MaxHealthPoints });
-                AddComponent(entity, new CurrentHealthPoints() { Value = authoring.MaxHealthPoints });
+                AddComponent(entity, new MaxHealthPoints { Value = authoring.MaxHealthPoints });
+                AddComponent(entity, new CurrentHealthPoints { Value = authoring.MaxHealthPoints });
                 AddBuffer<DamageBufferElement>(entity);
                 AddBuffer<DamageThisTick>(entity);
             }

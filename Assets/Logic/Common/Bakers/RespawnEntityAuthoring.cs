@@ -1,8 +1,9 @@
-﻿using Unity.Entities;
+﻿using ROMA2.Logic.Data;
+using Unity.Entities;
 using Unity.NetCode;
 using UnityEngine;
 
-namespace Logic.Common.Authorings
+namespace ROMA2.Logic.Common.Bakers
 {
     public class RespawnEntityAuthoring : MonoBehaviour
     {

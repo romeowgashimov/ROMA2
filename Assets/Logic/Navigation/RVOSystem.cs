@@ -1,5 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
-using Logic.Common;
+using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -10,11 +10,10 @@ using static Unity.Entities.SystemAPI;
 using static Unity.Mathematics.math;
 using float2 = Unity.Mathematics.float2;
 
-namespace ROMA2.Logic.Common.Movement
+namespace ROMA2.Logic.Navigation
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     [UpdateAfter(typeof(PathFindingSystem))]
-    [UpdateBefore(typeof(MoveSystem))]
     public partial struct RVOSystem : ISystem
     {
         private EntityQuery _mainMinionQuery;
@@ -26,15 +25,15 @@ namespace ROMA2.Logic.Common.Movement
         {
             _mainMinionQuery = QueryBuilder()
                 .WithAll<LocalTransform, MoveTargetPosition, MoveSpeed, 
-                         PathPositionElement, FollowPathProperties, PhysicsVelocity, AttackRadius>()
-                .WithAll<MinionTag, TargetEntity, RVOAgent>()
+                         PathPositionElement, FollowPathProperties, PhysicsVelocity>()
+                .WithAll<MinionTag,  RVOAgent>()
                 .WithDisabled<PathFindingRequest, IncorrectPathProperties>()
                 .Build();
             
             _mainChampionQuery = QueryBuilder()
                 .WithAll<LocalTransform, MoveTargetPosition, MoveSpeed, 
-                    PathPositionElement, FollowPathProperties, PhysicsVelocity, AttackRadius>()
-                .WithAll<ChampTag, TargetEntity, RVOAgent>()
+                    PathPositionElement, FollowPathProperties, PhysicsVelocity>()
+                .WithAll<ChampTag, RVOAgent>()
                 .WithDisabled<PathFindingRequest, IncorrectPathProperties>()
                 .Build();
             
@@ -127,17 +126,16 @@ namespace ROMA2.Logic.Common.Movement
             ref FollowPathProperties followPathProperties,
             in DynamicBuffer<PathPositionElement> pathPositions,
             in MoveTargetPosition goalPos,
-            in TargetEntity targetEntity,
             ref RVOAgent agent)
         {
             // Если дошли до цели, останавливаемся и отключаем RVO
-            if (targetEntity.InAttackArea || followPathProperties.ReachedTheTarget
+            if (followPathProperties.ReachedTheTarget
                 || (pathPositions.IsEmpty && !followPathProperties.IsCleanPath)) return;
 
             float2 selfPosXZ = transform.Position.xz;
             float2 currentVXZ = velocity.Linear.xz;
             float2 targetPathXZ;
-
+            
             // <= 1 обусловлено тем, что при нечётном количестве вейпоинтов концом пути будет 1
             if (followPathProperties.IsCleanPath || followPathProperties.Index <= 1) targetPathXZ = goalPos.Value.xz;
             else
@@ -160,21 +158,17 @@ namespace ROMA2.Logic.Common.Movement
                         targetPathXZ = pathPositions[followPathProperties.Index].Value;
                     }
                 }
-            }
-
-            // Считаем чистый вектор и расстояние до цели
+            } 
+            
             float2 vectorToTarget = targetPathXZ - selfPosXZ;
-            float distanceToTarget = length(vectorToTarget);
-
-            // Направление движения 
             float2 moveDirection = normalizesafe(vectorToTarget);
-
-            // Рассчитываем желаемую скорость
+            
+            // Желаемая скорость
             float desiredSpeed = moveSpeed.Value;
-
+            
             // Скорость за кадр (Speed * DeltaTime) не должна превышать расстояние до цели
             // Делим расстояние на DeltaTime, чтобы получить максимально допустимую скорость для этого кадра
-            float maxAllowedSpeed = distanceToTarget / DeltaTime;
+            float maxAllowedSpeed = length(vectorToTarget) / DeltaTime;
             float finalSpeed = min(desiredSpeed, maxAllowedSpeed);
             
             float2 vGoal = moveDirection * finalSpeed;
@@ -195,7 +189,7 @@ namespace ROMA2.Logic.Common.Movement
                 else
                 {
                     sincos(PI2 / MaxSamples * i, out float sin, out float cos);
-                    vCand = new float2(cos, sin) * moveSpeed.Value;
+                    vCand = new float2(cos, sin) * desiredSpeed;
                 }
     
                 float penalty = 

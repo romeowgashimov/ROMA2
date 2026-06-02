@@ -1,9 +1,10 @@
-﻿using Unity.Burst;
+﻿using ROMA2.Logic.Data;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 
-namespace Logic.Common.Systems
+namespace ROMA2.Logic.Common.DamageCalculator
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup), OrderLast = true)]
     [UpdateAfter(typeof(CalculateFrameDamageSystem))]

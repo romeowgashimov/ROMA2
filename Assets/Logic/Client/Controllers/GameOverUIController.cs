@@ -1,4 +1,4 @@
-﻿using Logic.Common;
+﻿using ROMA2.Logic.Data;
 using TMPro;
 using Unity.Entities;
 using Unity.NetCode;
@@ -6,9 +6,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static Unity.Entities.World;
-using GameOverSystem = Logic.Common.Systems.GameOverSystem;
+using GameOverSystem = ROMA2.Logic.Common.GameProcesses.GameOverSystem;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Controllers
 {
     public class GameOverUIController : MonoBehaviour
     {

@@ -1,7 +1,8 @@
-﻿using Unity.Entities;
+﻿using ROMA2.Logic.Data;
+using Unity.Entities;
 using Unity.NetCode;
 
-namespace Logic.Common.Systems
+namespace ROMA2.Logic.Common.Combat
 {
     public partial struct InitializeDestroyOnTimerSystem : ISystem
     {

@@ -1,10 +1,10 @@
-﻿using Logic.Common;
+﻿using ROMA2.Logic.Data;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Entities.Serialization;
 using static Unity.Scenes.SceneSystem;
 
-namespace Logic.Server
+namespace ROMA2.Logic.Server.Initialization
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct ServerLoadCharactersSystem : ISystem

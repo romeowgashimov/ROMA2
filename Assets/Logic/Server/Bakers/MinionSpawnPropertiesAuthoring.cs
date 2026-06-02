@@ -1,7 +1,8 @@
-﻿using Unity.Entities;
+﻿using ROMA2.Logic.Server.GameProcesses;
+using Unity.Entities;
 using UnityEngine;
 
-namespace Logic.Server
+namespace ROMA2.Logic.Server.Bakers
 {
     public class MinionSpawnPropertiesAuthoring : MonoBehaviour
     {

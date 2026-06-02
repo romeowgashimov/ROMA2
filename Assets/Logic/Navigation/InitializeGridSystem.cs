@@ -1,8 +1,7 @@
-using Logic.Common;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace ROMA2.Logic.Common.Movement
+namespace ROMA2.Logic.Navigation
 {
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     public partial class InitializeGridSystem : SystemBase

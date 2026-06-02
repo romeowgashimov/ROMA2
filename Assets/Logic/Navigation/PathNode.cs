@@ -1,6 +1,6 @@
 using Unity.Entities;
 
-namespace ROMA2.Logic.Common.Movement
+namespace ROMA2.Logic.Navigation
 {
     [InternalBufferCapacity(0)]
     public struct PathNode : IBufferElementData

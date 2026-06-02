@@ -1,11 +1,12 @@
 ﻿using System;
+using ROMA2.Logic.Data;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
 
-namespace Logic.Common.Systems
+namespace ROMA2.Logic.Common.GameProcesses
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial class RespawnChampionSystem : SystemBase

@@ -1,12 +1,12 @@
-using Logic.Common;
 using ROMA2.Logic.Client.UI;
+using ROMA2.Logic.Data;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Rendering;
 
-namespace ROMA2.Logic.Client.Network
+namespace ROMA2.Logic.Client.Initialization
 {
     [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
     public partial struct InitializeCharacterSystem : ISystem

@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.NetCode;
 
-namespace Logic.Common
+namespace ROMA2.Logic.Data
 {
     public struct GameplayingTag : IComponentData { }
 

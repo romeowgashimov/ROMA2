@@ -1,7 +1,7 @@
 using Unity.Entities;
 using UnityEngine;
 
-namespace Logic.Common
+namespace ROMA2.Logic.Data
 {
     public struct MobaPrefabs : IComponentData
     {
@@ -11,6 +11,7 @@ namespace Logic.Common
         public Entity RespawnEntity;
     }
 
+    // UI лучше вынести в Client
     public class UIPrefabs : IComponentData
     {
         public GameObject HealthBar;

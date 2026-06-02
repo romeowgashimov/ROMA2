@@ -1,10 +1,11 @@
-﻿using Unity.Burst;
+﻿using ROMA2.Logic.Data;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
 
-namespace Logic.Common.Systems
+namespace ROMA2.Logic.Common.Abilities
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct AbilityMoveSpeedSystem : ISystem

@@ -1,6 +1,8 @@
-using Logic.Common;
+using ROMA2.Logic.Common.Abilities;
 using ROMA2.Logic.Common.Databases;
 using ROMA2.Logic.Common.Extensions;
+using ROMA2.Logic.Data;
+using ROMA2.Logic.Navigation;
 using Unity.Entities;
 using UnityEngine;
 
@@ -35,6 +37,7 @@ namespace ROMA2.Logic.Common.Bakers
                 AddComponent<FollowPathProperties>(entity);
                 AddComponent<IncorrectPathProperties>(entity);
                 SetComponentEnabled<IncorrectPathProperties>(entity, false);
+                AddComponent<IgnoreRegistrationInGrid>(entity);
 
                 AddComponent<AbilityInput>(entity);
                 AddComponent<AimingTag>(entity);

@@ -1,8 +1,9 @@
-﻿using Unity.Entities;
+﻿using ROMA2.Logic.Server.Initialization;
+using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Logic.Server
+namespace ROMA2.Logic.Server.Bakers
 {
     public class GameStartPropertiesAuthoring : MonoBehaviour
     {

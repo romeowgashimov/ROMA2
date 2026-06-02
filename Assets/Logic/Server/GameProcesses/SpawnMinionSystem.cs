@@ -1,9 +1,9 @@
-﻿using Logic.Common;
+﻿using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
 
-namespace Logic.Server
+namespace ROMA2.Logic.Server.GameProcesses
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct SpawnMinionSystem : ISystem

@@ -1,12 +1,11 @@
-﻿using Logic.Common;
-using ROMA2.Logic.Server.Initialization;
+﻿using ROMA2.Logic.Data;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Scenes;
 using Unity.Transforms;
 
-namespace Logic.Server
+namespace ROMA2.Logic.Server.Initialization
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [UpdateInGroup(typeof(InitializationSystemGroup))]

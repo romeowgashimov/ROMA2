@@ -1,8 +1,9 @@
+using ROMA2.Logic.Navigation;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Logic.Common.PathFindingDirectory
+namespace ROMA2.Logic.Common.Bakers
 {
     public class GridAuthoring : MonoBehaviour
     {

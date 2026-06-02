@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Controllers
 {
     public class AbilityCooldownUIController : MonoBehaviour
     {

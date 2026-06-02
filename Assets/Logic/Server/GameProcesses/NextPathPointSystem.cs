@@ -1,4 +1,5 @@
-﻿using Logic.Common;
+﻿using ROMA2.Logic.Data;
+using ROMA2.Logic.Navigation;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;

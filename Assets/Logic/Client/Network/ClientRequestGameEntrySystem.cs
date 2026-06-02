@@ -1,13 +1,10 @@
 using System;
-using Assets.Logic.Client;
-using Logic.Common;
+using ROMA2.Logic.Data;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using UnityEngine;
-using static Unity.Scenes.SceneSystem;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Network
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
     public partial class ClientRequestGameEntrySystem : SystemBase

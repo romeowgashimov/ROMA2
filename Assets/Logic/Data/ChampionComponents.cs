@@ -3,7 +3,7 @@ using Unity.Entities.Serialization;
 using Unity.Mathematics;
 using Unity.NetCode;
 
-namespace Logic.Common
+namespace ROMA2.Logic.Data
 {
     public struct ChampTag : IComponentData { }
     
@@ -27,25 +27,12 @@ namespace Logic.Common
         [GhostField] public TeamType Value;
     }
     
-    public struct MoveSpeed : IComponentData
-    {
-        public float Value;
-    }
-    
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     public struct InputMoveTargetPosition : IInputComponentData
     {
         [GhostField(Quantization = 0)] public float3 Value;
         public bool Flag;
     }
-
-    public struct MoveTargetPosition : IComponentData
-    {
-        /*Убрал синхронизацию с сервером, pathfinding у клиента срабатывал раньше,
-        чем синхронизация, поэтому находился путь к не той точке */
-        public float3 Value;
-        public bool Flag;
-    } 
     
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     public struct AbilityInput : IInputComponentData

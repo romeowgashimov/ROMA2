@@ -1,10 +1,11 @@
-﻿using Unity.Collections;
+﻿using ROMA2.Logic.Data;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Entities.Serialization;
 using Unity.NetCode;
 using static Unity.Scenes.SceneSystem;
 
-namespace Logic.Common
+namespace ROMA2.Logic.Client.Network
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     public partial struct ClientLoadCharactersSystem : ISystem

@@ -1,12 +1,13 @@
 using Assets.Logic.Client;
-using Logic.Common;
+using ROMA2.Logic.Data;
+using ROMA2.Logic.Navigation;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Physics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.GhostInput
 {
     [UpdateInGroup(typeof(GhostInputSystemGroup))]
     public partial class MoveInputSystem : SystemBase
@@ -38,10 +39,7 @@ namespace Logic.Client
             _inputActions.Disable();
         }
 
-        protected override void OnUpdate()
-        {
-            
-        }
+        protected override void OnUpdate() { }
 
         private void OnSelectMovePosition(InputAction.CallbackContext obj)
         {

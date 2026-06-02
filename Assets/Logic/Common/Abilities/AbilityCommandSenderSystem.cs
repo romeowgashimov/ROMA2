@@ -1,9 +1,10 @@
 ﻿using ROMA2.Logic.Common.Extensions;
+using ROMA2.Logic.Data;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Transforms;
 
-namespace Logic.Common.ACs
+namespace ROMA2.Logic.Common.Abilities
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct AbilityCommandSenderSystem : ISystem

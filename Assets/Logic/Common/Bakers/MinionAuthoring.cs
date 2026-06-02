@@ -1,6 +1,8 @@
-﻿using Logic.Common;
+﻿using ROMA2.Logic.Data;
+using ROMA2.Logic.Navigation;
 using Unity.Entities;
 using UnityEngine;
+using MinionTag = ROMA2.Logic.Data.MinionTag;
 
 namespace ROMA2.Logic.Common.Bakers
 {
@@ -26,6 +28,7 @@ namespace ROMA2.Logic.Common.Bakers
                 AddComponent(entity, new MoveTargetPosition { Flag = false });
                 AddComponent<IncorrectPathProperties>(entity);
                 SetComponentEnabled<IncorrectPathProperties>(entity, false);
+                AddComponent<IgnoreRegistrationInGrid>(entity);
                 
                 AddComponent<Team>(entity);
                 AddComponent<LastTargetEntityPosition>(entity, new() { Value = 0 });

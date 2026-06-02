@@ -1,9 +1,8 @@
-﻿using Logic.Common;
-using ROMA2.Logic.Server.Initialization;
+﻿using ROMA2.Logic.Data;
 using Unity.Entities;
 using Unity.NetCode;
 
-namespace Logic.Server
+namespace ROMA2.Logic.Server.Initialization
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [UpdateInGroup(typeof(InitializationSystemGroup))]

@@ -1,6 +1,6 @@
 ﻿using System.Collections;
+using Logic.Client;
 using Logic.Client.UI;
-using Logic.Common;
 using ROMA2.Logic.Common.Databases;
 using TMPro;
 using Unity.Entities;
@@ -9,9 +9,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static Unity.Entities.World;
-using CountdownToGameStartSystem = Logic.Common.Systems.CountdownToGameStartSystem;
+using ChoiceChampionSystem = ROMA2.Logic.Client.Models.ChoiceChampionSystem;
+using ClientRequestGameEntrySystem = ROMA2.Logic.Client.Network.ClientRequestGameEntrySystem;
+using ClientStartGameSystem = ROMA2.Logic.Client.Network.ClientStartGameSystem;
+using CountdownToGameStartSystem = ROMA2.Logic.Common.GameProcesses.CountdownToGameStartSystem;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Controllers
 {
     public class GameStartUIController : MonoBehaviour
     {

@@ -1,7 +1,6 @@
-﻿using System;
-using Unity.Entities;
+﻿using Unity.Entities;
 
-namespace Logic.Server
+namespace ROMA2.Logic.Server.GameProcesses
 {
     public struct MinionSpawnProperties : IComponentData
     {

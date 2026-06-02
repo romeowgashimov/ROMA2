@@ -1,11 +1,14 @@
-﻿using Unity.Burst;
+﻿
+using ROMA2.Logic.Common.Databases;
+using ROMA2.Logic.Data;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Physics;
 using static Unity.Entities.SystemAPI;
 
-namespace Logic.Common.Systems
+namespace ROMA2.Logic.Common.DamageCalculator
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     [UpdateAfter(typeof(AbilityCommandSystemGroup))]

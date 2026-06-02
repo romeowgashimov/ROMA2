@@ -1,4 +1,4 @@
-﻿using Logic.Common;
+﻿using ROMA2.Logic.Data;
 using Unity.Entities;
 using Unity.NetCode;
 

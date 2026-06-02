@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 
-namespace Logic.Server
+namespace ROMA2.Logic.Server.Initialization
 {
     public struct GameStartProperties : IComponentData
     {

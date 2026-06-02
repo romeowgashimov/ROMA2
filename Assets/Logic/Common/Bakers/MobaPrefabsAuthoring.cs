@@ -1,7 +1,8 @@
+using ROMA2.Logic.Data;
 using Unity.Entities;
 using UnityEngine;
 
-namespace Logic.Common.Authorings
+namespace ROMA2.Logic.Common.Bakers
 {
     public class MobaPrefabsAuthoring : MonoBehaviour
     {

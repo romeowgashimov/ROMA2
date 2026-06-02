@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-namespace Logic.Common
+namespace ROMA2.Logic.Common.Abilities
 {
     // Что делать с умениями, которые не имеют префабов, таргетные, допустим, или баффы на себя или союзника
     public interface IAbilityCommand : IComponentData, IEnableableComponent

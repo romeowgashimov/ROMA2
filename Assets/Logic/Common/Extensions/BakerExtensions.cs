@@ -1,5 +1,6 @@
-﻿using Logic.Common;
-using ROMA2.Logic.Common.Combat;
+﻿using ROMA2.Logic.Common.Abilities;
+using ROMA2.Logic.Data;
+using ROMA2.Logic.Navigation;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;

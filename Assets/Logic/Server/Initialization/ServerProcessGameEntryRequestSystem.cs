@@ -1,5 +1,4 @@
-using Logic.Common;
-using ROMA2.Logic.Server.Initialization;
+using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -7,7 +6,7 @@ using Unity.Mathematics;
 using Unity.NetCode;
 using UnityEngine;
 
-namespace Logic.Server
+namespace ROMA2.Logic.Server.Initialization
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [UpdateInGroup(typeof(InitializationSystemGroup))]

@@ -2,9 +2,10 @@
 using Unity.Mathematics;
 using Unity.NetCode;
 
-namespace Logic.Common
+namespace ROMA2.Logic.Data
 {
     public struct MinionTag : IComponentData { }
+    
     public struct NewMinionTag : IComponentData { }
 
     public struct MinionPathPosition : IBufferElementData

@@ -1,5 +1,6 @@
 ﻿using Logic.Client;
-using Logic.Common;
+using ROMA2.Logic.Common.Abilities;
+using ROMA2.Logic.Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;

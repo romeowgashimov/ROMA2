@@ -1,7 +1,7 @@
-using Logic.Common;
+using ROMA2.Logic.Data;
 using Unity.Entities;
 
-namespace Assets.Logic.Client
+namespace ROMA2.Logic.Client.Network
 {
     public struct ClientTeamRequest : IComponentData
     {

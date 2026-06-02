@@ -1,10 +1,11 @@
-using Logic.Common;
+using ROMA2.Logic.Data;
+using ROMA2.Logic.Navigation;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Transforms;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Initialization
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
     public partial struct InitializeChampLocalSystem : ISystem

@@ -1,4 +1,4 @@
-namespace Logic.Common
+namespace ROMA2.Logic.Data
 {
     public enum TeamType : byte
     {

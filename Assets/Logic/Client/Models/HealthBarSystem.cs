@@ -1,11 +1,12 @@
-﻿using Logic.Common;
+﻿using Logic.Client;
+using ROMA2.Logic.Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Models
 {
     [UpdateAfter(typeof(TransformSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]

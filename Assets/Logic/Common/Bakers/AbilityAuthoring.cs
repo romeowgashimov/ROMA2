@@ -1,9 +1,9 @@
-﻿using Logic.Common;
+﻿using ROMA2.Logic.Data;
 using Unity.Entities;
 using Unity.NetCode;
 using UnityEngine;
 
-namespace ROMA2.Logic.Helpers.Bakers
+namespace ROMA2.Logic.Common.Bakers
 {
     public class AbilityAuthoring : MonoBehaviour
     {

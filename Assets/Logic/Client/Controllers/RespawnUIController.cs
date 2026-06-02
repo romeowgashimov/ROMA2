@@ -1,10 +1,9 @@
-﻿using Logic.Common;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using static Unity.Entities.World;
-using RespawnChampionSystem = Logic.Common.Systems.RespawnChampionSystem;
+using RespawnChampionSystem = ROMA2.Logic.Common.GameProcesses.RespawnChampionSystem;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Controllers
 {
     public class RespawnUIController : MonoBehaviour
     {

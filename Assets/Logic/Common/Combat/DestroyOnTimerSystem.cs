@@ -1,8 +1,9 @@
-﻿using Unity.Burst;
+﻿using ROMA2.Logic.Data;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.NetCode;
 
-namespace Logic.Common.Systems
+namespace ROMA2.Logic.Common.Combat
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct DestroyOnTimerSystem : ISystem

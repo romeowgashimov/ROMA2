@@ -1,5 +1,5 @@
-﻿using Logic.Common;
-using ROMA2.Logic.Client.UI;
+﻿using ROMA2.Logic.Client.UI;
+using ROMA2.Logic.Data;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;

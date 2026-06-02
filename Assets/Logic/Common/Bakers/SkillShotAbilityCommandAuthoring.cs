@@ -1,10 +1,9 @@
-﻿using ROMA2.Logic.Common.Bakers;
+﻿using ROMA2.Logic.Common.Abilities;
 using ROMA2.Logic.Common.Extensions;
-using ROMA2.Logic.Helpers.Bakers;
 using Unity.Entities;
 using UnityEngine;
 
-namespace Logic.Common.ACs
+namespace ROMA2.Logic.Common.Bakers
 {
     public class SkillShotAbilityCommandAuthoring : MonoBehaviour
     {

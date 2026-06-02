@@ -1,5 +1,5 @@
-using Assets.Logic.Client;
-using Logic.Common;
+using ROMA2.Logic.Client.Network;
+using ROMA2.Logic.Data;
 using ROMA2.Logic.Server.Initialization;
 using TMPro;
 using Unity.Entities;

@@ -1,7 +1,8 @@
 ﻿using System;
+using ROMA2.Logic.Data;
 using Unity.Entities;
 
-namespace Logic.Common.Systems
+namespace ROMA2.Logic.Common.GameProcesses
 {
     public partial class GameOverSystem : SystemBase
     {

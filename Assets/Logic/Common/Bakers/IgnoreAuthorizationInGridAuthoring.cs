@@ -1,4 +1,4 @@
-﻿using Logic.Common;
+﻿using ROMA2.Logic.Navigation;
 using Unity.Entities;
 using UnityEngine;
 

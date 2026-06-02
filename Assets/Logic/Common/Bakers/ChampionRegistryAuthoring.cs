@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Logic.Common;
 using ROMA2.Logic.Common.Databases;
+using ROMA2.Logic.Data;
 using Unity.Entities;
 using UnityEngine;
 

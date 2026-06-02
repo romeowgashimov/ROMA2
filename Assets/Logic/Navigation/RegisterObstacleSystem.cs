@@ -1,4 +1,4 @@
-﻿using Logic.Common;
+﻿using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -8,7 +8,7 @@ using Unity.Transforms;
 using static Unity.Entities.SystemAPI;
 using static Unity.Mathematics.math;
 
-namespace ROMA2.Logic.Common.Movement
+namespace ROMA2.Logic.Navigation
 {
     [BurstCompile]
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
@@ -25,13 +25,13 @@ namespace ROMA2.Logic.Common.Movement
 
             _nonRegisteredObstaclesQuery = QueryBuilder()
                 .WithAll<PhysicsVelocity, LocalToWorld, PhysicsCollider>()
-                .WithNone<MinionTag, ChampTag, RegisteredObstacleInGrid, IgnoreRegistrationInGrid>()
+                .WithNone<RegisteredObstacleInGrid, IgnoreRegistrationInGrid>()
                 .Build();
             
             
             _unRegisteringObstaclesQuery = QueryBuilder()
                 .WithAll<PhysicsVelocity, LocalToWorld, PhysicsCollider, RegisteredObstacleInGrid, DestroyEntityTag>()
-                .WithNone<MinionTag, ChampTag, IgnoreRegistrationInGrid>()
+                .WithNone<IgnoreRegistrationInGrid>()
                 .Build();
         }
 

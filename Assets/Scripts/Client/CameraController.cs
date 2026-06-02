@@ -1,6 +1,6 @@
-﻿using Assets.Logic.Client;
-using Cinemachine;
-using Logic.Common;
+﻿using Cinemachine;
+using ROMA2.Logic.Client.Network;
+using ROMA2.Logic.Data;
 using Unity.Entities;
 using UnityEngine;
 

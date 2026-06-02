@@ -15,7 +15,7 @@ MonoBehaviour:
   Configs:
   - Id: 0
     Prefab: {fileID: 403193853099150282, guid: 2fe49a526567fdc46a55b0b1094bd406, type: 3}
-    MoveSpeed: 20
+    MoveSpeed: 30
     HealthPoints: 500
     AttackSpeed: 1
     AttackRadius: 8

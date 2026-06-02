@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-namespace ROMA2.Logic.Common.Combat
+namespace ROMA2.Logic.Data
 {
     public struct AttackSpeed : IComponentData
     {

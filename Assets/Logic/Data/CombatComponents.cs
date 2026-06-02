@@ -2,7 +2,7 @@
 using Unity.Mathematics;
 using Unity.NetCode;
 
-namespace Logic.Common
+namespace ROMA2.Logic.Data
 {
     public struct MaxHealthPoints : IComponentData
     {
@@ -167,5 +167,18 @@ namespace Logic.Common
     public struct ReAggrRequest : IComponentData, IEnableableComponent
     {
         public Entity Target;
+    }
+    
+    public struct MoveTargetPosition : IComponentData
+    {
+        /*Убрал синхронизацию с сервером, pathfinding у клиента срабатывал раньше,
+        чем синхронизация, поэтому находился путь к не той точке */
+        public float3 Value;
+        public bool Flag;
+    } 
+    
+    public struct MoveSpeed : IComponentData
+    {
+        public float Value;
     }
 }

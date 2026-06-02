@@ -1,5 +1,5 @@
-﻿using Logic.Common;
-using Logic.Common.Systems;
+﻿using ROMA2.Logic.Common.DamageCalculator;
+using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;

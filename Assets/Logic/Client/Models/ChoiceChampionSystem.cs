@@ -1,11 +1,10 @@
 ﻿using System;
-using Logic.Common;
+using ROMA2.Logic.Data;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using UnityEngine;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Models
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     public partial class ChoiceChampionSystem : SystemBase

@@ -1,4 +1,6 @@
 ﻿using Assets.Logic.Client;
+using ROMA2.Logic.Common.Abilities;
+using ROMA2.Logic.Data;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
@@ -6,7 +8,7 @@ using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
 
-namespace Logic.Common.Systems
+namespace ROMA2.Logic.Client.GhostInput
 {
     [UpdateInGroup(typeof(GhostInputSystemGroup))]
     public partial struct AimingSystem : ISystem

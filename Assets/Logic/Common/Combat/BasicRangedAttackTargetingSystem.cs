@@ -1,4 +1,5 @@
-﻿using Unity.Burst;
+﻿using ROMA2.Logic.Data;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -8,7 +9,7 @@ using Unity.Transforms;
 using static Unity.Mathematics.math;
 using static Unity.Mathematics.quaternion;
 
-namespace Logic.Common.Systems
+namespace ROMA2.Logic.Common.Combat
 {
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct BasicRangedAttackTargetingSystem : ISystem
