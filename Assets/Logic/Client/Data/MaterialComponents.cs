@@ -2,7 +2,7 @@
 using Unity.Rendering;
 using UnityEngine;
 
-namespace ROMA2.Logic.Client.UI
+namespace ROMA2.Logic.Client.Data
 {
     [MaterialProperty("_OutlineWidth")]
     public struct OutlineWidth : IComponentData

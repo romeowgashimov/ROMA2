@@ -2,7 +2,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Data
 {
     public class HealthBarUIReference : ICleanupComponentData
     {

@@ -1,4 +1,4 @@
-﻿using Logic.Client;
+﻿using ROMA2.Logic.Client.Data;
 using ROMA2.Logic.Data;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -8,31 +8,30 @@ using UnityEngine.UI;
 
 namespace ROMA2.Logic.Client.Models
 {
-    [UpdateAfter(typeof(TransformSystemGroup))]
-    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
+    [UpdateInGroup(typeof(PresentationSystemGroup))]
     public partial struct HealthBarSystem : ISystem
     {
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
+            state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
             state.RequireForUpdate<UIPrefabs>();
         }
 
         public void OnUpdate(ref SystemState state)
         {
             EntityCommandBuffer ecb = SystemAPI
-                .GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
+                .GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged);
 
             // Spawn health bars for entities that require them
             foreach ((LocalTransform transform, HealthBarOffset healthBarOffset,
-                         MaxHealthPoints maxHealthPoints, Entity entity) in SystemAPI
-                         .Query<LocalTransform, HealthBarOffset, MaxHealthPoints>()
+                         MaxHealthPoints maxHealthPoints, LocalToWorld localToWorld, Entity entity) in SystemAPI
+                         .Query<LocalTransform, HealthBarOffset, MaxHealthPoints, LocalToWorld>()
                          .WithNone<HealthBarUIReference>()
                          .WithEntityAccess())
             {
                 GameObject healthBarPrefab = SystemAPI.ManagedAPI.GetSingleton<UIPrefabs>().HealthBar;
-                float3 spawnPosition = transform.Position + healthBarOffset.Value;
+                float3 spawnPosition = localToWorld.Position + healthBarOffset.Value;
                 GameObject newHealthBar = Object.Instantiate(healthBarPrefab, spawnPosition, Quaternion.identity);
                 SetHealthBar(newHealthBar, maxHealthPoints.Value, maxHealthPoints.Value);
                 ecb.AddComponent(entity, new HealthBarUIReference { Value = newHealthBar });
@@ -41,10 +40,11 @@ namespace ROMA2.Logic.Client.Models
             // Update positions and values of health bar
             foreach ((LocalTransform transform, HealthBarOffset healthBarOffset,
                          MaxHealthPoints maxHealthPoints, CurrentHealthPoints currentHealthPoints, 
-                         HealthBarUIReference healthBarUIReference) in SystemAPI
-                         .Query<LocalTransform, HealthBarOffset, MaxHealthPoints, CurrentHealthPoints, HealthBarUIReference>())
+                         HealthBarUIReference healthBarUIReference, LocalToWorld localToWorld) in SystemAPI
+                         .Query<LocalTransform, HealthBarOffset, 
+                             MaxHealthPoints, CurrentHealthPoints, HealthBarUIReference, LocalToWorld>())
             {
-                float3 healthBarPosition = transform.Position + healthBarOffset.Value;
+                float3 healthBarPosition = localToWorld.Position + healthBarOffset.Value;
                 healthBarUIReference.Value.transform.position = healthBarPosition;
                 SetHealthBar(healthBarUIReference.Value, currentHealthPoints.Value, maxHealthPoints.Value);
             }

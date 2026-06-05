@@ -1,4 +1,5 @@
-﻿using Cinemachine;
+﻿using System;
+using Cinemachine;
 using ROMA2.Logic.Client.Network;
 using ROMA2.Logic.Data;
 using Unity.Entities;
@@ -78,6 +79,11 @@ namespace Client
         }
 
         private void Update()
+        {
+            
+        }
+
+        private void LateUpdate()
         {
             SetCameraForAutoAssignTeam();
             MoveCamera();

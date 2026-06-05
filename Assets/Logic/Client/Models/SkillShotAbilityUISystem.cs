@@ -1,4 +1,4 @@
-﻿using Logic.Client;
+﻿using ROMA2.Logic.Client.Data;
 using ROMA2.Logic.Common.Abilities;
 using ROMA2.Logic.Data;
 using Unity.Entities;

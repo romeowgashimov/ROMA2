@@ -1,8 +1,8 @@
-﻿using Logic.Client;
+﻿using ROMA2.Logic.Client.Data;
 using Unity.Entities;
 using UnityEngine;
 
-namespace ROMA2.Logic.Helpers.Bakers
+namespace ROMA2.Logic.Client.Bakers
 {
     public class HealthBarOffsetAuthoring : MonoBehaviour
     {

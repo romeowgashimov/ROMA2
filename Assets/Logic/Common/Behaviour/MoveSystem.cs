@@ -4,7 +4,6 @@ using ROMA2.Logic.Navigation;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
 using static Unity.Entities.SystemAPI;
@@ -17,7 +16,7 @@ using float3 = Unity.Mathematics.float3;
 namespace ROMA2.Logic.Common.Behaviour
 {
     [BurstCompile]
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     [UpdateAfter(typeof(RVOSystem))]
     public partial struct MoveSystem : ISystem
     {
@@ -75,9 +74,9 @@ namespace ROMA2.Logic.Common.Behaviour
             }
             
             // Логика обычного движения
-            float2 finalVXZ = distToGoalSq >= 9 // За 3 клетки до конечной точки сбрасываем накопление
+            float2 finalVXZ = distToGoalSq >= 1 // За 1 клетку до конечной точки сбрасываем накопление
                 ? lerp(velocity.Linear.xz, agent.BestVelocity.xz, 
-                    clamp(moveSpeed.Value / 100, 0.2f, 1f)) 
+                    clamp(moveSpeed.Value / 100, 0.2f, 0.5f)) 
                 : agent.BestVelocity.xz;
 
             // Логика поворота выполняется ТОЛЬКО для нового пути

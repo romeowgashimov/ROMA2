@@ -1,8 +1,8 @@
-﻿using ROMA2.Logic.Client.UI;
+﻿using ROMA2.Logic.Client.Data;
 using Unity.Entities;
 using UnityEngine;
 
-namespace Logic.Client
+namespace ROMA2.Logic.Client.Bakers
 {
     public class OutlineParentAuthoring : MonoBehaviour
     {

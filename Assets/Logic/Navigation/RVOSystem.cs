@@ -3,7 +3,6 @@ using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
 using static Unity.Entities.SystemAPI;
@@ -12,8 +11,8 @@ using float2 = Unity.Mathematics.float2;
 
 namespace ROMA2.Logic.Navigation
 {
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-    [UpdateAfter(typeof(PathFindingSystem))]
+    [BurstCompile]
+    [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
     public partial struct RVOSystem : ISystem
     {
         private EntityQuery _mainMinionQuery;
@@ -189,7 +188,7 @@ namespace ROMA2.Logic.Navigation
                 else
                 {
                     sincos(PI2 / MaxSamples * i, out float sin, out float cos);
-                    vCand = new float2(cos, sin) * desiredSpeed;
+                    vCand = new float2(cos, sin) * finalSpeed;
                 }
     
                 float penalty = 

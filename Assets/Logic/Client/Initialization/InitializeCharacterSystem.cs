@@ -1,4 +1,4 @@
-using ROMA2.Logic.Client.UI;
+using ROMA2.Logic.Client.Data;
 using ROMA2.Logic.Data;
 using Unity.Collections;
 using Unity.Entities;
@@ -27,9 +27,9 @@ namespace ROMA2.Logic.Client.Initialization
 
                 float4 teamColor = team.Value switch
                 {
-                    TeamType.Blue => new float4(0, 0, 1, 1),
-                    TeamType.Red => new float4(1, 0, 0, 1),
-                    _ => new float4(1)
+                    TeamType.Blue => new(0, 0, 1, 1),
+                    TeamType.Red => new(1, 0, 0, 1),
+                    _ => new(1)
                 };
                 
                 ecb.AddComponent<LastOutlinedEntity>(newCharacterEntity);
