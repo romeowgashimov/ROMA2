@@ -6,7 +6,7 @@ namespace ROMA2.Logic.Common.Bakers
 {
     public class BasicAttackTargetAuthoring : MonoBehaviour
     {
-        private class BasicAttackTargetBaker : Baker<BasicAttackTargetAuthoring>
+        private class BasicRangedAttackBaker : Baker<BasicAttackTargetAuthoring>
         {
             public override void Bake(BasicAttackTargetAuthoring authoring)
             {
