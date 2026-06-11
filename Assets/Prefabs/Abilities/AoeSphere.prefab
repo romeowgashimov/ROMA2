@@ -16,9 +16,8 @@ GameObject:
   - component: {fileID: 6112087915612313388}
   - component: {fileID: 8249077242028756187}
   - component: {fileID: 615828026369737881}
-  - component: {fileID: 2929833728329225979}
-  - component: {fileID: -9080011458858322763}
-  - component: {fileID: 96949054753313765}
+  - component: {fileID: 5500810394811268265}
+  - component: {fileID: -2866804444495869621}
   m_Layer: 0
   m_Name: AoeSphere
   m_TagString: Untagged
@@ -319,7 +318,21 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &2929833728329225979
+--- !u!114 &5500810394811268265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4554436324229213116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f877ed5c9acfd7468b7e347cbdea478, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Logic.Common::ROMA2.Logic.Common.Abilities.DeathSphereAuthoring
+  MagicalDamage: 100
+  MagicalPercentage: 100
+--- !u!114 &-2866804444495869621
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -330,31 +343,5 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc26fbed839543a49be66961623e18a9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.DestroyOnTimerAuthoring
+  m_EditorClassIdentifier: Logic.Common::ROMA2.Logic.Common.Bakers.DestroyOnTimerAuthoring
   DestroyOnTimer: 3
---- !u!114 &-9080011458858322763
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4554436324229213116}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5261b185628d44d8b903e23bbb831764, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.DamageOnTriggerAuthoring
-  DamageOnTrigger: 100
---- !u!114 &96949054753313765
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4554436324229213116}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71e71f5e5c854763b21b03e6fe2a9594, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Logic.Helpers::ROMA2.Logic.Helpers.Bakers.IgnoreAuthorizationInGridAuthoring
-  Flag: 2

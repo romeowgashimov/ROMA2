@@ -1,4 +1,4 @@
-﻿using ROMA2.Logic.Common.DamageCalculator;
+﻿using ROMA2.Logic.Common.Databases;
 using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Collections;
@@ -13,7 +13,7 @@ namespace ROMA2.Logic.Common.Behaviour
 {
     [BurstCompile]
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-    [UpdateBefore(typeof(CalculateFrameDamageSystem))]
+    [UpdateBefore(typeof(DamageCalculatorSystemGroup))]
     public partial struct ReAggrSystem : ISystem
     {
         private CollisionFilter _filter;

@@ -1,5 +1,4 @@
-﻿
-using ROMA2.Logic.Common.Databases;
+﻿using ROMA2.Logic.Common.Databases;
 using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Collections;
@@ -10,8 +9,7 @@ using static Unity.Entities.SystemAPI;
 
 namespace ROMA2.Logic.Common.DamageCalculator
 {
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
-    [UpdateAfter(typeof(AbilityCommandSystemGroup))]
+    [UpdateInGroup(typeof(DamageCalculatorSystemGroup))]
     public partial struct DamageOnTriggerSystem : ISystem
     {
         public void OnCreate(ref SystemState state)
@@ -27,80 +25,53 @@ namespace ROMA2.Logic.Common.DamageCalculator
                 GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
             SimulationSingleton simulationSingleton = GetSingleton<SimulationSingleton>();
             
-            DamageOnTriggerJob job = new()
+            state.Dependency = new DamageOnTriggerJob
             {
-                DamageOnTriggerLookup = GetComponentLookup<DamageOnTrigger>(true),
-                TeamLookup = GetComponentLookup<Team>(true),
+                TriggerLookup = GetComponentLookup<TriggerEntityInfo>(true),
                 AlreadyDamagedLookup = GetBufferLookup<AlreadyDamagedEntity>(true),
-                DamageBufferLookup = GetBufferLookup<DamageBufferElement>(true),
-                AttackTargetLookup = GetComponentLookup<BasicAttackTarget>(true),
-                OwnerLookup = GetComponentLookup<Owner>(true),
+                TeamLookup = GetComponentLookup<Team>(true),
                 ECB = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged),
-            };
-            
-            state.Dependency = job.Schedule(simulationSingleton, state.Dependency);
+            }.Schedule(simulationSingleton, state.Dependency);
         }
     }
 
     [BurstCompile]
     public struct DamageOnTriggerJob : ITriggerEventsJob
     {
-        [ReadOnly] public ComponentLookup<DamageOnTrigger> DamageOnTriggerLookup;
+        [ReadOnly] public ComponentLookup<TriggerEntityInfo> TriggerLookup;
         [ReadOnly] public ComponentLookup<Team> TeamLookup;
         [ReadOnly] public BufferLookup<AlreadyDamagedEntity> AlreadyDamagedLookup;
-        [ReadOnly] public BufferLookup<DamageBufferElement> DamageBufferLookup;
-        [ReadOnly] public ComponentLookup<BasicAttackTarget> AttackTargetLookup;
-        [ReadOnly] public ComponentLookup<Owner> OwnerLookup;
-
         public EntityCommandBuffer ECB;
         
         public void Execute(TriggerEvent triggerEvent)
         {
-            Entity damageDealingEntity;
-            Entity damageReceivingEntity;
+            Entity damageDealingEntity = Entity.Null;
+            Entity damageReceivingEntity = Entity.Null;
 
-            if (DamageBufferLookup.HasBuffer(triggerEvent.EntityA) &&
-                DamageOnTriggerLookup.HasComponent(triggerEvent.EntityB))
+            if (TriggerLookup.HasComponent(triggerEvent.EntityA))
             {
-                damageReceivingEntity = triggerEvent.EntityA;
-                damageDealingEntity = triggerEvent.EntityB;
-            }
-            else if (DamageBufferLookup.HasBuffer(triggerEvent.EntityB) &&
-                     DamageOnTriggerLookup.HasComponent(triggerEvent.EntityA))
-            {
-                damageReceivingEntity = triggerEvent.EntityB;
                 damageDealingEntity = triggerEvent.EntityA;
+                damageReceivingEntity = triggerEvent.EntityB;
             }
-            else return;
-            
-            bool reachedTheTarget = false;
-            if (AttackTargetLookup.TryGetComponent(damageDealingEntity, out BasicAttackTarget target))
-                if (damageReceivingEntity != target.Value) return;
-                else reachedTheTarget = true;
+            else if (TriggerLookup.HasComponent(triggerEvent.EntityB))
+            {
+                damageDealingEntity = triggerEvent.EntityB;
+                damageReceivingEntity = triggerEvent.EntityA;
+            }
 
-            if (!AlreadyDamagedLookup.TryGetBuffer(damageDealingEntity,
-                    out DynamicBuffer<AlreadyDamagedEntity> alreadyDamagedBuffer)) return;
-            
-            foreach (AlreadyDamagedEntity alreadyDamagedEntity in alreadyDamagedBuffer)
-                if (alreadyDamagedEntity.Value.Equals(damageReceivingEntity)) return;
-            
             if (TeamLookup.TryGetComponent(damageReceivingEntity, out Team receivingTeam) && 
                 TeamLookup.TryGetComponent(damageDealingEntity, out Team dealingTeam))
                 if (receivingTeam.Value == dealingTeam.Value) return;
 
-            if (!DamageOnTriggerLookup.TryGetComponent(damageDealingEntity, out DamageOnTrigger damageOnTrigger))
+            if (!AlreadyDamagedLookup.TryGetBuffer(damageDealingEntity,
+                    out DynamicBuffer<AlreadyDamagedEntity> alreadyDamagedBuffer))
                 return;
             
-            // Если игрока убьют, то тогда что?
-            OwnerLookup.TryGetComponent(damageDealingEntity, out Owner owner);
-            ECB.AppendToBuffer(damageReceivingEntity, new DamageBufferElement
-            {
-                Value = damageOnTrigger.Value,
-                DealingDamageEntity = owner.Value
-            });
-            ECB.AppendToBuffer(damageDealingEntity, new AlreadyDamagedEntity { Value = damageReceivingEntity });
+            foreach (AlreadyDamagedEntity alreadyDamagedEntity in alreadyDamagedBuffer)
+                if (alreadyDamagedEntity.Value.Equals(damageReceivingEntity)) return;
             
-            if (reachedTheTarget) ECB.AddComponent<DestroyEntityTag>(damageDealingEntity);
+            ECB.AppendToBuffer<AlreadyDamagedEntity>(damageDealingEntity, new() { Value = damageReceivingEntity });
+            ECB.SetComponent<TriggerEntityInfo>(damageDealingEntity, new() { Value = damageReceivingEntity });
         }
     } 
 }

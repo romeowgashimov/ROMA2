@@ -11,13 +11,13 @@ namespace ROMA2.Logic.Data
         
     public struct CurrentHealthPoints : IComponentData
     {
-        [GhostField] public int Value;
+        [GhostField(Quantization = 100)] public float Value;
     }
 
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     public struct DamageBufferElement : IBufferElementData
     {
-        public int Value;
+        public float Value;
         public Entity DealingDamageEntity;
     }
         
@@ -25,7 +25,7 @@ namespace ROMA2.Logic.Data
     public struct DamageThisTick : ICommandData
     {
         public NetworkTick Tick { get; set; }
-        public int Value;
+        public float Value;
     }
 
     public struct AbilityCommands : IComponentData
@@ -180,5 +180,11 @@ namespace ROMA2.Logic.Data
     public struct MoveSpeed : IComponentData
     {
         public float Value;
+    }
+
+    // Триггер только для базовых атак и умений для нанесения урона
+    public struct TriggerEntityInfo : IComponentData
+    {
+        public Entity Value;
     }
 }

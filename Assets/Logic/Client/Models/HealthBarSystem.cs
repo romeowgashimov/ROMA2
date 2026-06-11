@@ -60,7 +60,7 @@ namespace ROMA2.Logic.Client.Models
             }
         }
 
-        private void SetHealthBar(GameObject healthBarCanvasObject, int curPoints, int maxPoints)
+        private void SetHealthBar(GameObject healthBarCanvasObject, float curPoints, int maxPoints)
         {
             Slider healthBarSlider = healthBarCanvasObject.GetComponentInChildren<Slider>();
             healthBarSlider.minValue = 0;

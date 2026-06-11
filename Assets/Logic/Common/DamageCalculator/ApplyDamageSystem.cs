@@ -34,7 +34,7 @@ namespace ROMA2.Logic.Common.DamageCalculator
                 if (!damageThisTickBuffer.GetDataAtTick(currentTick, out DamageThisTick damageThisTick)) continue;
                 if (damageThisTick.Tick != currentTick) continue;
                 
-                int health = currentHealthPoints.ValueRO.Value;
+                float health = currentHealthPoints.ValueRO.Value;
                 health = math.clamp(health - damageThisTick.Value, 0, health);
                 currentHealthPoints.ValueRW.Value = health;
                 

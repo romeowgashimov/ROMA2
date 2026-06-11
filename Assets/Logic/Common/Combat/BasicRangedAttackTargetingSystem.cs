@@ -41,8 +41,8 @@ namespace ROMA2.Logic.Common.Combat
     [BurstCompile]
     public partial struct BasicRangedAttackTargetingJob : IJobEntity
     {
-        [NativeDisableContainerSafetyRestriction]
-        [ReadOnly] public ComponentLookup<LocalTransform> TransformLookup;
+        [NativeDisableContainerSafetyRestriction] [ReadOnly] 
+        public ComponentLookup<LocalTransform> TransformLookup;
         public EntityCommandBuffer.ParallelWriter ECB;
         public float DeltaTime;
         

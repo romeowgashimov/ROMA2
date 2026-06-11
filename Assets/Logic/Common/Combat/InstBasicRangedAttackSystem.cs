@@ -9,7 +9,7 @@ using Unity.Transforms;
 namespace ROMA2.Logic.Common.Combat
 {
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
-    public partial struct BasicRangedAttackSystem : ISystem
+    public partial struct InstBasicRangedAttackSystem : ISystem
     {
         public void OnCreate(ref SystemState state)
         {
@@ -26,7 +26,7 @@ namespace ROMA2.Logic.Common.Combat
                 .CreateCommandBuffer(state.WorldUnmanaged)
                 .AsParallelWriter();
 
-            state.Dependency = new BasicRangedAttackJob
+            state.Dependency = new InstBasicRangedAttackJob
             {
                 CurrentTick = networkTime.ServerTick,
                 TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(isReadOnly: true),
@@ -37,7 +37,7 @@ namespace ROMA2.Logic.Common.Combat
 
     [BurstCompile]
     [WithAll(typeof(Simulate), typeof(InAttackArea))]
-    public partial struct BasicRangedAttackJob : IJobEntity
+    public partial struct InstBasicRangedAttackJob : IJobEntity
     {
         private const int SIMULATION_TICK_RATE = 60;
         
@@ -47,9 +47,15 @@ namespace ROMA2.Logic.Common.Combat
         public EntityCommandBuffer.ParallelWriter ECB;
 
         [BurstCompile]
-        private void Execute([ChunkIndexInQuery] int sortKey, ref DynamicBuffer<AttackCooldown> attackCooldown,
-            in RangedAttackProperties attackProperties, in TargetEntity targetEntity, 
-            Entity npcEntity, Team team, AttackSpeed attackSpeed)
+        private void Execute(
+            [ChunkIndexInQuery] int sortKey,
+            ref DynamicBuffer<AttackCooldown> attackCooldown,
+            in RangedAttackProperties attackProperties,
+            in TargetEntity targetEntity, 
+            Entity npcEntity,
+            in Team team,
+            in AttackSpeed attackSpeed, 
+            in PhysicalPower physicalPower)
         {
             if (!TransformLookup.HasComponent(targetEntity.Value)) return;
             if (!attackCooldown.GetDataAtTick(CurrentTick, out AttackCooldown cooldownExpirationTick))
@@ -70,6 +76,10 @@ namespace ROMA2.Logic.Common.Combat
             ECB.SetComponent(sortKey, newAttack, team);
             ECB.SetComponent(sortKey, newAttack, new BasicAttackTarget { Value = targetEntity.Value });
             ECB.SetComponent(sortKey, newAttack, new Owner { Value = npcEntity });
+            ECB.SetComponent<CombineCharsComponent>(sortKey, newAttack, new()
+            {
+                PhysicalPower = physicalPower.Value
+            });
             
             NetworkTick newCooldownTick = CurrentTick;
             newCooldownTick.Add((uint)attackSpeed.Value * SIMULATION_TICK_RATE);

@@ -1,5 +1,11 @@
 ﻿<Solution>
-  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Logic.Client.csproj" />
+  <Project Path="Logic.Common.csproj" />
   <Project Path="Unity.Physics.Custom.csproj" />
+  <Project Path="Logic.Navigation.csproj" />
+  <Project Path="Logic.Server.csproj" />
   <Project Path="Unity.Physics.Custom.Editor.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Logic.Helpers.csproj" />
+  <Project Path="Logic.Data.csproj" />
 </Solution>

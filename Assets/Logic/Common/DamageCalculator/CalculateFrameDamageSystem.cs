@@ -1,11 +1,12 @@
-﻿using ROMA2.Logic.Data;
+﻿using ROMA2.Logic.Common.Databases;
+using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.NetCode;
 
 namespace ROMA2.Logic.Common.DamageCalculator
 {
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateInGroup(typeof(DamageCalculatorSystemGroup))]
     [UpdateBefore(typeof(DamageOnTriggerSystem))]
     public partial struct CalculateFrameDamageSystem : ISystem
     {
@@ -17,8 +18,10 @@ namespace ROMA2.Logic.Common.DamageCalculator
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            NetworkTick currentTick = SystemAPI.GetSingleton<NetworkTime>().ServerTick;
-
+            NetworkTick currentTick = SystemAPI
+                .GetSingleton<NetworkTime>()
+                .ServerTick;
+            
             foreach ((DynamicBuffer<DamageBufferElement> damageBuffer,
                          DynamicBuffer<DamageThisTick> damageThisTickBuffer) in SystemAPI
                          .Query<DynamicBuffer<DamageBufferElement>, DynamicBuffer<DamageThisTick>>()
@@ -28,7 +31,7 @@ namespace ROMA2.Logic.Common.DamageCalculator
                     damageThisTickBuffer.AddCommandData(new() { Tick = currentTick, Value = 0 });
                 else
                 {
-                    int totalDamage = 0;
+                    float totalDamage = 0;
                     if (damageThisTickBuffer.GetDataAtTick(currentTick, out DamageThisTick damageThisTick))
                         totalDamage = damageThisTick.Value;
                     

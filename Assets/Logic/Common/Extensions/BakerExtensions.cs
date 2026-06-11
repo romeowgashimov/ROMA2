@@ -17,8 +17,16 @@ namespace ROMA2.Logic.Common.Extensions
             Entity entity = baker.GetEntity(TransformUsageFlags.Dynamic);
             baker.AddComponent(entity, new MaxHealthPoints { Value = maxHealth });
             baker.AddComponent(entity, new CurrentHealthPoints { Value = maxHealth });
+            
             baker.AddBuffer<DamageBufferElement>(entity);
+            baker.AddBuffer<IncomingDamageChangerElement>(entity);
+            baker.AddBuffer<AttackCommandElement>(entity);
             baker.AddBuffer<DamageThisTick>(entity);
+
+            baker.AddComponent<PhysicalPower>(entity, new() { Value = 100 });
+            baker.AddComponent<MagicalPower>(entity, new() { Value = 100 });
+            baker.AddComponent<PhysicalArmor>(entity, new() { Value = 50 });
+            baker.AddComponent<MagicalArmor>(entity, new() { Value = 0 });
         }
 
         public static void BakeBehaviour<T>(
@@ -46,7 +54,7 @@ namespace ROMA2.Logic.Common.Extensions
             baker.AddComponent<AttackSpeed>(entity, new() { Value = attackSpeed });
             baker.AddComponent<TargetEntity>(entity, new() { InAttackArea = false });
             baker.AddBuffer<AttackCooldown>(entity);
-                
+
             baker.AddComponent(entity, new DetectionRadius { Value = detectionRadius });
             baker.AddComponent<InAttackArea>(entity);
             baker.SetComponentEnabled<InAttackArea>(entity, false);

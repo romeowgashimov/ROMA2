@@ -22,7 +22,7 @@ namespace ROMA2.Logic.Common.Abilities
             _query = SystemAPI.QueryBuilder()
                 .WithAll<AbilityInput, AbilityCommands, AbilityCooldownTicks, Team,
                     LocalTransform, AbilityCooldownTargetTicks, AimInput>()
-                .WithAll<SkillShotAbilityCommand, AimingTag, Simulate>()
+                .WithAll<SkillShotAbilityCommand, AimingTag, Simulate, PhysicalPower>()
                 .WithAllRW<ActivatedAbilitiesCommands>()
                 .Build();
         }
@@ -71,12 +71,15 @@ namespace ROMA2.Logic.Common.Abilities
             AbilityCooldownTicks abilityCooldownTicks, Team team, 
             RefRW<ActivatedAbilitiesCommands> activatedAbilitiesCommands,
             LocalTransform transform, DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
-            AimInput aimInput, SkillShotAbilityCommand skillShotAbilityCommand, Entity owner)
+            AimInput aimInput, SkillShotAbilityCommand skillShotAbilityCommand, 
+            PhysicalPower physicalPower, Entity owner)
         {
             if (!skillShotAbilityCommand.IsConfirmParallel(
                     key, ECB, activatedAbilitiesCommands, abilityInput, owner)) return;
 
-            skillShotAbilityCommand.InstantSkillShotParallel(key,  ECB, team, transform, aimInput, owner);
+            Entity ability = skillShotAbilityCommand
+                .InstantSkillShotParallel(key,  ECB, team, transform, aimInput, owner);
+            ECB.SetComponent<CombineCharsComponent>(key, ability, new() { PhysicalPower = physicalPower.Value });
             
             skillShotAbilityCommand.CancelParallel(ECB, key, owner, activatedAbilitiesCommands);
 

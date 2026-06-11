@@ -22,7 +22,8 @@ namespace ROMA2.Logic.Common.Abilities
             _query = SystemAPI.QueryBuilder()
                 .WithAll<AbilityInput, AbilityCommands, AbilityCooldownTicks, Team,
                     LocalTransform, AbilityCooldownTargetTicks, AimInput>()
-                .WithAll<AoeAbilityCommand, AimingTag, ActivatedAbilitiesCommands, Simulate>()
+                .WithAll<AoeAbilityCommand, AimingTag, Simulate, MagicalPower>()
+                .WithAllRW<ActivatedAbilitiesCommands>()
                 .Build();
         }
 
@@ -75,13 +76,14 @@ namespace ROMA2.Logic.Common.Abilities
             AbilityCooldownTicks abilityCooldownTicks, Team team, 
             RefRW<ActivatedAbilitiesCommands> activatedAbilitiesCommands,
             LocalTransform transform, DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
-            AimInput aimInput, AoeAbilityCommand aoeAbilityCommand, Entity owner)
+            AimInput aimInput, AoeAbilityCommand aoeAbilityCommand, MagicalPower magicalPower, Entity owner)
         {
             if (!aoeAbilityCommand.IsConfirmParallel(
                     key, ECB, activatedAbilitiesCommands, abilityInput, owner)) return;
 
-            aoeAbilityCommand.InstantSkillShotParallel(key,  ECB, team, transform, aimInput, owner);
-            
+            Entity ability = aoeAbilityCommand.InstantSkillShotParallel(key,  ECB, team, transform, aimInput, owner);
+            ECB.SetComponent<CombineCharsComponent>(key, ability, new() { MagicalPower = magicalPower.Value });
+
             aoeAbilityCommand.CancelParallel(ECB, key, owner, activatedAbilitiesCommands);
             
             cooldownTargetTicks.UpdateCooldown(

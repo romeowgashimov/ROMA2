@@ -14,12 +14,11 @@ GameObject:
   - component: {fileID: 8530934920086910296}
   - component: {fileID: -1260067781772005339}
   - component: {fileID: -1908121846860201962}
-  - component: {fileID: 8164251329664147597}
   - component: {fileID: -4323266398317425856}
   - component: {fileID: 6337206203329382095}
   - component: {fileID: 3778857652509032201}
   - component: {fileID: -1794782140057881931}
-  - component: {fileID: -989521828780419985}
+  - component: {fileID: 7514726814690129385}
   m_Layer: 0
   m_Name: SkillShotAbility
   m_TagString: Untagged
@@ -266,7 +265,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 1
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!114 &-1908121846860201962
@@ -282,19 +281,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.DestroyOnTimerAuthoring
   DestroyOnTimer: 2
---- !u!114 &8164251329664147597
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7632189609624789992}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5261b185628d44d8b903e23bbb831764, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.DamageOnTriggerAuthoring
-  DamageOnTrigger: 50
 --- !u!114 &-4323266398317425856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -359,7 +345,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.AbilityMoveSpeedAuthoring
   MoveSpeed: 7.5
---- !u!114 &-989521828780419985
+--- !u!114 &7514726814690129385
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -368,7 +354,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 7632189609624789992}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71e71f5e5c854763b21b03e6fe2a9594, type: 3}
+  m_Script: {fileID: 11500000, guid: 1391b5bc432fdd54cbc8bee795b52946, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Logic.Helpers::ROMA2.Logic.Helpers.Bakers.IgnoreAuthorizationInGridAuthoring
-  Flag: 2
+  m_EditorClassIdentifier: Logic.Common::SkillShotAuthoring
+  PhysicalDamage: 100
+  PhysicalPercentage: 100
