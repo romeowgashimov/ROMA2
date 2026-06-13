@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 435933090865035530}
   - component: {fileID: 5038823480235253792}
   m_Layer: 0
-  m_Name: SkillShotAbilityCommand
+  m_Name: DeathSphereAbilityCommand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,5 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c75da4bc6f274a0fac12819b653042fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.SkillShotAbilityAuthoring
-  SkillShotAbilityPrefab: {fileID: 7632189609624789992, guid: c96dc541883d3a740a832d3178d12f81,
+  AbilityPrefab: {fileID: 4554436324229213116, guid: 4f2e3d45dce0b9e40b98fd7cc8534655,
     type: 3}

@@ -58,7 +58,7 @@ namespace ROMA2.Logic.Common.Combat
             }
                 
             float3 direction = normalize(targetTransform.Position - transform.ValueRO.Position);
-            transform.ValueRW.Position += direction * speed.Value * DeltaTime;
+            transform.ValueRW.Position += DeltaTime * speed.Value * direction;
             transform.ValueRW.Rotation = LookRotationSafe(direction, up());
         }
     }

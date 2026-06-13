@@ -1,5 +1,4 @@
-﻿using ROMA2.Logic.Common.Databases;
-using ROMA2.Logic.Data;
+﻿using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.NetCode;
@@ -13,17 +12,12 @@ namespace ROMA2.Logic.Common.Combat
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<AttackCommandContainerTag>();
             state.RequireForUpdate<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            Entity attackCommandPrefab = SystemAPI
-                .GetSingleton<AttackCommandContainerTag>()
-                .Value;
-            
             EntityCommandBuffer.ParallelWriter ecb = SystemAPI
                 .GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged)
@@ -31,7 +25,6 @@ namespace ROMA2.Logic.Common.Combat
             
             state.Dependency = new BasicRangedAttackJob
             {
-                AttackCommandPrefab = attackCommandPrefab,
                 ECB = ecb
             }.ScheduleParallel(state.Dependency);
         }
@@ -47,27 +40,32 @@ namespace ROMA2.Logic.Common.Combat
         public void Execute(
             [ChunkIndexInQuery] int key,
             in CombineCharsComponent combineCharsComponent,
-            ref TriggerEntityInfo triggerInfo,
+            ref DynamicBuffer<TriggerEntityInfo> triggerInfoBuffer,
             in BasicAttackTarget target,
             in Owner owner,
             Entity attack)
         {
-            Entity triggerEntity = triggerInfo.Value;
-            if (triggerEntity == Entity.Null 
-                || triggerEntity != target.Value) return;
+            if (triggerInfoBuffer.IsEmpty) return;
 
-            float totalDamage = combineCharsComponent.PhysicalPower;
-            
-            Entity attackCommand = ECB.Instantiate(key, AttackCommandPrefab);
-            ECB.SetComponent<AttackCommand>(key, attackCommand, new()
+            for (int i = 0; i < triggerInfoBuffer.Length; ++i)
             {
-                PhysicalDamage = totalDamage,
-                Owner = owner.Value,
-                Receiver = triggerEntity
-            });
-            
-            triggerInfo.Value = Entity.Null; 
-            ECB.AddComponent<DestroyEntityTag>(key, attack);
+                Entity triggerEntity = triggerInfoBuffer[i].Value;
+                if (triggerEntity == Entity.Null 
+                    || triggerEntity != target.Value) continue;
+
+                float totalDamage = combineCharsComponent.PhysicalPower;
+
+                // Если буфер есть, то команда ничего не сделает, нужен только из-за отката состояний неткода
+                ECB.AddBuffer<IncomingDamageElement>(key, triggerInfoBuffer[i].Value);
+                ECB.AppendToBuffer<IncomingDamageElement>(key, triggerInfoBuffer[i].Value, new()
+                {
+                    Owner = owner.Value,
+                    Receiver = triggerInfoBuffer[i].Value,
+                    PhysicalDamage = totalDamage
+                });
+                triggerInfoBuffer.Clear();
+                ECB.AddComponent<DestroyEntityTag>(key, attack);
+            }
         }
     }
 }

@@ -22,44 +22,74 @@ namespace ROMA2.Logic.Common.DamageCalculator
 
             state.Dependency = new CalculateFinalDamageJob
             {
-                AttackCommandLookup = SystemAPI.GetComponentLookup<AttackCommand>(true),
+                OutgoingDamageChangerLookup = SystemAPI.GetBufferLookup<OutgoingDamageChangerElement>(true), 
                 ecb = ecb
             }.ScheduleParallel(state.Dependency);
         }
     }
 
     [BurstCompile]
-    [WithNone(typeof(DestroyEntityTag))]
     public partial struct CalculateFinalDamageJob : IJobEntity
     {
-        [ReadOnly] public ComponentLookup<AttackCommand> AttackCommandLookup; 
+        [ReadOnly] public BufferLookup<OutgoingDamageChangerElement> OutgoingDamageChangerLookup; 
         public EntityCommandBuffer.ParallelWriter ecb;
         
         public void Execute(
             [ChunkIndexInQuery] int key,
             in PhysicalArmor physicalArmor,
             in MagicalArmor magicalArmor,
-            in DynamicBuffer<IncomingDamageChangerElement> damageChangerBuffer,
+            in DynamicBuffer<IncomingDamageChangerElement> incomingDamageChangerBuffer,
             ref DynamicBuffer<DamageBufferElement> damageBuffer,
-            ref DynamicBuffer<AttackCommandElement> attackCommands,
+            ref DynamicBuffer<IncomingDamageElement> incomingDamageBuffer,
             Entity receiver)
         {
-            if (attackCommands.IsEmpty) return;
+            if (incomingDamageBuffer.IsEmpty) return;
             
-            for (int i = 0; i < attackCommands.Length; i++)
+            for (int i = 0; i < incomingDamageBuffer.Length; i++)
             {
-                Entity mainCommand = attackCommands[i].Value;
-                if (!AttackCommandLookup.TryGetComponent(mainCommand, out AttackCommand attackCommand))
-                    return;
-
-                float physicalDamage = attackCommand.PhysicalDamage;
-                float magicalDamage = attackCommand.MagicalDamage;
-                float trueDamage = attackCommand.TrueDamage;
+                IncomingDamageElement element = incomingDamageBuffer[i];
+                Entity damageSender = element.Owner;
+                float physicalDamage = element.PhysicalDamage;
+                float magicalDamage = element.MagicalDamage;
+                float trueDamage = element.TrueDamage;
                 
+                // Бафы/дебафы отправителя урона
+                if (OutgoingDamageChangerLookup.TryGetBuffer(damageSender, 
+                    out DynamicBuffer<OutgoingDamageChangerElement> outgoingDamageChangerBuffer))
+                        foreach(OutgoingDamageChangerElement changer in outgoingDamageChangerBuffer)
+                    {
+                        switch (changer.Type)
+                        {
+                            case DamageType.Physical when changer.IsPercentage:
+                                physicalDamage *= changer.Value;
+                                break;
+                            case DamageType.Physical:
+                                physicalDamage += changer.Value;
+                                break;
+                            case DamageType.Magical when changer.IsPercentage:
+                                magicalDamage *= changer.Value;
+                                break;
+                            case DamageType.Magical:
+                                magicalDamage += changer.Value;
+                                break;
+                            case DamageType.All when changer.IsPercentage:
+                                physicalDamage *= changer.Value;
+                                magicalDamage *= changer.Value;
+                                trueDamage *= changer.Value;
+                                break;
+                            case DamageType.All:
+                                physicalDamage += changer.Value;
+                                magicalDamage += changer.Value;
+                                trueDamage += changer.Value;
+                                break;
+                        }
+                    }
+
                 physicalDamage *= math.clamp((100 - physicalArmor.Value) / 100f, 0, 1);
                 magicalDamage *= math.clamp((100 - magicalArmor.Value) / 100f, 0, 1);
 
-                foreach (IncomingDamageChangerElement changer in damageChangerBuffer)
+                // Бафы/дебафы получателя урона
+                foreach (IncomingDamageChangerElement changer in incomingDamageChangerBuffer)
                 {
                     switch (changer.Type)
                     {
@@ -93,19 +123,19 @@ namespace ROMA2.Logic.Common.DamageCalculator
                 damageBuffer.Add(new()
                 {
                     Value = totalDamage,
-                    DealingDamageEntity = attackCommand.Owner
+                    DealingDamageEntity = damageSender
                 });
-                attackCommands.RemoveAtSwapBack(i);
+                incomingDamageBuffer.RemoveAtSwapBack(i);
 
-                ecb.SetComponent<AttackCommand>(key, mainCommand, new()
+                // Если буфер есть, то команда его не тронет, нужен только из-за отката состояний неткода
+                ecb.AddBuffer<ProcessedDamageElement>(key, damageSender);
+                ecb.AppendToBuffer<ProcessedDamageElement>(key, damageSender, new()
                 {
                     PhysicalDamage = physicalDamage,
                     MagicalDamage = magicalDamage,
                     TrueDamage = trueDamage,
-                    Owner = attackCommand.Owner,
                     Receiver = receiver
                 });
-                ecb.SetComponentEnabled<ProcessedAttackCommand>(key, mainCommand, true);
             }
         }
     }

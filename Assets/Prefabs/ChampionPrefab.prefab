@@ -361,7 +361,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Physics.Custom::Unity.Physics.Authoring.PhysicsBodyAuthoring
   m_MotionType: 0
-  m_Smoothing: 1
+  m_Smoothing: 0
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0
@@ -462,7 +462,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1215624f01a8c7c4b8f4ec5111b72439, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Logic.Common.ChampionAuthoring
-  PathPositionsCapacity: 100
   ChampionID: 0
   Database: {fileID: 11400000, guid: 1ee62af5bf15ffd42abac2b9de976edf, type: 2}
   FirePointOffset: {x: 0, y: 1.5, z: 0}
@@ -481,7 +480,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.AoeAbilityAuthoring
   Ability1: {fileID: 2008466357010077448, guid: 89983fd094130ad44afa533d5820871c,
     type: 3}
-  Ability2: {fileID: 3378036069303024400, guid: a0dd3496cb9282a44bb97f9e867ec4d4,
+  Ability2: {fileID: 2008466357010077448, guid: 50c3fc595c12b7b4a9f26244ed6efd75,
     type: 3}
   Ability1Cooldown: 4
   Ability2Cooldown: 6

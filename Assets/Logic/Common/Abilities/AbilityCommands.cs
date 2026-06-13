@@ -2,20 +2,12 @@
 
 namespace ROMA2.Logic.Common.Abilities
 {
-    // Что делать с умениями, которые не имеют префабов, таргетные, допустим, или баффы на себя или союзника
-    public interface IAbilityCommand : IComponentData, IEnableableComponent
-    {
-        bool NeedToConfirmAbilities { get; set; }
-        int AbilityIndex { get; set; }
-        Entity Prefab { get; set; }
-    }
-    
-    public struct AbilityCommand : IAbilityCommand
+    public struct AbilityCommand : IComponentData
     {
         public Entity Owner;
-        public bool NeedToConfirmAbilities { get; set; }
-        public int AbilityIndex { get; set; }
-        public Entity Prefab { get; set; }
+        public bool NeedToConfirmAbilities;
+        public int AbilityIndex;
+        public Entity Prefab;
     }
 
     public struct ActivatedAbilitiesCommands : IComponentData
@@ -59,24 +51,13 @@ namespace ROMA2.Logic.Common.Abilities
             }
         }
     }
-
-    public struct DrawAbilityUITag<T> : IComponentData, IEnableableComponent where T : IAbilityCommand { }
-    
-    public struct UpdateAbilityUITag<T> : IComponentData, IEnableableComponent where T : IAbilityCommand { }
     
     public struct AimingTag : IComponentData, IEnableableComponent { }
-
-    public struct AoeAbilityCommand : IAbilityCommand
-    {
-        public bool NeedToConfirmAbilities { get; set; }
-        public int AbilityIndex { get; set; }
-        public Entity Prefab { get; set; }
-    }
     
-    public struct SkillShotAbilityCommand : IAbilityCommand
+    public struct DefaultInstAbilityCommand : IComponentData, IEnableableComponent
     {
-        public bool NeedToConfirmAbilities { get; set; }
-        public int AbilityIndex { get; set; }
-        public Entity Prefab { get; set; }
+        public bool NeedToConfirmAbilities;
+        public int AbilityIndex;
+        public Entity Prefab;
     }
 }

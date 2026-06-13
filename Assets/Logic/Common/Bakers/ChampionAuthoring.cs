@@ -10,11 +10,11 @@ namespace ROMA2.Logic.Common.Bakers
 {
     public class ChampionAuthoring : MonoBehaviour
     {
-        public int PathPositionsCapacity = 100;
         public int ChampionID;
         public ChampionDatabase Database;
         public Vector3 FirePointOffset;
         public float DetectionRadius = 15;
+        public float RVORadius = 0.5f;
         
         public class ChampionBaker : Baker<ChampionAuthoring>
         {
@@ -30,15 +30,12 @@ namespace ROMA2.Logic.Common.Bakers
                 PathFindingRequest pathFindingRequest = new();
                 AddComponent(entity, pathFindingRequest);
                 SetComponentEnabled<PathFindingRequest>(entity, false);
-                AddComponent(entity, new MoveSpeed { Value = config.MoveSpeed });
                 AddComponent(entity, new MoveTargetPosition { Flag = false });
-                DynamicBuffer<PathPositionElement> pathPositions = AddBuffer<PathPositionElement>(entity);
-                pathPositions.Capacity = authoring.PathPositionsCapacity;
+                AddBuffer<PathPositionElement>(entity);
                 AddComponent<FollowPathProperties>(entity);
                 AddComponent<IncorrectPathProperties>(entity);
                 SetComponentEnabled<IncorrectPathProperties>(entity, false);
                 AddComponent<IgnoreRegistrationInGrid>(entity);
-
                 AddComponent<AbilityInput>(entity);
                 AddComponent<AimingTag>(entity);
                 AddComponent<AimInput>(entity);
@@ -47,14 +44,41 @@ namespace ROMA2.Logic.Common.Bakers
                 AddComponent<SelectedEntity>(entity);
                 AddComponent<LastTargetEntityPosition>(entity);
                 
-                this.BakeHealth(config.HealthPoints);
-                this.BakeBehaviour(
-                    config.AttackRadius,
-                    authoring.DetectionRadius,
-                    authoring.FirePointOffset,
-                    config.AttackSpeed,
-                    true,
-                    config.AttackPrefab);
+                AddComponent(entity, new MaxHealthPoints { Value = config.MaxHealthPoints });
+                AddComponent(entity, new CurrentHealthPoints { Value = config.MaxHealthPoints });
+                AddComponent(entity, new HealthRegeneration { Value = config.HealthRegeneration });
+                AddComponent(entity, new MaxMana { Value = config.MaxMana });
+                AddComponent(entity, new ManaRegeneration { Value = config.ManaRegeneration });
+                AddComponent<PhysicalPower>(entity, new() { Value = config.PhysicalPower });
+                AddComponent<MagicalPower>(entity, new() { Value = config.MagicalPower });
+                AddComponent<PhysicalArmor>(entity, new() { Value = config.PhysicalArmor });
+                AddComponent<MagicalArmor>(entity, new() { Value = config.MagicalArmor });
+                AddComponent(entity, new AttackSpeed { Value = config.AttackSpeed });
+                AddComponent(entity, new MoveSpeed { Value = config.MoveSpeed });
+            
+                AddBuffer<DamageBufferElement>(entity);
+                AddBuffer<IncomingDamageChangerElement>(entity);
+                AddBuffer<IncomingDamageElement>(entity);
+                AddBuffer<DamageThisTick>(entity);
+                AddBuffer<ProcessedDamageElement>(entity);
+
+                AddComponent(entity, new AttackRadius { Value = config.AttackRadius });
+                if (config.AttackPrefab != null)
+                {
+                    AddComponent(entity, new RangedAttackProperties
+                    {
+                        AttackPrefab = GetEntity(config.AttackPrefab, TransformUsageFlags.Dynamic),
+                        FirePointOffset = authoring.FirePointOffset
+                    });
+                }
+            
+                AddComponent<TargetEntity>(entity, new() { InAttackArea = false });
+                AddBuffer<AttackCooldown>(entity);
+                AddComponent(entity, new DetectionRadius { Value = authoring.DetectionRadius });
+                AddComponent<InAttackArea>(entity);
+                SetComponentEnabled<InAttackArea>(entity, false);
+            
+                AddComponent<RVOAgent>(entity, new() { BodyRadius = authoring.RVORadius });
             }
         }
     }

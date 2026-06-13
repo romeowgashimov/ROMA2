@@ -182,8 +182,9 @@ namespace ROMA2.Logic.Data
         public float Value;
     }
 
-    // Триггер только для базовых атак и умений для нанесения урона
-    public struct TriggerEntityInfo : IComponentData
+    // Триггер только для базовых атак и умений для нанесения урона 
+    // Буфер, потому что атака может быть массовой, чтобы сохранить всех, кто попал под атаку
+    public struct TriggerEntityInfo : IBufferElementData
     {
         public Entity Value;
     }

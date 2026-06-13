@@ -1,4 +1,5 @@
 ﻿using Unity.Entities;
+using Unity.NetCode;
 
 namespace ROMA2.Logic.Data
 {
@@ -72,7 +73,8 @@ namespace ROMA2.Logic.Data
         public DamageType Type; // Тип урона
     }
 
-    public struct AttackCommand : IComponentData
+    [InternalBufferCapacity(0)] // Данные всегда хранятся в куче
+    public struct IncomingDamageElement : IBufferElementData
     {
         // Не атака или умение, а владелец сущности, нанёсшей урон
         public Entity Owner;
@@ -80,25 +82,17 @@ namespace ROMA2.Logic.Data
         public float PhysicalDamage;
         public float MagicalDamage;
         public float TrueDamage;
+        public bool IsBasicAttack;
     }
 
-    // Маркер, что команда обработалась
-    public struct ProcessedAttackCommand : IComponentData, IEnableableComponent { }
-    
-    // Маркер, что команда базовой атаки 
-    // ПО УМОЛЧАНИЮ КОМАНДА ВСЕГДА КОМАНДА БАЗОВОЙ АТАКИ!!!
-    public struct BasicAttackCommand : IComponentData, IEnableableComponent { }
-
-    public struct NewAttackCommand : IComponentData, IEnableableComponent { }
-
-    public struct AttackCommandElement : IBufferElementData
+    [InternalBufferCapacity(0)]
+    public struct ProcessedDamageElement : IBufferElementData
     {
-        public Entity Value;
-    }
-
-    public struct AttackCommandContainerTag : IComponentData
-    {
-        public Entity Value;
+        public Entity Receiver;
+        public float PhysicalDamage;
+        public float MagicalDamage;
+        public float TrueDamage;
+        public bool IsBasicAttack;
     }
     
     public struct DefaultDamage : IComponentData
@@ -109,7 +103,7 @@ namespace ROMA2.Logic.Data
         public float TrueDamage;
     }
 
-    public struct SkillShotAbility : IComponentData
+    public struct DeathShotAbility : IComponentData
     {
         public int PhysicalPercentage;
     }

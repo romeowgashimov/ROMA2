@@ -5,17 +5,17 @@ using UnityEngine;
 
 namespace ROMA2.Logic.Common.Abilities
 {
-    public class SkillShotAuthoring : MonoBehaviour
+    public class DeathShotAuthoring : MonoBehaviour
     {
         public float PhysicalDamage;
         public int PhysicalPercentage;
     
-        private class SkillShotBaker : Baker<SkillShotAuthoring>
+        private class DeathShotBaker : Baker<DeathShotAuthoring>
         {
-            public override void Bake(SkillShotAuthoring authoring)
+            public override void Bake(DeathShotAuthoring authoring)
             {
                 Entity entity = GetEntity(TransformUsageFlags.Dynamic);
-                AddComponent<SkillShotAbility>(entity, new()
+                AddComponent<DeathShotAbility>(entity, new()
                 {
                     PhysicalPercentage = authoring.PhysicalPercentage
                 });

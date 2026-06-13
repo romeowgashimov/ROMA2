@@ -7,63 +7,56 @@ using Unity.NetCode;
 namespace ROMA2.Logic.Common.Abilities
 {
     [UpdateInGroup(typeof(AbilityCommandSystemGroup))]
-    public partial struct DeathSphereSystem : ISystem
+    public partial struct DeathSphereAbilitySystem : ISystem
     {
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<AttackCommandContainerTag>();
             state.RequireForUpdate<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            Entity attackCommandPrefab = SystemAPI
-                .GetSingleton<AttackCommandContainerTag>()
-                .Value;
-            
             EntityCommandBuffer.ParallelWriter ecb = SystemAPI
                 .GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged)
                 .AsParallelWriter();
             
-            state.Dependency = new DeathSphereJob
+            state.Dependency = new DeathSphereAbilityJob
             {
-                AttackCommandPrefab = attackCommandPrefab,
                 ECB = ecb
             }.ScheduleParallel(state.Dependency);
         }
     }
 
     [BurstCompile]
-    public partial struct DeathSphereJob : IJobEntity
+    public partial struct DeathSphereAbilityJob : IJobEntity
     {
-        public Entity AttackCommandPrefab;
         public EntityCommandBuffer.ParallelWriter ECB;
         
         public void Execute(
             [ChunkIndexInQuery] int key,
             in DeathSphereAbility ability,
-            ref TriggerEntityInfo triggerInfo,
+            ref DynamicBuffer<TriggerEntityInfo> triggerInfoBuffer,
             in CombineCharsComponent combineCharsComponent,
             in DefaultDamage damage,
             in Owner owner)
         {
-            if (triggerInfo.Value == Entity.Null) return;
-            
-            float magicalDamage = damage.MagicalDamage;
-            magicalDamage += ability.MagicalPercentage / 100 * combineCharsComponent.MagicalPower;
+            if (triggerInfoBuffer.IsEmpty) return;
 
-            Entity attackCommand = ECB.Instantiate(key, AttackCommandPrefab);
-            ECB.SetComponent<AttackCommand>(key, attackCommand, new()
+            for (int i = 0; i < triggerInfoBuffer.Length; ++i)
             {
-                MagicalDamage = magicalDamage,
-                Owner = owner.Value,
-                Receiver = triggerInfo.Value
-            });
-            ECB.SetComponentEnabled<BasicAttackCommand>(key, attackCommand, false);
+                float magicalDamage = damage.MagicalDamage;
+                magicalDamage += ability.MagicalPercentage / 100 * combineCharsComponent.MagicalPower;
 
-            triggerInfo.Value = Entity.Null;
+                ECB.AppendToBuffer<IncomingDamageElement>(key, triggerInfoBuffer[i].Value, new()
+                {
+                    Owner = owner.Value,
+                    Receiver = triggerInfoBuffer[i].Value,
+                    MagicalDamage = magicalDamage
+                });
+                triggerInfoBuffer.RemoveAtSwapBack(i);
+            }
         }
     }
 }

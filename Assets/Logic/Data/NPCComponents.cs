@@ -17,4 +17,6 @@ namespace ROMA2.Logic.Data
     {
         [GhostField] public byte Value;
     }
+
+    public struct TowerTag : IComponentData { }
 }

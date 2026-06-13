@@ -16,16 +16,30 @@ MonoBehaviour:
   - Id: 0
     Prefab: {fileID: 403193853099150282, guid: 2fe49a526567fdc46a55b0b1094bd406, type: 3}
     MoveSpeed: 30
-    HealthPoints: 500
+    MaxHealthPoints: 1000
     AttackSpeed: 1
-    AttackRadius: 8
+    MaxMana: 500
+    HealthRegeneration: 10
+    ManaRegeneration: 5
+    PhysicalPower: 50
+    MagicalPower: 0
+    PhysicalArmor: 20
+    MagicalArmor: 10
+    AttackRadius: 12
     AttackPrefab: {fileID: 4375477658151305662, guid: b136942dad4460047b5d1af88a37f71d,
       type: 3}
   - Id: 1
     Prefab: {fileID: 403193853099150282, guid: dc014915911b35949b432e1fb4ccdafb, type: 3}
     MoveSpeed: 10
-    HealthPoints: 3000
+    MaxHealthPoints: 3000
     AttackSpeed: 4
-    AttackRadius: 12
+    MaxMana: 1000
+    HealthRegeneration: 50
+    ManaRegeneration: 10
+    PhysicalPower: 100
+    MagicalPower: 500
+    PhysicalArmor: 100
+    MagicalArmor: 10
+    AttackRadius: 8
     AttackPrefab: {fileID: 4375477658151305662, guid: b136942dad4460047b5d1af88a37f71d,
       type: 3}

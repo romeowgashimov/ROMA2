@@ -27,9 +27,10 @@ namespace ROMA2.Logic.Common.DamageCalculator
             
             state.Dependency = new DamageOnTriggerJob
             {
-                TriggerLookup = GetComponentLookup<TriggerEntityInfo>(true),
+                TriggerLookup = GetBufferLookup<TriggerEntityInfo>(true),
                 AlreadyDamagedLookup = GetBufferLookup<AlreadyDamagedEntity>(true),
                 TeamLookup = GetComponentLookup<Team>(true),
+                IncomingDamageLookup = GetBufferLookup<IncomingDamageElement>(true),
                 ECB = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged),
             }.Schedule(simulationSingleton, state.Dependency);
         }
@@ -38,9 +39,10 @@ namespace ROMA2.Logic.Common.DamageCalculator
     [BurstCompile]
     public struct DamageOnTriggerJob : ITriggerEventsJob
     {
-        [ReadOnly] public ComponentLookup<TriggerEntityInfo> TriggerLookup;
+        [ReadOnly] public BufferLookup<TriggerEntityInfo> TriggerLookup;
         [ReadOnly] public ComponentLookup<Team> TeamLookup;
         [ReadOnly] public BufferLookup<AlreadyDamagedEntity> AlreadyDamagedLookup;
+        [ReadOnly] public BufferLookup<IncomingDamageElement> IncomingDamageLookup;
         public EntityCommandBuffer ECB;
         
         public void Execute(TriggerEvent triggerEvent)
@@ -48,12 +50,14 @@ namespace ROMA2.Logic.Common.DamageCalculator
             Entity damageDealingEntity = Entity.Null;
             Entity damageReceivingEntity = Entity.Null;
 
-            if (TriggerLookup.HasComponent(triggerEvent.EntityA))
+            if (TriggerLookup.HasBuffer(triggerEvent.EntityA)
+                && IncomingDamageLookup.HasBuffer(triggerEvent.EntityB))
             {
                 damageDealingEntity = triggerEvent.EntityA;
                 damageReceivingEntity = triggerEvent.EntityB;
             }
-            else if (TriggerLookup.HasComponent(triggerEvent.EntityB))
+            else if (TriggerLookup.HasBuffer(triggerEvent.EntityB)
+                && IncomingDamageLookup.HasBuffer(triggerEvent.EntityA))
             {
                 damageDealingEntity = triggerEvent.EntityB;
                 damageReceivingEntity = triggerEvent.EntityA;
@@ -71,7 +75,7 @@ namespace ROMA2.Logic.Common.DamageCalculator
                 if (alreadyDamagedEntity.Value.Equals(damageReceivingEntity)) return;
             
             ECB.AppendToBuffer<AlreadyDamagedEntity>(damageDealingEntity, new() { Value = damageReceivingEntity });
-            ECB.SetComponent<TriggerEntityInfo>(damageDealingEntity, new() { Value = damageReceivingEntity });
+            ECB.AppendToBuffer<TriggerEntityInfo>(damageDealingEntity, new() { Value = damageReceivingEntity });
         }
     } 
 }

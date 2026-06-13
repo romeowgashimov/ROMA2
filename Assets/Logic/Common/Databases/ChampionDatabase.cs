@@ -10,8 +10,15 @@ namespace ROMA2.Logic.Common.Databases
         public int Id;
         public GameObject Prefab;
         public int MoveSpeed;
-        public int HealthPoints;
+        public int MaxHealthPoints;
         public int AttackSpeed;
+        public int MaxMana;
+        public float HealthRegeneration;
+        public float ManaRegeneration;
+        public int PhysicalPower;
+        public int MagicalPower;
+        public int PhysicalArmor;
+        public int MagicalArmor;
         public float AttackRadius;
         public GameObject AttackPrefab;
     }

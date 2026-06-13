@@ -50,7 +50,6 @@ namespace ROMA2.Logic.Common.Behaviour
                 TeamLookup = GetComponentLookup<Team>(true),
                 Champions = GetComponentLookup<ChampTag>(true),
                 TransformLookup = GetComponentLookup<LocalTransform>(true)
-                
             }.ScheduleParallel(state.Dependency);
         }
     }

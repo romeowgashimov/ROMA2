@@ -7,63 +7,57 @@ using Unity.NetCode;
 namespace ROMA2.Logic.Common.Abilities
 {
     [UpdateInGroup(typeof(AbilityCommandSystemGroup))]
-    public partial struct SkillShotSystem : ISystem
+    public partial struct DeathShotAbilitySystem : ISystem
     {
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<AttackCommandContainerTag>();
             state.RequireForUpdate<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            Entity attackCommandPrefab = SystemAPI
-                .GetSingleton<AttackCommandContainerTag>()
-                .Value;
-            
             EntityCommandBuffer.ParallelWriter ecb = SystemAPI
                 .GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>()
                 .CreateCommandBuffer(state.WorldUnmanaged)
                 .AsParallelWriter();
             
-            state.Dependency = new SkillShotAbilityJob
+            state.Dependency = new DeathShotAbilityJob
             {
-                AttackCommandPrefab = attackCommandPrefab,
                 ECB = ecb
             }.ScheduleParallel(state.Dependency);
         }
     }
 
     [BurstCompile]
-    public partial struct SkillShotAbilityJob : IJobEntity
+    public partial struct DeathShotAbilityJob : IJobEntity
     {
         public Entity AttackCommandPrefab;
         public EntityCommandBuffer.ParallelWriter ECB;
         
         public void Execute(
             [ChunkIndexInQuery] int key,
-            in SkillShotAbility ability,
-            ref TriggerEntityInfo triggerInfo,
+            in DeathShotAbility ability,
+            ref DynamicBuffer<TriggerEntityInfo> triggerInfoBuffer,
             in CombineCharsComponent combineCharsComponent,
             in DefaultDamage damage,
             in Owner owner)
         {
-            if (triggerInfo.Value == Entity.Null) return;
-            
-            float physicalDamage = damage.PhysicalDamage;
-            physicalDamage += ability.PhysicalPercentage / 100 * combineCharsComponent.PhysicalPower;
+            if (triggerInfoBuffer.IsEmpty) return;
 
-            Entity attackCommand = ECB.Instantiate(key, AttackCommandPrefab);
-            ECB.SetComponent<AttackCommand>(key, attackCommand, new()
+            for (int i = 0; i < triggerInfoBuffer.Length; ++i)
             {
-                PhysicalDamage = physicalDamage,
-                Owner = owner.Value,
-                Receiver = triggerInfo.Value
-            });
-            ECB.SetComponentEnabled<BasicAttackCommand>(key, attackCommand, false);
-            
-            triggerInfo.Value = Entity.Null;
+                float physicalDamage = damage.PhysicalDamage;
+                physicalDamage += ability.PhysicalPercentage / 100 * combineCharsComponent.PhysicalPower;
+
+                ECB.AppendToBuffer<IncomingDamageElement>(key, triggerInfoBuffer[i].Value, new()
+                {
+                    Owner = owner.Value,
+                    Receiver = triggerInfoBuffer[i].Value,
+                    PhysicalDamage = physicalDamage
+                });
+                triggerInfoBuffer.RemoveAtSwapBack(i);
+            }
         }
     }
 }

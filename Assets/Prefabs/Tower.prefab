@@ -14,12 +14,10 @@ GameObject:
   - component: {fileID: 8371266242411514044}
   - component: {fileID: -2293352519496087944}
   - component: {fileID: 9109658604866127568}
-  - component: {fileID: -6906729116083896886}
-  - component: {fileID: 5998907826215234344}
   - component: {fileID: -2269101407946460892}
-  - component: {fileID: -3311513262280386151}
   - component: {fileID: 1102717316980471336}
   - component: {fileID: -697762992449105583}
+  - component: {fileID: 5302421487595867036}
   m_Layer: 0
   m_Name: Tower
   m_TagString: Untagged
@@ -283,33 +281,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &-6906729116083896886
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1808960621481842931}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9546a3726f0a480c85cceab8c824d950, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HealthPointsAuthoring
-  MaxHealthPoints: 200
-  HealthBarOffset: {x: 0, y: 4.5, z: 0}
---- !u!114 &5998907826215234344
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1808960621481842931}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c516d86e83e46e38e879577f68e4c60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.TeamAuthoring
-  Team: 0
 --- !u!114 &-2269101407946460892
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,25 +307,6 @@ MonoBehaviour:
   UseSingleBaseline: 0
   RollbackPredictedSpawnedGhostState: 0
   RollbackPredictionOnStructuralChanges: 1
---- !u!114 &-3311513262280386151
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1808960621481842931}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8729631d900843168dae5e931c569994, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.NpcAttackAuthoring
-  AttackRadius: 12
-  DetectionRadius: 12
-  FirePointOffset: {x: 0, y: 2.5, z: 0}
-  AttackSpeed: 3
-  AttackPrefab: {fileID: 4375477658151305662, guid: 22daabb38370a494ead1c7f2099aa13e,
-    type: 3}
-  NetCodeConfig: {fileID: 11400000, guid: dce9a8c7da8b8cf4093e70364ed6f4c4, type: 2}
 --- !u!114 &1102717316980471336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -381,6 +333,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Helpers.Bakers.RenderAuthoring
   Offset: {x: 0, y: 4, z: 0}
+--- !u!114 &5302421487595867036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1808960621481842931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d256d70637177b94695f8df9c5003905, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Logic.Common::ROMA2.Logic.Common.Bakers.TowerAuthoring
+  MaxHealthPoints: 4000
+  PhysicalPower: 200
+  MagicalPower: 0
+  PhysicalArmor: 50
+  MagicalArmor: 50
+  AttackSpeed: 2
+  AttackRadius: 10
+  DetectionRadius: 10
+  FirePointOffset: 2
+  AttackPrefab: {fileID: 4375477658151305662, guid: 22daabb38370a494ead1c7f2099aa13e,
+    type: 3}
+  RVORadius: 0.5
 --- !u!1 &3965942692478284425
 GameObject:
   m_ObjectHideFlags: 0

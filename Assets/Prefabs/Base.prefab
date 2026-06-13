@@ -117,7 +117,7 @@ GameObject:
   - component: {fileID: 2844751077918081652}
   - component: {fileID: -8021306472977558250}
   - component: {fileID: 7851604728728984867}
-  - component: {fileID: 1830789450377393214}
+  - component: {fileID: 8177053178946981156}
   - component: {fileID: 4568716967356504705}
   - component: {fileID: 6402601007678475366}
   - component: {fileID: -4786637120621914483}
@@ -385,7 +385,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &1830789450377393214
+--- !u!114 &8177053178946981156
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -394,11 +394,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5326781307255034168}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9546a3726f0a480c85cceab8c824d950, type: 3}
+  m_Script: {fileID: 11500000, guid: 160138f9814639c4cbd80de34c14e176, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Logic.Common.HealthPointsAuthoring
-  MaxHealthPoints: 100
-  HealthBarOffset: {x: 0, y: 3, z: 0}
+  m_EditorClassIdentifier: Logic.Common::ROMA2.Logic.Common.Bakers.HealthPointAuthoring
+  MaxHealthPoints: 1000
+  PhysicalArmor: 50
+  MagicalArmor: 50
 --- !u!114 &4568716967356504705
 MonoBehaviour:
   m_ObjectHideFlags: 0

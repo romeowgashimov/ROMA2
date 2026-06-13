@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ROMA2.Logic.Client.Models
 {
-    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
+    /*[WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     [UpdateInGroup(typeof(PresentationSystemGroup))]
     public partial struct SkillShotAbilityUISystem : ISystem
     {
@@ -25,13 +25,13 @@ namespace ROMA2.Logic.Client.Models
 
             foreach ((LocalTransform transform, Entity owner) in SystemAPI
                          .Query<LocalTransform>()
-                         .WithAll<DrawAbilityUITag<SkillShotAbilityCommand>, OwnerChampTag, Simulate>()
-                         .WithAll<SkillShotAbilityCommand>()
-                         .WithNone<UpdateAbilityUITag<SkillShotAbilityCommand>>()
+                         .WithAll<DrawAbilityUITag<DefaultInstAbilityCommand>, OwnerChampTag, Simulate>()
+                         .WithAll<DefaultInstAbilityCommand>()
+                         .WithNone<UpdateAbilityUITag<DefaultInstAbilityCommand>>()
                          .WithEntityAccess())
             {
-                ecb.SetComponentEnabled<DrawAbilityUITag<SkillShotAbilityCommand>>(owner, false);
-                ecb.SetComponentEnabled<UpdateAbilityUITag<SkillShotAbilityCommand>>(owner, true);
+                ecb.SetComponentEnabled<DrawAbilityUITag<DefaultInstAbilityCommand>>(owner, false);
+                ecb.SetComponentEnabled<UpdateAbilityUITag<DefaultInstAbilityCommand>>(owner, true);
                 
                 GameObject skillShotPrefab = SystemAPI.ManagedAPI.GetSingleton<UIPrefabs>().SkillShot;
                 GameObject skillShotUI =
@@ -42,7 +42,7 @@ namespace ROMA2.Logic.Client.Models
             foreach ((RefRW<AimInput> aimInput, RefRW<LocalTransform> localTransform,
                          SkillShotUIReference skillShotUIReference) in SystemAPI
                          .Query<RefRW<AimInput>, RefRW<LocalTransform>, SkillShotUIReference>()
-                         .WithAll<UpdateAbilityUITag<SkillShotAbilityCommand>, OwnerChampTag, SkillShotAbilityCommand>())
+                         .WithAll<UpdateAbilityUITag<DefaultInstAbilityCommand>, OwnerChampTag, DefaultInstAbilityCommand>())
             {
                 skillShotUIReference.Value.transform.position = localTransform.ValueRO.Position;
                 float3 direction = aimInput.ValueRO.Value;
@@ -53,14 +53,14 @@ namespace ROMA2.Logic.Client.Models
             
             foreach ((SkillShotUIReference skillShotUIReference, Entity owner) in SystemAPI
                          .Query<SkillShotUIReference>()
-                         .WithAll<UpdateAbilityUITag<SkillShotAbilityCommand>, OwnerChampTag>()
+                         .WithAll<UpdateAbilityUITag<DefaultInstAbilityCommand>, OwnerChampTag>()
                          .WithAll<AimInput, LocalTransform>()
-                         .WithNone<SkillShotAbilityCommand>()
+                         .WithNone<DefaultInstAbilityCommand>()
                          .WithEntityAccess())
             {
                 Object.Destroy(skillShotUIReference.Value);
                 ecb.RemoveComponent<SkillShotUIReference>(owner);
-                ecb.SetComponentEnabled<UpdateAbilityUITag<SkillShotAbilityCommand>>(owner, false);
+                ecb.SetComponentEnabled<UpdateAbilityUITag<DefaultInstAbilityCommand>>(owner, false);
             }
             
             foreach ((SkillShotUIReference skillShotUIReference, Entity entity) in SystemAPI
@@ -73,5 +73,5 @@ namespace ROMA2.Logic.Client.Models
                 ecb.RemoveComponent<SkillShotUIReference>(entity);
             }
         }
-    }
+    }*/
 }

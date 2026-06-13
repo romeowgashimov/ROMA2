@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace ROMA2.Logic.Common.Bakers
 {
-    public class IgnoreAuthorizationInGridAuthoring : MonoBehaviour
+    public class IgnoreRegistrationInGridAuthoring : MonoBehaviour
     {
-        private class IgnoreAuthorizationInGridBaker : Baker<IgnoreAuthorizationInGridAuthoring>
+        private class IgnoreAuthorizationInGridBaker : Baker<IgnoreRegistrationInGridAuthoring>
         {
-            public override void Bake(IgnoreAuthorizationInGridAuthoring authoring)
+            public override void Bake(IgnoreRegistrationInGridAuthoring authoring)
             {
                 Entity entity = GetEntity(TransformUsageFlags.Dynamic);
                 AddComponent<IgnoreRegistrationInGrid>(entity);

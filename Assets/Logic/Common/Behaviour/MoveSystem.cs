@@ -4,6 +4,7 @@ using ROMA2.Logic.Navigation;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
 using static Unity.Entities.SystemAPI;
@@ -33,6 +34,7 @@ namespace ROMA2.Logic.Common.Behaviour
 
             state.RequireForUpdate<GameplayingTag>();
             state.RequireForUpdate(_query);
+            state.RequireForUpdate<NetworkTime>();
         }
 
         [BurstCompile]
@@ -52,10 +54,8 @@ namespace ROMA2.Logic.Common.Behaviour
             in MoveSpeed moveSpeed,
             ref FollowPathProperties followPathProperties,
             ref DynamicBuffer<PathPositionElement> pathPositions,
-            in AttackRadius radius,
             in RVOAgent agent,
-            in MaxHealthPoints maxHP,
-            in TargetEntity attackTarget)
+            in MaxHealthPoints maxHP)
         {
             if (followPathProperties.ReachedTheTarget 
                 || (pathPositions.IsEmpty || followPathProperties.Index < 0) && !followPathProperties.IsCleanPath)

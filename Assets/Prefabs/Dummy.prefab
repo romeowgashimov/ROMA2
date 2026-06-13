@@ -15,10 +15,11 @@ GameObject:
   - component: {fileID: 9220732206247590521}
   - component: {fileID: 739782461219420247}
   - component: {fileID: 303912971215926720}
-  - component: {fileID: 3132023166854835002}
   - component: {fileID: 3723768595677729893}
   - component: {fileID: 7398516402731149365}
   - component: {fileID: 4300693997971100737}
+  - component: {fileID: 2179661970686744552}
+  - component: {fileID: 8334316609394738315}
   m_Layer: 0
   m_Name: Dummy
   m_TagString: Untagged
@@ -331,20 +332,6 @@ MonoBehaviour:
         Tag07: 0
     m_SerializedVersion: 1
   m_SerializedVersion: 1
---- !u!114 &3132023166854835002
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 582324163252478382}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9546a3726f0a480c85cceab8c824d950, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Logic.Common::ROMA2.Logic.Common.Bakers.HealthPointsAuthoring
-  MaxHealthPoints: 200
-  HealthBarOffset: {x: 0, y: 0, z: 0}
 --- !u!114 &3723768595677729893
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -383,6 +370,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Logic.Client::ROMA2.Logic.Client.Bakers.OutlineParentAuthoring
   OutlinePrefab: {fileID: 6484575714478743253}
+--- !u!114 &2179661970686744552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582324163252478382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 160138f9814639c4cbd80de34c14e176, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Logic.Common::ROMA2.Logic.Common.Bakers.HealthPointAuthoring
+  MaxHealthPoints: 1500
+  PhysicalArmor: 50
+  MagicalArmor: 70
+--- !u!114 &8334316609394738315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 582324163252478382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c516d86e83e46e38e879577f68e4c60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Logic.Common::ROMA2.Logic.Common.Bakers.TeamAuthoring
+  Team: 0
 --- !u!1 &6484575714478743253
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,6 +6,6 @@
   <Project Path="Logic.Server.csproj" />
   <Project Path="Unity.Physics.Custom.Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
-  <Project Path="Logic.Helpers.csproj" />
   <Project Path="Logic.Data.csproj" />
+  <Project Path="Logic.Helpers.csproj" />
 </Solution>

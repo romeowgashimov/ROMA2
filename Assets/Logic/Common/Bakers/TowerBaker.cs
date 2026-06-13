@@ -1,11 +1,11 @@
-﻿using ROMA2.Logic.Data;
+using ROMA2.Logic.Data;
 using ROMA2.Logic.Navigation;
 using Unity.Entities;
 using UnityEngine;
 
 namespace ROMA2.Logic.Common.Bakers
 {
-    public class MinionAuthoring : MonoBehaviour
+    public class TowerAuthoring : MonoBehaviour
     {
         public int MaxHealthPoints;
         public int PhysicalPower;
@@ -17,29 +17,17 @@ namespace ROMA2.Logic.Common.Bakers
         public int DetectionRadius;
         public float FirePointOffset;
         public GameObject AttackPrefab;
-        public float MoveSpeed;
         public float RVORadius = 0.5f;
+        public TeamType Team;
 
-        public class MinionBaker : Baker<MinionAuthoring>
+        public class TowerBaker : Baker<TowerAuthoring>
         {
-            public override void Bake(MinionAuthoring authoring)
+            public override void Bake(TowerAuthoring authoring)
             {
                 Entity entity = GetEntity(TransformUsageFlags.Dynamic);
-                AddComponent<MinionTag>(entity);
-                AddComponent<NewMinionTag>(entity);
-                AddComponent<MinionPathIndex>(entity);
-                AddComponent<MinionPathPosition>(entity);
-                AddComponent<PathFindingRequest>(entity);
-                SetComponentEnabled<PathFindingRequest>(entity, false);
-                AddComponent<FollowPathProperties>(entity);
-                AddBuffer<PathPositionElement>(entity);
-                AddComponent(entity, new MoveTargetPosition { Flag = false });
-                AddComponent<IncorrectPathProperties>(entity);
-                SetComponentEnabled<IncorrectPathProperties>(entity, false);
-                AddComponent<IgnoreRegistrationInGrid>(entity);
-                AddComponent<Team>(entity);
-                AddComponent<LastTargetEntityPosition>(entity, new() { Value = 0 });
-
+                AddComponent<TowerTag>(entity);
+                AddComponent<Team>(entity, new() { Value = authoring.Team });
+                
                 AddComponent(entity, new MaxHealthPoints { Value = authoring.MaxHealthPoints });
                 AddComponent(entity, new CurrentHealthPoints { Value = authoring.MaxHealthPoints });
                 AddComponent<PhysicalPower>(entity, new() { Value = authoring.PhysicalPower });
@@ -47,7 +35,6 @@ namespace ROMA2.Logic.Common.Bakers
                 AddComponent<PhysicalArmor>(entity, new() { Value = authoring.PhysicalArmor });
                 AddComponent<MagicalArmor>(entity, new() { Value = authoring.MagicalArmor });
                 AddComponent(entity, new AttackSpeed { Value = authoring.AttackSpeed });
-                AddComponent(entity, new MoveSpeed { Value = authoring.MoveSpeed });
                 
                 AddBuffer<DamageBufferElement>(entity);
                 AddBuffer<IncomingDamageChangerElement>(entity);
