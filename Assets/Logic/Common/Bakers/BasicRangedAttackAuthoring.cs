@@ -18,6 +18,7 @@ namespace ROMA2.Logic.Common.Bakers
                 AddComponent<CombineCharsComponent>(entity);
 
                 AddBuffer<AlreadyDamagedEntity>(entity);
+                AddBuffer<SendDamageElement>(entity);
                 AddComponent<Owner>(entity);
 
                 AddComponent<IgnoreRegistrationInGrid>(entity);

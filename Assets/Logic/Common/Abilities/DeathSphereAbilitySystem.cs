@@ -17,29 +17,20 @@ namespace ROMA2.Logic.Common.Abilities
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityCommandBuffer.ParallelWriter ecb = SystemAPI
-                .GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>()
-                .CreateCommandBuffer(state.WorldUnmanaged)
-                .AsParallelWriter();
-            
-            state.Dependency = new DeathSphereAbilityJob
-            {
-                ECB = ecb
-            }.ScheduleParallel(state.Dependency);
+            state.Dependency = new DeathSphereAbilityJob().ScheduleParallel(state.Dependency);
         }
     }
 
     [BurstCompile]
     public partial struct DeathSphereAbilityJob : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter ECB;
-        
         public void Execute(
-            [ChunkIndexInQuery] int key,
             in DeathSphereAbility ability,
             ref DynamicBuffer<TriggerEntityInfo> triggerInfoBuffer,
             in CombineCharsComponent combineCharsComponent,
             in DefaultDamage damage,
+            ref DynamicBuffer<SendDamageElement> sendDamages,
+            in AbilityIndex abilityIndex,
             in Owner owner)
         {
             if (triggerInfoBuffer.IsEmpty) return;
@@ -49,11 +40,12 @@ namespace ROMA2.Logic.Common.Abilities
                 float magicalDamage = damage.MagicalDamage;
                 magicalDamage += ability.MagicalPercentage / 100 * combineCharsComponent.MagicalPower;
 
-                ECB.AppendToBuffer<IncomingDamageElement>(key, triggerInfoBuffer[i].Value, new()
+                sendDamages.Add(new()
                 {
-                    Owner = owner.Value,
+                    MagicalDamage = magicalDamage,
                     Receiver = triggerInfoBuffer[i].Value,
-                    MagicalDamage = magicalDamage
+                    Owner = owner.Value,
+                    AbilityIndex = abilityIndex.Value
                 });
                 triggerInfoBuffer.RemoveAtSwapBack(i);
             }

@@ -78,11 +78,23 @@ namespace ROMA2.Logic.Data
     {
         // Не атака или умение, а владелец сущности, нанёсшей урон
         public Entity Owner;
+        public float PhysicalDamage;
+        public float MagicalDamage;
+        public float TrueDamage;
+        // Индекс базовой атаки -1
+        public int AbilityIndex;
+    }
+
+    public struct SendDamageElement : IBufferElementData
+    {
+        // Не атака или умение, а владелец сущности, нанёсшей урон
+        public Entity Owner;
         public Entity Receiver;
         public float PhysicalDamage;
         public float MagicalDamage;
         public float TrueDamage;
-        public bool IsBasicAttack;
+        // Индекс базовой атаки -1
+        public int AbilityIndex;
     }
 
     [InternalBufferCapacity(0)]
@@ -92,7 +104,7 @@ namespace ROMA2.Logic.Data
         public float PhysicalDamage;
         public float MagicalDamage;
         public float TrueDamage;
-        public bool IsBasicAttack;
+        public int AbilityIndex;
     }
     
     public struct DefaultDamage : IComponentData
@@ -126,4 +138,9 @@ namespace ROMA2.Logic.Data
     }
     
     public struct RangedAttack : IComponentData { }
+
+    public struct AbilityIndex : IComponentData
+    {
+        public int Value;
+    }
 }

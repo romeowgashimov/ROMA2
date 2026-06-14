@@ -47,6 +47,7 @@ namespace ROMA2.Logic.Common.Abilities
                          .WithAll<Simulate>()
                          .WithEntityAccess())
             {
+                // Если компонент уже есть на сущности, команда не приведёт к структурным изменениям
                 ECB.AddComponent(mainCommand.Owner, new DefaultInstAbilityCommand
                 {
                     Prefab = anyCommand.Prefab,
@@ -115,6 +116,7 @@ namespace ROMA2.Logic.Common.Abilities
                 PhysicalPower = physicalPower.Value,
                 MagicalPower = magicalPower.Value
             });
+            ECB.SetComponent<AbilityIndex>(key, ability, new() { Value = anyCommand.AbilityIndex });
             
             // Выключение команды после инициализации
             ECB.SetComponentEnabled<DefaultInstAbilityCommand>(key, owner, false);

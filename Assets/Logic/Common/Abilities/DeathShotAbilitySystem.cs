@@ -17,30 +17,20 @@ namespace ROMA2.Logic.Common.Abilities
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityCommandBuffer.ParallelWriter ecb = SystemAPI
-                .GetSingleton<EndPredictedSimulationEntityCommandBufferSystem.Singleton>()
-                .CreateCommandBuffer(state.WorldUnmanaged)
-                .AsParallelWriter();
-            
-            state.Dependency = new DeathShotAbilityJob
-            {
-                ECB = ecb
-            }.ScheduleParallel(state.Dependency);
+            state.Dependency = new DeathShotAbilityJob().ScheduleParallel(state.Dependency);
         }
     }
 
     [BurstCompile]
     public partial struct DeathShotAbilityJob : IJobEntity
     {
-        public Entity AttackCommandPrefab;
-        public EntityCommandBuffer.ParallelWriter ECB;
-        
         public void Execute(
-            [ChunkIndexInQuery] int key,
             in DeathShotAbility ability,
             ref DynamicBuffer<TriggerEntityInfo> triggerInfoBuffer,
             in CombineCharsComponent combineCharsComponent,
             in DefaultDamage damage,
+            ref DynamicBuffer<SendDamageElement> sendDamages,
+            in AbilityIndex abilityIndex,
             in Owner owner)
         {
             if (triggerInfoBuffer.IsEmpty) return;
@@ -50,11 +40,12 @@ namespace ROMA2.Logic.Common.Abilities
                 float physicalDamage = damage.PhysicalDamage;
                 physicalDamage += ability.PhysicalPercentage / 100 * combineCharsComponent.PhysicalPower;
 
-                ECB.AppendToBuffer<IncomingDamageElement>(key, triggerInfoBuffer[i].Value, new()
+                sendDamages.Add(new()
                 {
-                    Owner = owner.Value,
+                    PhysicalDamage = physicalDamage,
                     Receiver = triggerInfoBuffer[i].Value,
-                    PhysicalDamage = physicalDamage
+                    Owner = owner.Value,
+                    AbilityIndex = abilityIndex.Value
                 });
                 triggerInfoBuffer.RemoveAtSwapBack(i);
             }

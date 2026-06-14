@@ -134,7 +134,8 @@ namespace ROMA2.Logic.Common.DamageCalculator
                     PhysicalDamage = physicalDamage,
                     MagicalDamage = magicalDamage,
                     TrueDamage = trueDamage,
-                    Receiver = receiver
+                    Receiver = receiver,
+                    AbilityIndex = element.AbilityIndex
                 });
             }
         }

@@ -32,9 +32,9 @@ namespace ROMA2.Logic.Common.Combat
 
     [BurstCompile]
     [WithAll(typeof(RangedAttack))]
+    [WithNone(typeof(AbilityIndex))]
     public partial struct BasicRangedAttackJob : IJobEntity
     {
-        public Entity AttackCommandPrefab;
         public EntityCommandBuffer.ParallelWriter ECB;
 
         public void Execute(
@@ -43,6 +43,7 @@ namespace ROMA2.Logic.Common.Combat
             ref DynamicBuffer<TriggerEntityInfo> triggerInfoBuffer,
             in BasicAttackTarget target,
             in Owner owner,
+            ref DynamicBuffer<SendDamageElement> sendDamages,
             Entity attack)
         {
             if (triggerInfoBuffer.IsEmpty) return;
@@ -55,13 +56,12 @@ namespace ROMA2.Logic.Common.Combat
 
                 float totalDamage = combineCharsComponent.PhysicalPower;
 
-                // Если буфер есть, то команда ничего не сделает, нужен только из-за отката состояний неткода
-                ECB.AddBuffer<IncomingDamageElement>(key, triggerInfoBuffer[i].Value);
-                ECB.AppendToBuffer<IncomingDamageElement>(key, triggerInfoBuffer[i].Value, new()
+                sendDamages.Add(new()
                 {
-                    Owner = owner.Value,
+                    PhysicalDamage = totalDamage,
                     Receiver = triggerInfoBuffer[i].Value,
-                    PhysicalDamage = totalDamage
+                    Owner = owner.Value,
+                    AbilityIndex = -1
                 });
                 triggerInfoBuffer.Clear();
                 ECB.AddComponent<DestroyEntityTag>(key, attack);
