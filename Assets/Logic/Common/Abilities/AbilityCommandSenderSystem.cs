@@ -1,11 +1,13 @@
 ﻿using ROMA2.Logic.Common.Extensions;
 using ROMA2.Logic.Data;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Transforms;
 
 namespace ROMA2.Logic.Common.Abilities
 {
+    [BurstCompile]
     [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
     public partial struct AbilityCommandSenderSystem : ISystem
     {
@@ -16,7 +18,7 @@ namespace ROMA2.Logic.Common.Abilities
             _query = SystemAPI.QueryBuilder()
                 .WithAll<AbilityInput, AbilityCommands, LocalTransform,
                     AbilityCooldownTicks, AbilityCooldownTargetTicks, Simulate>()
-                .WithAll<Team, AimInput, ActivatedAbilitiesCommands>()
+                .WithAll<Team, AimInput, ActivatedAbilitiesCommands, CurrentMana, AbilityManaCost>()
                 .Build();
 
             state.RequireForUpdate<NetworkTime>();
@@ -42,24 +44,36 @@ namespace ROMA2.Logic.Common.Abilities
         }
     }
 
+    [BurstCompile]
     public partial struct AbilityCommandJob : IJobEntity
     {
         public EntityCommandBuffer.ParallelWriter ECB;
         public NetworkTime NetworkTime;
         
-        private void Execute([EntityIndexInQuery] int key, AbilityInput input, AbilityCommands abilityCommand,
+        private void Execute(
+            [EntityIndexInQuery] int key, 
+            in AbilityInput input, 
+            in AbilityCommands abilityCommand,
             DynamicBuffer<AbilityCooldownTargetTicks> cooldownTargetTicks,
-            RefRW<ActivatedAbilitiesCommands> activatedAbilitiesCommands, Entity owner)
+            RefRW<ActivatedAbilitiesCommands> activatedAbilitiesCommands, 
+            in CurrentMana currMana,
+            in AbilityManaCost manaCosts,
+            Entity owner)
         {
             for (int i = 0; i < input.Length; ++i)
             {
                 if (!input[i].IsSet) continue; // Сделать так, чтобы нельзя было активировать два умения одновременно
+                int manaCost = manaCosts.GetManaCost(i);
+                if (currMana.Value < manaCost) continue;
                 if (activatedAbilitiesCommands.ValueRO[i]) continue;
                 if (cooldownTargetTicks.IsOnCooldown(NetworkTime, i)) continue;
                 Entity abilityCommandEntity = ECB.Instantiate(key, abilityCommand[i]);
                 ECB.SetComponent(key, abilityCommandEntity, new AbilityCommand
                 {
-                    Owner = owner, AbilityIndex = i, NeedToConfirmAbilities = input.NeedToConfirmAbilities
+                    Owner = owner, 
+                    AbilityIndex = i, 
+                    NeedToConfirmAbilities = input.NeedToConfirmAbilities,
+                    ManaCost = manaCost
                 });
                 activatedAbilitiesCommands.ValueRW[i] = true;
             }

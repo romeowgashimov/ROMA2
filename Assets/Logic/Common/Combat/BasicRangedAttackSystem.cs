@@ -54,7 +54,7 @@ namespace ROMA2.Logic.Common.Combat
                 if (triggerEntity == Entity.Null 
                     || triggerEntity != target.Value) continue;
 
-                float totalDamage = combineCharsComponent.PhysicalPower;
+                int totalDamage = combineCharsComponent.PhysicalPower;
 
                 sendDamages.Add(new()
                 {

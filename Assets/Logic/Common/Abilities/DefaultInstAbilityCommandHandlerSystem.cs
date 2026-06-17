@@ -26,7 +26,7 @@ namespace ROMA2.Logic.Common.Abilities
                 .WithAll<AbilityInput, AbilityCommands, AbilityCooldownTicks, Team,
                     LocalTransform, AbilityCooldownTargetTicks, AimInput>()
                 .WithAll<DefaultInstAbilityCommand, ActivatedAbilitiesCommands,
-                    AimingTag, Simulate, PhysicalPower, MagicalPower>()
+                    AimingTag, Simulate, PhysicalPower, MagicalPower, CurrentMana>()
                 .Build();
         }
 
@@ -53,7 +53,8 @@ namespace ROMA2.Logic.Common.Abilities
                     Prefab = anyCommand.Prefab,
                     AbilityIndex = mainCommand.AbilityIndex,
                     // Менять на глобальный конфиг настроек
-                    NeedToConfirmAbilities = mainCommand.NeedToConfirmAbilities 
+                    NeedToConfirmAbilities = mainCommand.NeedToConfirmAbilities ,
+                    ManaCost = mainCommand.ManaCost
                 });
                 ECB.SetComponentEnabled<DefaultInstAbilityCommand>(mainCommand.Owner, true);
                 ECB.DestroyEntity(commandEntity);
@@ -87,21 +88,21 @@ namespace ROMA2.Logic.Common.Abilities
             in DefaultInstAbilityCommand anyCommand, 
             in PhysicalPower physicalPower, 
             in MagicalPower magicalPower,
+            ref CurrentMana currMana,
             Entity owner)
         {
             // Проверка, нужно ли подтверждать умение
             if (anyCommand.NeedToConfirmAbilities)
             {
                 if (!abilityInput.ConfirmAbility.IsSet)
+                {
+                    if (abilityInput.CancelAbility.IsSet) 
                     {
-                        if (abilityInput.CancelAbility.IsSet) 
-                        {
-                            ECB.SetComponentEnabled<DefaultInstAbilityCommand>(key, owner, false);
-                            activatedAbilitiesCommands[anyCommand.AbilityIndex] = false;
-                            return;
-                        }
-                        return;
+                        ECB.SetComponentEnabled<DefaultInstAbilityCommand>(key, owner, false);
+                        activatedAbilitiesCommands[anyCommand.AbilityIndex] = false;
                     }
+                    return;
+                }
             }
 
             // Инициализация умения
@@ -128,6 +129,9 @@ namespace ROMA2.Logic.Common.Abilities
                 NetTime, 
                 anyCommand.AbilityIndex, 
                 IsServer);
+            
+            // Уменьшение маны после применения
+            currMana.Value -= anyCommand.ManaCost;
         }
     }
 }

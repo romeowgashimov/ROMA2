@@ -37,7 +37,7 @@ namespace ROMA2.Logic.Common.Abilities
 
             for (int i = 0; i < triggerInfoBuffer.Length; ++i)
             {
-                float physicalDamage = damage.PhysicalDamage;
+                int physicalDamage = damage.PhysicalDamage;
                 physicalDamage += ability.PhysicalPercentage / 100 * combineCharsComponent.PhysicalPower;
 
                 sendDamages.Add(new()

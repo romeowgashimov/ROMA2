@@ -37,7 +37,7 @@ namespace ROMA2.Logic.Common.Abilities
 
             for (int i = 0; i < triggerInfoBuffer.Length; ++i)
             {
-                float magicalDamage = damage.MagicalDamage;
+                int magicalDamage = damage.MagicalDamage;
                 magicalDamage += ability.MagicalPercentage / 100 * combineCharsComponent.MagicalPower;
 
                 sendDamages.Add(new()

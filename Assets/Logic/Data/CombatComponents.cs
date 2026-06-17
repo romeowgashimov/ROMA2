@@ -11,13 +11,13 @@ namespace ROMA2.Logic.Data
         
     public struct CurrentHealthPoints : IComponentData
     {
-        [GhostField(Quantization = 100)] public float Value;
+        [GhostField(Quantization = 0)] public float Value;
     }
 
     [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     public struct DamageBufferElement : IBufferElementData
     {
-        public float Value;
+        public int Value;
         public Entity DealingDamageEntity;
     }
         
@@ -25,7 +25,7 @@ namespace ROMA2.Logic.Data
     public struct DamageThisTick : ICommandData
     {
         public NetworkTick Tick { get; set; }
-        public float Value;
+        public int Value;
     }
 
     public struct AbilityCommands : IComponentData
@@ -45,6 +45,28 @@ namespace ROMA2.Logic.Data
             3 => Ability4,
             _ => default
         };
+    }
+
+    public struct AbilityManaCost : IComponentData
+    {
+        public int Ability1;
+        public int Ability2; 
+        public int Ability3;
+        public int Ability4;
+
+        public readonly int GetManaCostCount() => 2;
+
+        public readonly int GetManaCost(int index)
+        {
+            return index switch
+            {
+                0 => Ability1,
+                1 => Ability2,
+                2 => Ability3,
+                3 => Ability4,
+                _ => int.MaxValue
+            };
+        }
     }
 
     public struct DestroyOnTimer : IComponentData

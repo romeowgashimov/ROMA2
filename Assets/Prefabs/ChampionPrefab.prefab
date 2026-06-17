@@ -466,6 +466,7 @@ MonoBehaviour:
   Database: {fileID: 11400000, guid: 1ee62af5bf15ffd42abac2b9de976edf, type: 2}
   FirePointOffset: {x: 0, y: 1.5, z: 0}
   DetectionRadius: 15
+  RVORadius: 0.5
 --- !u!114 &6582418448893277616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -484,6 +485,8 @@ MonoBehaviour:
     type: 3}
   Ability1Cooldown: 4
   Ability2Cooldown: 6
+  Ability1ManaCost: 50
+  Ability2ManaCost: 90
   NetCodeConfig: {fileID: 11400000, guid: dce9a8c7da8b8cf4093e70364ed6f4c4, type: 2}
 --- !u!114 &4200093114891827029
 MonoBehaviour:

@@ -7,7 +7,7 @@ namespace ROMA2.Logic.Common.Abilities
 {
     public class DeathSphereAuthoring : MonoBehaviour
     {
-        public float MagicalDamage;
+        public int MagicalDamage;
         public int MagicalPercentage;
     
         private class DeathSphereBaker : Baker<DeathSphereAuthoring>

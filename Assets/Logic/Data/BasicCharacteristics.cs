@@ -40,12 +40,12 @@ namespace ROMA2.Logic.Data
     
     public struct CurrentMana : IComponentData
     {
-        public int Value;
+        [GhostField(Quantization = 0)] public float Value;
     }
     
     public struct MaxMana : IComponentData
     {
-        public int Value;
+        [GhostField] public int Value;
     }
 
     public enum DamageType : byte
@@ -60,7 +60,7 @@ namespace ROMA2.Logic.Data
     // Изменение исходящего урона от персонажа
     public struct OutgoingDamageChangerElement : IBufferElementData // Буфер, так как может быть множество эффектов 
     {
-        public float Value; // Количество урона
+        public int Value; // Количество урона
         public bool IsPercentage; // Процент или номинальный урон
         public DamageType Type; // Тип урона
     }
@@ -68,7 +68,7 @@ namespace ROMA2.Logic.Data
     // Изменение входящего урона персонажа
     public struct IncomingDamageChangerElement : IBufferElementData  
     {
-        public float Value; // Количество урона
+        public int Value; // Количество урона
         public bool IsPercentage; // Процент или номинальный урон
         public DamageType Type; // Тип урона
     }
@@ -78,9 +78,9 @@ namespace ROMA2.Logic.Data
     {
         // Не атака или умение, а владелец сущности, нанёсшей урон
         public Entity Owner;
-        public float PhysicalDamage;
-        public float MagicalDamage;
-        public float TrueDamage;
+        public int PhysicalDamage;
+        public int MagicalDamage;
+        public int TrueDamage;
         // Индекс базовой атаки -1
         public int AbilityIndex;
     }
@@ -90,9 +90,9 @@ namespace ROMA2.Logic.Data
         // Не атака или умение, а владелец сущности, нанёсшей урон
         public Entity Owner;
         public Entity Receiver;
-        public float PhysicalDamage;
-        public float MagicalDamage;
-        public float TrueDamage;
+        public int PhysicalDamage;
+        public int MagicalDamage;
+        public int TrueDamage;
         // Индекс базовой атаки -1
         public int AbilityIndex;
     }
@@ -101,18 +101,18 @@ namespace ROMA2.Logic.Data
     public struct ProcessedDamageElement : IBufferElementData
     {
         public Entity Receiver;
-        public float PhysicalDamage;
-        public float MagicalDamage;
-        public float TrueDamage;
+        public int PhysicalDamage;
+        public int MagicalDamage;
+        public int TrueDamage;
         public int AbilityIndex;
     }
     
     public struct DefaultDamage : IComponentData
     {
         // Допускаем смешанный урон, поэтому такой костыль
-        public float PhysicalDamage;
-        public float MagicalDamage;
-        public float TrueDamage;
+        public int PhysicalDamage;
+        public int MagicalDamage;
+        public int TrueDamage;
     }
 
     public struct DeathShotAbility : IComponentData
@@ -140,6 +140,11 @@ namespace ROMA2.Logic.Data
     public struct RangedAttack : IComponentData { }
 
     public struct AbilityIndex : IComponentData
+    {
+        public int Value;
+    }
+
+    public struct Vampirism : IComponentData
     {
         public int Value;
     }

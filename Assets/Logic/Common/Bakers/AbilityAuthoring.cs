@@ -13,6 +13,9 @@ namespace ROMA2.Logic.Common.Bakers
         public float Ability1Cooldown;
         public float Ability2Cooldown;
         
+        public int Ability1ManaCost;
+        public int Ability2ManaCost;
+        
         public NetCodeConfig NetCodeConfig;
 
         private int SimulationTickRate => NetCodeConfig.ClientServerTickRate.SimulationTickRate;
@@ -33,6 +36,11 @@ namespace ROMA2.Logic.Common.Bakers
                     Ability2 = (uint)(authoring.Ability2Cooldown * authoring.SimulationTickRate)
                 });
                 AddBuffer<AbilityCooldownTargetTicks>(entity);
+                AddComponent<AbilityManaCost>(entity, new()
+                {
+                    Ability1 = authoring.Ability1ManaCost,
+                    Ability2 = authoring.Ability2ManaCost
+                });
             }
         }
     }

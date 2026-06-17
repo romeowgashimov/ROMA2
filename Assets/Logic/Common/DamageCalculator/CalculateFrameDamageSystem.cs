@@ -31,7 +31,7 @@ namespace ROMA2.Logic.Common.DamageCalculator
                     damageThisTickBuffer.AddCommandData(new() { Tick = currentTick, Value = 0 });
                 else
                 {
-                    float totalDamage = 0;
+                    int totalDamage = 0;
                     if (damageThisTickBuffer.GetDataAtTick(currentTick, out DamageThisTick damageThisTick))
                         totalDamage = damageThisTick.Value;
                     

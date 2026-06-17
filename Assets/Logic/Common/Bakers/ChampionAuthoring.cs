@@ -48,6 +48,7 @@ namespace ROMA2.Logic.Common.Bakers
                 AddComponent(entity, new CurrentHealthPoints { Value = config.MaxHealthPoints });
                 AddComponent(entity, new HealthRegeneration { Value = config.HealthRegeneration });
                 AddComponent(entity, new MaxMana { Value = config.MaxMana });
+                AddComponent(entity, new CurrentMana() { Value = config.MaxMana });
                 AddComponent(entity, new ManaRegeneration { Value = config.ManaRegeneration });
                 AddComponent<PhysicalPower>(entity, new() { Value = config.PhysicalPower });
                 AddComponent<MagicalPower>(entity, new() { Value = config.MagicalPower });
@@ -55,6 +56,7 @@ namespace ROMA2.Logic.Common.Bakers
                 AddComponent<MagicalArmor>(entity, new() { Value = config.MagicalArmor });
                 AddComponent(entity, new AttackSpeed { Value = config.AttackSpeed });
                 AddComponent(entity, new MoveSpeed { Value = config.MoveSpeed });
+                AddComponent(entity, new Vampirism { Value = 50 });
             
                 AddBuffer<DamageBufferElement>(entity);
                 AddBuffer<IncomingDamageChangerElement>(entity);

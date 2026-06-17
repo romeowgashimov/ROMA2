@@ -6,7 +6,7 @@ using Unity.Entities;
 namespace ROMA2.Logic.Common.DamageCalculator
 {
     [BurstCompile]
-    [UpdateInGroup(typeof(DamageCalculatorSystemGroup), OrderLast = true)]
+    [UpdateInGroup(typeof(DamageCalculatorSystemGroup))]
     public partial struct ClearProcessedDamageSystem : ISystem
     {
         public void OnUpdate(ref SystemState state)

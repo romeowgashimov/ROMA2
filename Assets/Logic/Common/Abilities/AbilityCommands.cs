@@ -7,7 +7,7 @@ namespace ROMA2.Logic.Common.Abilities
         public Entity Owner;
         public bool NeedToConfirmAbilities;
         public int AbilityIndex;
-        public Entity Prefab;
+        public int ManaCost;
     }
 
     public struct ActivatedAbilitiesCommands : IComponentData
@@ -59,5 +59,6 @@ namespace ROMA2.Logic.Common.Abilities
         public bool NeedToConfirmAbilities;
         public int AbilityIndex;
         public Entity Prefab;
+        public int ManaCost;
     }
 }

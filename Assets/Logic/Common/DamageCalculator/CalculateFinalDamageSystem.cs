@@ -12,6 +12,11 @@ namespace ROMA2.Logic.Common.DamageCalculator
     [UpdateInGroup(typeof(DamageCalculatorSystemGroup))]
     public partial struct CalculateFinalDamageSystem : ISystem
     {
+        public void OnCreate(ref SystemState state)
+        {
+            state.RequireForUpdate<EndPredictedSimulationEntityCommandBufferSystem.Singleton>();
+        }
+
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
@@ -56,7 +61,7 @@ namespace ROMA2.Logic.Common.DamageCalculator
                 // Бафы/дебафы отправителя урона
                 if (OutgoingDamageChangerLookup.TryGetBuffer(damageSender, 
                     out DynamicBuffer<OutgoingDamageChangerElement> outgoingDamageChangerBuffer))
-                        foreach(OutgoingDamageChangerElement changer in outgoingDamageChangerBuffer)
+                    foreach(OutgoingDamageChangerElement changer in outgoingDamageChangerBuffer)
                     {
                         switch (changer.Type)
                         {
@@ -118,7 +123,7 @@ namespace ROMA2.Logic.Common.DamageCalculator
                     }
                 }
 
-                float totalDamage = physicalDamage + magicalDamage + trueDamage;
+                int totalDamage = (int)(physicalDamage + magicalDamage + trueDamage);
 
                 damageBuffer.Add(new()
                 {
@@ -131,9 +136,9 @@ namespace ROMA2.Logic.Common.DamageCalculator
                 ecb.AddBuffer<ProcessedDamageElement>(key, damageSender);
                 ecb.AppendToBuffer<ProcessedDamageElement>(key, damageSender, new()
                 {
-                    PhysicalDamage = physicalDamage,
-                    MagicalDamage = magicalDamage,
-                    TrueDamage = trueDamage,
+                    PhysicalDamage = (int)physicalDamage,
+                    MagicalDamage = (int)magicalDamage,
+                    TrueDamage = (int)trueDamage,
                     Receiver = receiver,
                     AbilityIndex = element.AbilityIndex
                 });
