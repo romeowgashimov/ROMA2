@@ -1,4 +1,4 @@
-using Assets.Logic.Client;
+using ROMA2.Logic.Client.Data;
 using ROMA2.Logic.Data;
 using ROMA2.Logic.Navigation;
 using Unity.Entities;

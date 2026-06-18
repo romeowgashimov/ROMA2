@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using Logic.Client;
 using Logic.Client.UI;
 using ROMA2.Logic.Common.Databases;
 using TMPro;
@@ -22,6 +21,7 @@ namespace ROMA2.Logic.Client.Controllers
         [SerializeField] private GameObject _confirmQuitPanel;
         [SerializeField] private GameObject _countdownPanel;
         [SerializeField] private GameObject _choiceChampionPanel;
+        [SerializeField] private GameObject _championPanel;
         
         [SerializeField] private GameObject _championsList;
         [SerializeField] private Button _confirmChoiceButton;
@@ -98,6 +98,7 @@ namespace ROMA2.Logic.Client.Controllers
             _confirmQuitPanel.SetActive(false);
             _choiceChampionPanel.SetActive(false);
             _countdownPanel.SetActive(true);
+            _championPanel.SetActive(true);
         }
 
         private void OnDisable()

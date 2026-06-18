@@ -19,7 +19,7 @@ MonoBehaviour:
     MaxHealthPoints: 1000
     AttackSpeed: 1
     MaxMana: 100
-    HealthRegeneration: 0
+    HealthRegeneration: 10
     ManaRegeneration: 10
     PhysicalPower: 200
     MagicalPower: 0

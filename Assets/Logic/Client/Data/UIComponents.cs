@@ -14,6 +14,18 @@ namespace ROMA2.Logic.Client.Data
         public float3 Value;
     }
 
+    public struct UpdatedHP4UI : IComponentData
+    {
+        public float Current;
+        public float Max;
+    }
+    
+    public struct UpdatedMana4UI : IComponentData
+    {
+        public float Current;
+        public float Max;
+    }
+
     public class SkillShotUIReference : ICleanupComponentData
     {
         public GameObject Value;

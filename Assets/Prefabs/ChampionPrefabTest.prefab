@@ -19,7 +19,8 @@ GameObject:
   - component: {fileID: 6582418448893277616}
   - component: {fileID: 1576833482191651461}
   - component: {fileID: 7050860296828747596}
-  m_Layer: 0
+  - component: {fileID: 8338394283133700827}
+  m_Layer: 3
   m_Name: ChampionPrefabTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -397,6 +398,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Logic.Helpers::Logic.Helpers.Bakers.RenderAuthoring
   Offset: {x: 0, y: 2, z: 0}
+--- !u!114 &8338394283133700827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 403193853099150282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4e30fb393e14f419a1d98a5c2f939d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Logic.Client::ROMA2.Logic.Client.Bakers.UpdateBarsAuthoring
 --- !u!1 &859060646936255700
 GameObject:
   m_ObjectHideFlags: 0
@@ -408,7 +421,7 @@ GameObject:
   - component: {fileID: 6745272296535458335}
   - component: {fileID: 957350709791577046}
   - component: {fileID: 7486611119000091704}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: HatBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -499,7 +512,7 @@ GameObject:
   - component: {fileID: 3208361647073123829}
   - component: {fileID: 5896162139575147532}
   - component: {fileID: 8868550942556422186}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: HatTop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -589,7 +602,7 @@ GameObject:
   - component: {fileID: 666315055243028222}
   - component: {fileID: 7806676630403874584}
   - component: {fileID: 6273275463234411586}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: StunnaShades
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -680,7 +693,7 @@ GameObject:
   - component: {fileID: 7508876057404476760}
   - component: {fileID: 1849797228556220990}
   - component: {fileID: 685273186391873088}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: OutlineEntity
   m_TagString: Untagged
   m_Icon: {fileID: 0}

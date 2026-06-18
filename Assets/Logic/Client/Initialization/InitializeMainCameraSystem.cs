@@ -1,7 +1,8 @@
+using ROMA2.Logic.Client.Data;
 using Unity.Entities;
 using UnityEngine;
 
-namespace Assets.Logic.Client
+namespace ROMA2.Logic.Client.Initialization
 {
     public partial class InitializeMainCameraSystem : SystemBase
     {
