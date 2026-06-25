@@ -26,11 +26,11 @@ namespace ROMA2.Logic.Client.Models
                 OutlineColorLookup = GetComponentLookup<OutlineColor>(),
                 OutlinedEntityLookup = GetComponentLookup<OutlineEntityContainer>(),
                 TeamLookup = GetComponentLookup<Team>(),
-                ID = GetSingleton<NetworkId>().Value
             }.Schedule(state.Dependency);
         }
     }
 
+    [WithAll(typeof(GhostOwnerIsLocal))]
     public partial struct OutlineJob : IJobEntity
     {
         private const float OUTLINE_WIDTH = 1.12F;
@@ -42,15 +42,12 @@ namespace ROMA2.Logic.Client.Models
         public ComponentLookup<OutlineColor> OutlineColorLookup;
         [ReadOnly] public ComponentLookup<OutlineEntityContainer> OutlinedEntityLookup;
         [ReadOnly] public ComponentLookup<Team> TeamLookup;
-        public int ID;
 
-        private void Execute(in SelectedEntity selectedEntity, 
+        private void Execute(
+            in SelectedEntity selectedEntity, 
             in Team team, 
-            ref LastOutlinedEntity outlinedEntity,
-            in GhostOwner ghostOwner)
+            ref LastOutlinedEntity outlinedEntity)
         {
-            if (ghostOwner.NetworkId != ID) return;
-            
             Entity selected = selectedEntity.Value;
             Entity outlined = outlinedEntity.Value;
             if (selected != outlined && outlined != Null)

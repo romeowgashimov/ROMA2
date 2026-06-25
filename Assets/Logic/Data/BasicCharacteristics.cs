@@ -98,13 +98,14 @@ namespace ROMA2.Logic.Data
     }
 
     [InternalBufferCapacity(0)]
+    [GhostComponent(PrefabType = GhostPrefabType.AllPredicted)]
     public struct ProcessedDamageElement : IBufferElementData
     {
-        public Entity Receiver;
-        public int PhysicalDamage;
-        public int MagicalDamage;
-        public int TrueDamage;
-        public int AbilityIndex;
+        [GhostField] public Entity Receiver;
+        [GhostField] public int PhysicalDamage;
+        [GhostField] public int MagicalDamage;
+        [GhostField] public int TrueDamage;
+        [GhostField] public int AbilityIndex;
     }
     
     public struct DefaultDamage : IComponentData

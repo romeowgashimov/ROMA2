@@ -693,7 +693,7 @@ GameObject:
   - component: {fileID: 7508876057404476760}
   - component: {fileID: 1849797228556220990}
   - component: {fileID: 685273186391873088}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: OutlineEntity
   m_TagString: Untagged
   m_Icon: {fileID: 0}

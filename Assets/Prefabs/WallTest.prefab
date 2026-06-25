@@ -263,8 +263,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.NetCode.Authoring.Hybrid::Unity.NetCode.GhostAuthoringComponent
   DefaultGhostMode: 0
   SupportedGhostModes: 3
-  OptimizationMode: 0
-  Importance: 10
+  OptimizationMode: 1
+  Importance: 1
   MaxSendRate: 0
   prefabId: d8f601ceebe958c4dba40e1da9c0d264
   HasOwner: 0
@@ -274,7 +274,7 @@ MonoBehaviour:
   UsePreSerialization: 0
   UseSingleBaseline: 0
   RollbackPredictedSpawnedGhostState: 0
-  RollbackPredictionOnStructuralChanges: 1
+  RollbackPredictionOnStructuralChanges: 0
 --- !u!54 &1295846248925341097
 Rigidbody:
   m_ObjectHideFlags: 0

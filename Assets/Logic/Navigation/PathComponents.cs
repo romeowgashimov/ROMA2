@@ -12,7 +12,7 @@ namespace ROMA2.Logic.Navigation
         public bool NotEnoughIterations;
     }
     
-    [InternalBufferCapacity(4)]
+    [InternalBufferCapacity(0)]
     public struct PathPositionElement : IBufferElementData
     {
         public int2 Value;
@@ -33,6 +33,7 @@ namespace ROMA2.Logic.Navigation
     public struct RVOAgent : IComponentData
     {
         public float3 BestVelocity;
+        public float3 CurrentVelocity;
         public float BodyRadius;
     }
     

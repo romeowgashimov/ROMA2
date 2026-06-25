@@ -11,7 +11,8 @@ using static Unity.Mathematics.math;
 namespace ROMA2.Logic.Navigation
 {
     [BurstCompile]
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateInGroup(typeof(SimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [UpdateBefore(typeof(PathFindingSystem))]
     public partial struct RegisterObstacleSystem : ISystem
     {

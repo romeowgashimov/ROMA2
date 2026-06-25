@@ -5,7 +5,6 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.NetCode;
 using Unity.Physics;
 using Unity.Transforms;
 using static Unity.Entities.SystemAPI;
@@ -14,7 +13,8 @@ using static Unity.Mathematics.math;
 namespace ROMA2.Logic.Navigation
 {
     [BurstCompile]
-    [UpdateInGroup(typeof(PredictedSimulationSystemGroup))]
+    [UpdateInGroup(typeof(SimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct PathFindingSystem : ISystem
     {
         private EntityQuery _query;

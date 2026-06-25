@@ -1,6 +1,7 @@
 ﻿using ROMA2.Logic.Data;
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace ROMA2.Logic.Common.Combat
 {
@@ -22,8 +23,10 @@ namespace ROMA2.Logic.Common.Combat
                 foreach (ProcessedDamageElement element in processedDamage)
                 {
                     if (element.AbilityIndex != -1) continue;
+                    if (currHP.ValueRO.Value >= maxHP.Value) return;
 
-                    currHP.ValueRW.Value += element.PhysicalDamage * vamp.Value / 100f;
+                    float vampHeal = element.PhysicalDamage * vamp.Value / 100f;
+                    currHP.ValueRW.Value = math.min(maxHP.Value, currHP.ValueRO.Value + vampHeal);
                 }
             }
         }

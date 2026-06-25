@@ -4,15 +4,18 @@ using UnityEngine;
 
 namespace ROMA2.Logic.Client.Bakers
 {
-    public class UpdateBarsAuthoring : MonoBehaviour
+    public class UIAuthoring : MonoBehaviour
     {
-        private class UpdateBarsAuthoringBaker : Baker<UpdateBarsAuthoring>
+        private class UIBaker : Baker<UIAuthoring>
         {
-            public override void Bake(UpdateBarsAuthoring authoring)
+            public override void Bake(UIAuthoring authoring)
             {
                 Entity entity = GetEntity(TransformUsageFlags.Dynamic);
                 AddComponent<UpdatedHP4UI>(entity);
                 AddComponent<UpdatedMana4UI>(entity);
+                AddComponent<UpdatedChars>(entity);
+                // Нужен для отобржанеия урона
+                AddBuffer<CachedDamageElement>(entity);
             }
         }
     }

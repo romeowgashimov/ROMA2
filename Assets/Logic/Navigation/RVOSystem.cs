@@ -13,6 +13,7 @@ namespace ROMA2.Logic.Navigation
 {
     [BurstCompile]
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     public partial struct RVOSystem : ISystem
     {
         private EntityQuery _mainMinionQuery;
@@ -203,7 +204,7 @@ namespace ROMA2.Logic.Navigation
                 }
             }
 
-            agent.BestVelocity = new(vBest.x, velocity.Linear.y, vBest.y);
+            agent.BestVelocity.xz = vBest;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -201,7 +201,7 @@ namespace ROMA2.Logic.Data
     
     public struct MoveSpeed : IComponentData
     {
-        public float Value;
+        public int Value;
     }
 
     // Триггер только для базовых атак и умений для нанесения урона 

@@ -133,6 +133,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: Dummy
       objectReference: {fileID: 0}
+    - target: {fileID: 739782461219420247, guid: 86e5a1ece4173c9469852ab795993f56,
+        type: 3}
+      propertyPath: m_MotionType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2179661970686744552, guid: 86e5a1ece4173c9469852ab795993f56,
+        type: 3}
+      propertyPath: PhysicalArmor
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 2179661970686744552, guid: 86e5a1ece4173c9469852ab795993f56,
+        type: 3}
+      propertyPath: MaxHealthPoints
+      value: 3000
+      objectReference: {fileID: 0}
     - target: {fileID: 3132023166854835002, guid: 86e5a1ece4173c9469852ab795993f56,
         type: 3}
       propertyPath: MaxHealthPoints
@@ -2838,6 +2853,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Dummy (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 739782461219420247, guid: 86e5a1ece4173c9469852ab795993f56,
+        type: 3}
+      propertyPath: m_MotionType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 739782461219420247, guid: 86e5a1ece4173c9469852ab795993f56,
+        type: 3}
+      propertyPath: m_AngularDamping
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 3132023166854835002, guid: 86e5a1ece4173c9469852ab795993f56,
         type: 3}
       propertyPath: MaxHealthPoints
@@ -3626,6 +3651,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1290515403}
   - component: {fileID: 1290515404}
+  - component: {fileID: 1290515405}
   m_Layer: 0
   m_Name: PrefabContainer
   m_TagString: Untagged
@@ -3666,9 +3692,23 @@ MonoBehaviour:
     type: 3}
   RespawnEntity: {fileID: 3807522330216363009, guid: af2237048064d1b4199811d5d8cfd683,
     type: 3}
+--- !u!114 &1290515405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1290515401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e265b7713a728ec4da9f4c8367b41af4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Logic.Client::ROMA2.Logic.Client.Bakers.UIPrefabsAuthoring
   HealthBarPrefab: {fileID: 6246730936639062891, guid: 8aadaf8ffd0c86343a26b96a6d7bb1fd,
     type: 3}
   SkillShotAimPrefab: {fileID: 907054830368013773, guid: 660bbd0c07689ab4da9d13040d620316,
+    type: 3}
+  Visualizer: {fileID: 5508012384094621386, guid: d018f15ec873cfa47883b6d9626a9b78,
     type: 3}
 --- !u!1 &1325075340
 GameObject:
@@ -3767,7 +3807,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Logic.Server.GameStartPropertiesAuthoring
   MaxPlayersPerTeam: 5
   MinPlayersToStartGame: 1
-  CountdownTime: 3
+  CountdownTime: 0
   SpawnOffsets:
   - {x: 0, y: 0, z: 0}
   - {x: -2, y: 0, z: 2}

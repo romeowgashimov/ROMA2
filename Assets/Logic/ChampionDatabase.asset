@@ -15,14 +15,14 @@ MonoBehaviour:
   Configs:
   - Id: 0
     Prefab: {fileID: 403193853099150282, guid: 2fe49a526567fdc46a55b0b1094bd406, type: 3}
-    MoveSpeed: 30
+    MoveSpeed: 50
     MaxHealthPoints: 1000
     AttackSpeed: 1
     MaxMana: 100
     HealthRegeneration: 10
     ManaRegeneration: 10
-    PhysicalPower: 200
-    MagicalPower: 0
+    PhysicalPower: 500
+    MagicalPower: 1000
     PhysicalArmor: 20
     MagicalArmor: 10
     AttackRadius: 12

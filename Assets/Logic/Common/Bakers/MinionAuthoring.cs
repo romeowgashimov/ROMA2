@@ -17,7 +17,7 @@ namespace ROMA2.Logic.Common.Bakers
         public int DetectionRadius;
         public float FirePointOffset;
         public GameObject AttackPrefab;
-        public float MoveSpeed;
+        public int MoveSpeed;
         public float RVORadius = 0.5f;
 
         public class MinionBaker : Baker<MinionAuthoring>

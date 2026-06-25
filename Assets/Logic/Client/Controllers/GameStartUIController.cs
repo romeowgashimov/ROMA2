@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Logic.Client.UI;
+using ROMA2.Logic.Client.Models;
 using ROMA2.Logic.Common.Databases;
 using TMPro;
 using Unity.Entities;

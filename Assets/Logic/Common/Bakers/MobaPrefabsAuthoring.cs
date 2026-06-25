@@ -12,10 +12,6 @@ namespace ROMA2.Logic.Common.Bakers
         public GameObject GameOverEntity;
         public GameObject RespawnEntity;
         
-        [Header("GameObjects")] 
-        public GameObject HealthBarPrefab;
-        public GameObject SkillShotAimPrefab;
-        
         public class MobaPrefabsBaker : Baker<MobaPrefabsAuthoring>
         {
             public override void Bake(MobaPrefabsAuthoring authoring)
@@ -27,11 +23,6 @@ namespace ROMA2.Logic.Common.Bakers
                     Minion = GetEntity(authoring.Minion, TransformUsageFlags.Dynamic),
                     GameOverEntity = GetEntity(authoring.GameOverEntity, TransformUsageFlags.None),
                     RespawnEntity = GetEntity(authoring.RespawnEntity, TransformUsageFlags.None),
-                });
-                AddComponentObject(prefabContainerEntity, new UIPrefabs
-                {
-                    HealthBar = authoring.HealthBarPrefab,
-                    SkillShot =  authoring.SkillShotAimPrefab,
                 });
             }
         }

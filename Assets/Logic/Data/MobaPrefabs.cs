@@ -10,11 +10,4 @@ namespace ROMA2.Logic.Data
         public Entity GameOverEntity;
         public Entity RespawnEntity;
     }
-
-    // UI лучше вынести в Client
-    public class UIPrefabs : IComponentData
-    {
-        public GameObject HealthBar;
-        public GameObject SkillShot;
-    }
 }

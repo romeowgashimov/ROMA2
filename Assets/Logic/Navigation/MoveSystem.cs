@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using ROMA2.Logic.Data;
-using ROMA2.Logic.Navigation;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -14,10 +13,11 @@ using static Unity.Mathematics.quaternion;
 using float2 = Unity.Mathematics.float2;
 using float3 = Unity.Mathematics.float3;
 
-namespace ROMA2.Logic.Common.Behaviour
+namespace ROMA2.Logic.Navigation
 {
     [BurstCompile]
     [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [UpdateAfter(typeof(RVOSystem))]
     public partial struct MoveSystem : ISystem
     {
@@ -47,6 +47,8 @@ namespace ROMA2.Logic.Common.Behaviour
     [BurstCompile]
     public partial struct MoveJob : IJobEntity
     {
+        public bool IsServer;
+
         private void Execute(
             ref LocalTransform transform,
             ref PhysicsVelocity velocity,

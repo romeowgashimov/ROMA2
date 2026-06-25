@@ -28,6 +28,7 @@ namespace ROMA2.Logic.Common.DamageCalculator
             state.Dependency = new CalculateFinalDamageJob
             {
                 OutgoingDamageChangerLookup = SystemAPI.GetBufferLookup<OutgoingDamageChangerElement>(true), 
+                ProcessedDamageLookup = SystemAPI.GetBufferLookup<ProcessedDamageElement>(true),
                 ecb = ecb
             }.ScheduleParallel(state.Dependency);
         }
@@ -37,6 +38,8 @@ namespace ROMA2.Logic.Common.DamageCalculator
     public partial struct CalculateFinalDamageJob : IJobEntity
     {
         [ReadOnly] public BufferLookup<OutgoingDamageChangerElement> OutgoingDamageChangerLookup; 
+        [ReadOnly] public BufferLookup<ProcessedDamageElement> ProcessedDamageLookup; 
+
         public EntityCommandBuffer.ParallelWriter ecb;
         
         public void Execute(
@@ -133,15 +136,15 @@ namespace ROMA2.Logic.Common.DamageCalculator
                 incomingDamageBuffer.RemoveAtSwapBack(i);
 
                 // Если буфер есть, то команда его не тронет, нужен только из-за отката состояний неткода
-                ecb.AddBuffer<ProcessedDamageElement>(key, damageSender);
-                ecb.AppendToBuffer<ProcessedDamageElement>(key, damageSender, new()
-                {
-                    PhysicalDamage = (int)physicalDamage,
-                    MagicalDamage = (int)magicalDamage,
-                    TrueDamage = (int)trueDamage,
-                    Receiver = receiver,
-                    AbilityIndex = element.AbilityIndex
-                });
+                if (ProcessedDamageLookup.HasBuffer(damageSender))
+                    ecb.AppendToBuffer<ProcessedDamageElement>(key, damageSender, new()
+                    {
+                        PhysicalDamage = (int)physicalDamage,
+                        MagicalDamage = (int)magicalDamage,
+                        TrueDamage = (int)trueDamage,
+                        Receiver = receiver,
+                        AbilityIndex = element.AbilityIndex
+                    });
             }
         }
     }
