@@ -9,6 +9,7 @@ using UnityEngine.UI;
 namespace ROMA2.Logic.Client.Models
 {
     [UpdateInGroup(typeof(PresentationSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     public partial struct HealthBarSystem : ISystem
     {
         public void OnCreate(ref SystemState state)

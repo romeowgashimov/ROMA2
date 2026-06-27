@@ -78,12 +78,40 @@ namespace ROMA2.Logic.Client.Data
     public class UIPrefabs : IComponentData
     {
         public GameObject HealthBar;
-        public DamageVisualizer Visualizer;
+        public GameObject Visualizer;
         public GameObject SkillShot;
     }
 
     public class DamageVisualizerUIReference : ICleanupComponentData
     {
-        public DamageVisualizer Value;
+        public GameObject Value;
+    }
+
+    public class ModelPrefabs : IComponentData
+    {
+        public GameObject Minion;
+        public GameObject Champion1;
+        public GameObject Champion2;
+
+        public GameObject Get(int index)
+        {
+            return index switch
+            {
+                0 => Minion,
+                1 => Champion1,
+                2 => Champion2,
+                _ => null,
+            };
+        }
+    }
+
+    public struct ModelId : IComponentData
+    {
+        public int Value;
+    }
+
+    public class ModelReference : ICleanupComponentData
+    {
+        public GameObject Value;
     }
 }

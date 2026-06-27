@@ -94,7 +94,7 @@ namespace ROMA2.Logic.Common.Behaviour
                         {
                             if (Champions.HasComponent(ally)) continue;
                             
-                            ECB.SetComponent(sortKey, ally, new ReAggrRequest { Target = enemy });
+                            ECB.AddComponent(sortKey, ally, new ReAggrRequest { Target = enemy });
                             ECB.SetComponentEnabled<ReAggrRequest>(sortKey, ally, true);
                         }
                 }

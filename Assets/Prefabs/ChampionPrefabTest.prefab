@@ -333,7 +333,7 @@ MonoBehaviour:
   UsePreSerialization: 0
   UseSingleBaseline: 0
   RollbackPredictedSpawnedGhostState: 0
-  RollbackPredictionOnStructuralChanges: 1
+  RollbackPredictionOnStructuralChanges: 0
 --- !u!114 &4151137899807470568
 MonoBehaviour:
   m_ObjectHideFlags: 0

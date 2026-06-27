@@ -1,4 +1,3 @@
-using ROMA2.Logic.Client.Controllers;
 using ROMA2.Logic.Client.Data;
 using Unity.Entities;
 using UnityEngine;
@@ -10,7 +9,7 @@ namespace ROMA2.Logic.Client.Bakers
         [Header("GameObjects")] 
         public GameObject HealthBarPrefab;
         public GameObject SkillShotAimPrefab;
-        public DamageVisualizer Visualizer;
+        public GameObject Visualizer;
         
         public class UIPrefabsBaker : Baker<UIPrefabsAuthoring>
         {

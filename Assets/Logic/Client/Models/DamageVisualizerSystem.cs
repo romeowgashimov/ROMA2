@@ -11,38 +11,43 @@ namespace ROMA2.Logic.Client.Models
 {
     [UpdateInGroup(typeof(PresentationSystemGroup))]
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
-    public partial class DamageVisualizerSystem : SystemBase
+    public partial struct DamageVisualizerSystem : ISystem
     {
         private static readonly float3 DAMAGE_WORLD_OFFSET = new(1.65f, -0.15f, -0.5f);
 
-        protected override void OnCreate()
+        public void OnCreate(ref SystemState state)
         {
-            RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
-            RequireForUpdate<UIPrefabs>();
-            RequireForUpdate<MainCamera>();
+            state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
+            state.RequireForUpdate<UIPrefabs>();
+            state.RequireForUpdate<MainCamera>();
         }
 
-        protected override void OnUpdate()
+        public void OnUpdate(ref SystemState state)
         {
             EntityCommandBuffer ecb = SystemAPI
                 .GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>()
-                .CreateCommandBuffer(EntityManager.WorldUnmanaged);
+                .CreateCommandBuffer(state.WorldUnmanaged);
 
-            DamageVisualizer visualizerPrefab = SystemAPI.ManagedAPI.GetSingleton<UIPrefabs>().Visualizer;
+            GameObject visualizerPrefab = SystemAPI.ManagedAPI.GetSingleton<UIPrefabs>().Visualizer;
             Camera mainCamera = SystemAPI.ManagedAPI.GetSingleton<MainCamera>().Value;
             float deltaTime = SystemAPI.Time.DeltaTime;
 
             foreach (DynamicBuffer<CachedDamageElement> processedDamages in SystemAPI
                         .Query<DynamicBuffer<CachedDamageElement>>()
-                        .WithAll<GhostOwnerIsLocal>())
+                        .WithAll<GhostOwnerIsLocal>()
+                        .WithNone<DestroyEntityTag>())
             {
                 foreach(CachedDamageElement element in processedDamages)
                 {
                     Entity receiver = element.Receiver;
-                    if (!EntityManager.HasComponent<DamageVisualizerUIReference>(receiver))
+                    if (SystemAPI.HasComponent<DestroyEntityTag>(receiver) 
+                        || !SystemAPI.HasComponent<LocalTransform>(receiver)) continue;
+
+                    if (!SystemAPI.ManagedAPI.HasComponent<DamageVisualizerUIReference>(receiver))
                     {
-                        DamageVisualizer newVisualizer = Object.Instantiate(visualizerPrefab);
-                        UpdateVisualizerPosition(newVisualizer, SystemAPI.GetComponent<LocalTransform>(receiver).Position, mainCamera);
+                        GameObject newVisualizer = Object.Instantiate(visualizerPrefab);
+                        UpdateVisualizerPosition(newVisualizer, SystemAPI
+                            .GetComponent<LocalTransform>(receiver).Position, mainCamera);
                         CachedDamage cached = new()
                         {
                             PhysicalDamage = element.PhysicalDamage,
@@ -57,8 +62,8 @@ namespace ROMA2.Logic.Client.Models
                     else
                     {
                         CachedDamage cached = SystemAPI.GetComponent<CachedDamage>(receiver);
-                        DamageVisualizer currVisualizer = EntityManager
-                            .GetComponentObject<DamageVisualizerUIReference>(receiver).Value;
+                        GameObject currVisualizer = SystemAPI.ManagedAPI
+                            .GetComponent<DamageVisualizerUIReference>(receiver).Value;
 
                         cached.PhysicalDamage += element.PhysicalDamage;
                         cached.MagicalDamage += element.MagicalDamage;
@@ -78,14 +83,15 @@ namespace ROMA2.Logic.Client.Models
             foreach ((LocalTransform transform, DamageVisualizerUIReference visualizer, 
                 RefRW<CachedDamage> cached, Entity entity) in SystemAPI
                     .Query<LocalTransform, DamageVisualizerUIReference, RefRW<CachedDamage>>()
+                    .WithNone<DestroyEntityTag>()
                     .WithEntityAccess())
             {
-               UpdateVisualizerPosition(visualizer.Value, transform.Position, mainCamera);
+                UpdateVisualizerPosition(visualizer.Value, transform.Position, mainCamera);
                 cached.ValueRW.LifeTime -= deltaTime;
 
                 if (cached.ValueRO.LifeTime <= 0)
                 {
-                    Object.Destroy(visualizer.Value.gameObject);
+                    Object.Destroy(visualizer.Value);
                     ecb.RemoveComponent<DamageVisualizerUIReference>(entity);
                     ecb.RemoveComponent<CachedDamage>(entity);
                 }
@@ -96,13 +102,14 @@ namespace ROMA2.Logic.Client.Models
                     .WithNone<LocalTransform>()
                     .WithEntityAccess())
             {
-                Object.Destroy(UIReference.Value.gameObject);
+                Object.Destroy(UIReference.Value);
                 ecb.RemoveComponent<DamageVisualizerUIReference>(entity);
             }
         }
 
-        private void SetDamageVisualizer(DamageVisualizer visualizer, CachedDamage element)
+        private void SetDamageVisualizer(GameObject visualizerCanvas, CachedDamage element)
         {
+            DamageVisualizer visualizer = visualizerCanvas.GetComponent<DamageVisualizer>();
             if (element.PhysicalDamage > 0)
                 visualizer.ChangeDamage(DamageType.Physical, element.PhysicalDamage);
             if (element.MagicalDamage > 0)
@@ -111,15 +118,15 @@ namespace ROMA2.Logic.Client.Models
                 visualizer.ChangeDamage(DamageType.True, element.TrueDamage);
         }
 
-        private void UpdateVisualizerPosition(DamageVisualizer visualizer, float3 worldPosition, Camera camera)
+        private void UpdateVisualizerPosition(GameObject visualizerCanvas, float3 worldPosition, Camera camera)
         {
-            if (visualizer == null) return;
+            if (visualizerCanvas == null) return;
 
             Vector3 targetWorldPos = (Vector3)(worldPosition + DAMAGE_WORLD_OFFSET);
-            visualizer.transform.position = targetWorldPos;
+            visualizerCanvas.transform.position = targetWorldPos;
 
             if (camera != null)
-                visualizer.transform.rotation = camera.transform.rotation;
+                visualizerCanvas.transform.rotation = camera.transform.rotation;
         }
     }
 }
